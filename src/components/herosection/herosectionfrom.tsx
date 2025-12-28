@@ -656,44 +656,43 @@ const Herosectionfrom: React.FC = () => {
                 Why trust Auraboost?
               </h3>
               <p className="text-xs sm:text-sm md:text-xl text-gray-400 mb-4">
-                Most trusted esports service with reliable and fully experienced
-                team
+                Your boosting experience is safe, reliable, and fully monitored.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-5">
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-xs sm:text-sm md:text-lg">
-                    Verified and trusted sellers
+                    Verified sellers
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-xs sm:text-sm md:text-lg">
-                    Fast and efficient delivery
+                    Quick delivery
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-xs sm:text-sm md:text-lg">
-                    24/7 customer support
+                    Round -the -clock- support
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-xs sm:text-sm md:text-lg">
-                    Secure instant payments
+                    Secure, immediate payments
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-xs sm:text-sm md:text-lg">
-                    Built-in buyer protection
+                    Buyer protection included
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-xs sm:text-sm md:text-lg">
-                    Wide range of offers to choose from
+                    Large selection of offers
                   </span>
                 </div>
               </div>

@@ -236,13 +236,11 @@ const Herosectionfrom: React.FC = () => {
                           <label className="block text-xs sm:text-sm text-gray-400 mb-2">
                             Current LP
                           </label>
-                          <select className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm">
-                            <option>0–20</option>
-                            <option>21–40</option>
-                            <option>41–60</option>
-                            <option>61–80</option>
-                            <option>81–100</option>
-                          </select>
+                          <input
+                            placeholder="Type your current LP"
+                            className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
+                            type="number"
+                          />
                         </div>
                       </div>
                     </div>

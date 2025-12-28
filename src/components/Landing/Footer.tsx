@@ -1,9 +1,5 @@
 "use client";
 
-// Canadian Doller
-//Hero section current lp input filed
-// offers page logo change as buyer expected
-
 import { useState } from "react";
 import Image from "next/image";
 import logo from "@/src/Assets/Landing/logo.png";
@@ -95,7 +91,7 @@ export default function Footer() {
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-gray-400 text-sm hover:text-white transition-colors"
+                      className="text-[#A3A3A3] text-sm hover:text-white transition-colors"
                     >
                       {link.name}
                     </a>
@@ -112,7 +108,7 @@ export default function Footer() {
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-gray-400 text-sm hover:text-white transition-colors"
+                      className="text-[#A3A3A3] text-sm hover:text-white transition-colors"
                     >
                       {link.name}
                     </a>
@@ -160,7 +156,7 @@ export default function Footer() {
                   />
                 </svg>
                 <span>
-                  {language} | {currency} - $
+                  {language} | {currency} - {currency === "CAD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$"}
                 </span>
                 <svg
                   className={`w-4 h-4 ml-1 transition-transform ${
@@ -276,6 +272,17 @@ export default function Footer() {
                     >
                       GBP - £
                     </button>
+                    <button
+                      onClick={() => {
+                        setCurrency("CAD");
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`block w-full text-left px-4 py-2 text-sm ${
+                        currency === "CAD" ? "bg-gray-700" : "hover:bg-gray-700"
+                      }`}
+                    >
+                      CAD - $
+                    </button>
                   </div>
                 </div>
               )}
@@ -289,13 +296,13 @@ export default function Footer() {
             © 2025. The Auraboost website is operated by GWD Processing FZCO.
           </p>
           <div className="mt-2 flex justify-center space-x-4">
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="#" className="text-[#A3A3A3] hover:text-white transition-colors">
               Privacy Policy
             </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="#" className="text-[#A3A3A3] hover:text-white transition-colors">
               Terms & Condition
             </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="#" className="text-[#A3A3A3] hover:text-white transition-colors">
               DMCA
             </a>
           </div>

@@ -30,7 +30,7 @@ export const documentationData: Record<string, DocumentationSection> = {
         number: 1,
         title: "Choose Your Game",
         content:
-          'Navigate to the "Accounts" section on the Auraboot website and select your game.',
+          'Navigate to the "Accounts" section on the Auraboost website and select your game.',
       },
       {
         number: 2,

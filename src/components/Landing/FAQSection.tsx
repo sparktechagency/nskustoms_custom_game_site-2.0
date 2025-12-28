@@ -7,12 +7,12 @@ export default function FAQSection() {
 
   const faqItems = [
     {
-      question: "How does Auraboot work?",
+      question: "How does Auraboost work?",
       answer:
-        "Auraboot connects you with experienced boosters who will play on your account to improve your rank. We handle all communication and ensure your account's security throughout the process.",
+        "Auraboost connects you with experienced boosters who will play on your account to improve your rank. We handle all communication and ensure your account's security throughout the process.",
     },
     {
-      question: "Is Auraboot safe?",
+      question: "Is Auraboost safe?",
       answer:
         "Yes, we prioritize your account's safety. All our boosters are vetted professionals who follow strict security protocols. We also offer a money-back guarantee for added peace of mind.",
     },
@@ -22,7 +22,7 @@ export default function FAQSection() {
         "If you've shared sensitive information, contact our support team immediately. We can help you secure your account and provide guidance on next steps.",
     },
     {
-      question: "How long does Auraboot take?",
+      question: "How long does Auraboost take?",
       answer:
         "The time varies depending on your starting rank and desired rank. Most boosts take between 24-72 hours, but we provide estimated completion times when you place your order.",
     },
@@ -32,12 +32,12 @@ export default function FAQSection() {
         "Once your boost is complete, you'll maintain your new rank until you play games that affect your ranking. Our boosters ensure you reach your target rank safely and efficiently.",
     },
     {
-      question: "Do I need to share my account for the Auraboot service?",
+      question: "Do I need to share my account for the Auraboost service?",
       answer:
         "Yes, you'll need to provide temporary access to your account. We use secure methods to protect your credentials, and our boosters never share or store your login information.",
     },
     {
-      question: "When can I track the progress of the Auraboot?",
+      question: "When can I track the progress of the Auraboost?",
       answer:
         "You can track your boost progress through our dashboard. We also provide regular updates via email and in-app notifications to keep you informed at every step.",
     },

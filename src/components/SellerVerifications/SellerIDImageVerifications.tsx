@@ -81,7 +81,7 @@ export default function SellerIDImageVerifications({
       {/* Instructions */}
       <div className="mb-6">
         <p className="text-sm text-gray-300 mb-2">
-          Take a photo showing your ID and Auraboot in the background
+          Take a photo showing your ID and Auraboost in the background
         </p>
 
         {/* Image Upload Section */}

@@ -31,7 +31,9 @@ export default function ServicesSection() {
         </div>
 
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-2 text-white">Why Choose Auraboot?</h3>
+          <h3 className="text-xl font-semibold mb-2 text-white">
+            Why Choose Auraboost?
+          </h3>
           <ul className="ml-6 space-y-2 text-white list-disc">
             <li>Expert team experience</li>
             <li>Play with experienced players</li>
@@ -41,7 +43,9 @@ export default function ServicesSection() {
         </div>
 
         <div>
-          <h3 className="text-xl font-semibold mb-2 text-white">How it Works:</h3>
+          <h3 className="text-xl font-semibold mb-2 text-white">
+            How it Works:
+          </h3>
           <ul className="ml-6 space-y-2 text-white list-disc">
             <li>Choose a boosting plan</li>
             <li>Select your rank target</li>

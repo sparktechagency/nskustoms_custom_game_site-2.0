@@ -61,7 +61,7 @@ export default function Footer() {
             <div className="mb-6">
               <Image
                 src={logo}
-                alt="Auraboot"
+                alt="Auraboost"
                 className="h-12 w-auto"
                 width={150}
                 height={48}
@@ -287,7 +287,7 @@ export default function Footer() {
         {/* Bottom section - Copyright and legal links */}
         <div className="mt-12 pt-6 border-t text-xs border-gray-800 text-center text-gray-400">
           <p>
-            © 2025. The Auraboot website is operated by GWD Processing FZCO.
+            © 2025. The Auraboost website is operated by GWD Processing FZCO.
           </p>
           <div className="mt-2 flex justify-center space-x-4">
             <a href="#" className="hover:text-white transition-colors">

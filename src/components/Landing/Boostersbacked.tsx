@@ -16,10 +16,10 @@ export default function Boostersbacked() {
             Boosting Services
           </span>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white drop-shadow-lg">
-            Boosters backed by Auraboot
+            Boosters backed by Auraboost
           </h1>
           <p className="text-lg mb-8 text-gray-200 drop-shadow">
-            Auraboot cultivates a premium booster community, dedicated to
+            Auraboost cultivates a premium booster community, dedicated to
             top-rated veteran boosters, consistent communication, and a
             money-back guarantee. Enjoy fast and secure service supported by our
             carefully vetted boosters and a dedicated Customer Support Team.

@@ -55,7 +55,11 @@ type RankType =
   | "Diamond I"
   | "Master"
   | "Grandmaster"
-  | "Challenger";
+  | "Challenger"
+  | "Emerald IV"
+  | "Emerald III"
+  | "Emerald II"
+  | "Emerald I";
 type QueueType = "Solo/Duo" | "5v5 Flex";
 type RegionType =
   | "North America"
@@ -89,6 +93,56 @@ const Herosectionfrom: React.FC = () => {
   const [appearOffline, setAppearOffline] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
 
+  const rankData = [
+    // Iron ranks
+    { name: "Iron IV", image: ironImage },
+    { name: "Iron III", image: ironImage },
+    { name: "Iron II", image: ironImage },
+    { name: "Iron I", image: ironImage },
+
+    // Bronze ranks
+    { name: "Bronze IV", image: bronzeImage },
+    { name: "Bronze III", image: bronzeImage },
+    { name: "Bronze II", image: bronzeImage },
+    { name: "Bronze I", image: bronzeImage },
+
+    // Silver ranks
+    { name: "Silver IV", image: sliverImage },
+    { name: "Silver III", image: sliverImage },
+    { name: "Silver II", image: sliverImage },
+    { name: "Silver I", image: sliverImage },
+
+    // Gold ranks
+    { name: "Gold IV", image: goldImage },
+    { name: "Gold III", image: goldImage },
+    { name: "Gold II", image: goldImage },
+    { name: "Gold I", image: goldImage },
+
+    // Platinum ranks
+    { name: "Platinum IV", image: platumImage },
+    { name: "Platinum III", image: platumImage },
+    { name: "Platinum II", image: platumImage },
+    { name: "Platinum I", image: platumImage },
+
+    // Emerald ranks
+    { name: "Emerald IV", image: emeraldImage },
+    { name: "Emerald III", image: emeraldImage },
+    { name: "Emerald II", image: emeraldImage },
+    { name: "Emerald I", image: emeraldImage },
+
+    // Diamond ranks
+    { name: "Diamond IV", image: diamondImage },
+    { name: "Diamond III", image: diamondImage },
+    { name: "Diamond II", image: diamondImage },
+    { name: "Diamond I", image: diamondImage },
+
+    // Master rank
+    { name: "Master", image: masterImage },
+
+    // Grandmaster rank
+    { name: "Grandmaster", image: grandmasterImage },
+  ];
+
   const ranks: RankType[] = [
     "Iron IV",
     "Iron III",
@@ -102,10 +156,22 @@ const Herosectionfrom: React.FC = () => {
     "Silver III",
     "Silver II",
     "Silver I",
+    "Gold IV",
+    "Gold III",
+    "Gold II",
+    "Gold I",
+    "Platinum IV",
+    "Platinum III",
+    "Platinum II",
+    "Platinum I",
     "Diamond IV",
     "Diamond III",
     "Diamond II",
     "Diamond I",
+    "Emerald IV",
+    "Emerald III",
+    "Emerald II",
+    "Emerald I",
     "Master",
     "Grandmaster",
     "Challenger",
@@ -195,7 +261,16 @@ const Herosectionfrom: React.FC = () => {
                   >
                     <div className="p-4 sm:p-6 ">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-                        <Image src={raja} alt="dsd" className="block" />
+                        <Image
+                          src={
+                            rankData.find((rank) => rank.name === currentLP)
+                              ?.image || raja
+                          }
+                          alt={currentLP}
+                          className="block"
+                          width={106}
+                          height={106}
+                        />
                         <div>
                           <h3 className="text-base sm:text-lg font-bold">
                             {currentLP}
@@ -263,7 +338,16 @@ const Herosectionfrom: React.FC = () => {
                   >
                     <div className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-                        <Image src={raja1} alt="dsd" className="block" />
+                        <Image
+                          src={
+                            rankData.find((rank) => rank.name === desiredRank)
+                              ?.image || raja1
+                          }
+                          alt={desiredRank}
+                          className="block"
+                          width={106}
+                          height={106}
+                        />
                         <div>
                           <h3 className="text-base sm:text-lg font-bold">
                             {desiredRank}
@@ -324,12 +408,21 @@ const Herosectionfrom: React.FC = () => {
                 style={{ backgroundImage: `url(${herobg.src})` }}
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-                  <Image src={raja} alt="image" className="" />
+                  <Image
+                    src={
+                      rankData.find((rank) => rank.name === previousSeasonRank)
+                        ?.image || raja
+                    }
+                    alt="Previous Season Rank"
+                    className=""
+                  />
                   <div>
                     <h3 className="text-xs sm:text-sm font-bold">
                       Placement Matches
                     </h3>
-                    <h3 className="text-lg sm:text-xl font-bold">Iron IV</h3>
+                    <h3 className="text-lg sm:text-xl font-bold">
+                      {previousSeasonRank}
+                    </h3>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -411,10 +504,19 @@ const Herosectionfrom: React.FC = () => {
                 style={{ backgroundImage: `url(${herobg.src})` }}
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-                  <Image src={raja} alt="image" />
+                  <Image
+                    src={
+                      rankData.find((rank) => rank.name === previousSeasonRank)
+                        ?.image || raja
+                    }
+                    alt="Current Rank"
+                    className=""
+                  />
                   <div>
                     <h3 className="text-xs sm:text-sm font-bold">Net Wins</h3>
-                    <h3 className="text-lg sm:text-xl font-bold">Iron IV</h3>
+                    <h3 className="text-lg sm:text-xl font-bold">
+                      {previousSeasonRank}
+                    </h3>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

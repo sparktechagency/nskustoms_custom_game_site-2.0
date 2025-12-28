@@ -7,6 +7,7 @@ import raja1 from "@/src/Assets/Landing/raja1.png";
 import Vector from "@/src/Assets/Landing/Vector.png";
 import whay from "@/src/Assets/Landing/Whay.png";
 import Ironiv from "@/src/Assets/Landing/Ironiv.png";
+import checkBox from "@/src/Assets/Landing/checkbox.png";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -660,37 +661,79 @@ const Herosectionfrom: React.FC = () => {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-5">
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-6 h-6">
+                    <Image
+                      src={checkBox}
+                      width={24}
+                      height={24}
+                      alt="Checkbox Image"
+                    />
+                  </div>
                   <span className="text-xs sm:text-sm md:text-lg">
                     Verified sellers
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-6 h-6">
+                    <Image
+                      src={checkBox}
+                      width={24}
+                      height={24}
+                      alt="Checkbox Image"
+                    />
+                  </div>
                   <span className="text-xs sm:text-sm md:text-lg">
                     Quick delivery
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-6 h-6">
+                    <Image
+                      src={checkBox}
+                      width={24}
+                      height={24}
+                      alt="Checkbox Image"
+                    />
+                  </div>
                   <span className="text-xs sm:text-sm md:text-lg">
                     Round -the -clock- support
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-6 h-6">
+                    <Image
+                      src={checkBox}
+                      width={24}
+                      height={24}
+                      alt="Checkbox Image"
+                    />
+                  </div>
                   <span className="text-xs sm:text-sm md:text-lg">
                     Secure, immediate payments
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-6 h-6">
+                    <Image
+                      src={checkBox}
+                      width={24}
+                      height={24}
+                      alt="Checkbox Image"
+                    />
+                  </div>
                   <span className="text-xs sm:text-sm md:text-lg">
                     Buyer protection included
                   </span>
                 </div>
                 <div className="flex items-center gap-2 border-b border-[#A3A3A380] rounded-b-md pb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-6 h-6">
+                    <Image
+                      src={checkBox}
+                      width={24}
+                      height={24}
+                      alt="Checkbox Image"
+                    />
+                  </div>
                   <span className="text-xs sm:text-sm md:text-lg">
                     Large selection of offers
                   </span>

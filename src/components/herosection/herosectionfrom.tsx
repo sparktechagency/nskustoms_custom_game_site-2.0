@@ -1,17 +1,27 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
+import React, { useState } from "react";
 import herobg from "@/src/Assets/Landing/herobg.png";
 import raja from "@/src/Assets/Landing/raja.png";
 import raja1 from "@/src/Assets/Landing/raja1.png";
 import Vector from "@/src/Assets/Landing/Vector.png";
 import whay from "@/src/Assets/Landing/Whay.png";
 import Ironiv from "@/src/Assets/Landing/Ironiv.png";
-import Challenger from "@/src/Assets/Landing/Challenger.png";
-
-import React, { useState } from "react";
-import { Star, Award } from "lucide-react";
+import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
+// ranks image
+import ironImage from "@/src/Assets/Landing/ranks/ironiv.png";
+import bronzeImage from "@/src/Assets/Landing/ranks/brozeiv.png";
+import challangerImage from "@/src/Assets/Landing/ranks/challerger.png";
+import diamondImage from "@/src/Assets/Landing/ranks/diamoniv.png";
+import emeraldImage from "@/src/Assets/Landing/ranks/emeraldiv.png";
+import goldImage from "@/src/Assets/Landing/ranks/goldiv.png";
+import grandmasterImage from "@/src/Assets/Landing/ranks/grandmaster.png";
+import masterImage from "@/src/Assets/Landing/ranks/master.png";
+import platumImage from "@/src/Assets/Landing/ranks/platinumiv.png";
+import sliverImage from "@/src/Assets/Landing/ranks/silveriv.png";
 
 type OrderType =
   | "rank-boost"

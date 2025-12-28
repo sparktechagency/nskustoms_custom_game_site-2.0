@@ -1,0 +1,26 @@
+{
+  "name": "NSKustoms - Best Platform for Game Rank Boosting",
+  "short_name": "NSKustoms",
+  "description": "Professional game rank boosting services for Valorant, League of Legends, CS:GO, and more.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

@@ -415,6 +415,8 @@ const Herosectionfrom: React.FC = () => {
                     }
                     alt="Previous Season Rank"
                     className=""
+                    width={106}
+                    height={106}
                   />
                   <div>
                     <h3 className="text-xs sm:text-sm font-bold">
@@ -511,6 +513,8 @@ const Herosectionfrom: React.FC = () => {
                     }
                     alt="Current Rank"
                     className=""
+                    width={106}
+                    height={106}
                   />
                   <div>
                     <h3 className="text-xs sm:text-sm font-bold">Net Wins</h3>

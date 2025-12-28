@@ -9,7 +9,6 @@ import Image from "next/image";
 import logo from "@/src/Assets/Landing/logo.png";
 import amex from "@/src/Assets/Footer/amex.png";
 import appleyPay from "@/src/Assets/Footer/applepay.png";
-import btc from "@/src/Assets/Footer/btc.png";
 import discover from "@/src/Assets/Footer/discover.png";
 import googlepay from "@/src/Assets/Footer/googlepay.png";
 import mastercard from "@/src/Assets/Footer/mastercard.png";

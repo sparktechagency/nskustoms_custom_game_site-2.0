@@ -16,7 +16,10 @@ const RankUpProcess = () => {
         {/* Process Steps */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Step 1 */}
-          <div className="flex flex-col items-center text-center">
+          <div
+            className="flex flex-col items-center text-center"
+            data-aos="zoom-in-up"
+          >
             <div className="mb-4">
               <Image
                 src={rocket}
@@ -33,7 +36,10 @@ const RankUpProcess = () => {
           </div>
 
           {/* Step 2 */}
-          <div className="flex flex-col items-center text-center">
+          <div
+            className="flex flex-col items-center text-center"
+            data-aos="zoom-in-up"
+          >
             <div className="mb-4">
               <Image
                 src={people}
@@ -50,7 +56,10 @@ const RankUpProcess = () => {
           </div>
 
           {/* Step 3 */}
-          <div className="flex flex-col items-center text-center">
+          <div
+            className="flex flex-col items-center text-center"
+            data-aos="zoom-in-up"
+          >
             <div className="mb-4">
               <Image
                 src={wallet}
@@ -67,7 +76,10 @@ const RankUpProcess = () => {
           </div>
 
           {/* Step 4 */}
-          <div className="flex flex-col items-center text-center">
+          <div
+            className="flex flex-col items-center text-center"
+            data-aos="zoom-in-up"
+          >
             <div className="mb-4">
               <Image
                 src={diamonds}

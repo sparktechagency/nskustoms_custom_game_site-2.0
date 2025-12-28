@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ReduxProvider from "@/src/Provider/ReduxProvider";
+import "aos/dist/aos.css";
 
 export const metadata: Metadata = {
   title: {

@@ -2,6 +2,9 @@
   "name": "nskustoms_custom_game_site",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "name": "Faysal Mridha"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

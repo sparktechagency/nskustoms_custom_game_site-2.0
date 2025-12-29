@@ -37,14 +37,14 @@ export type RankType =
   | "Emerald I";
 export type QueueType = "Solo/Duo" | "5v5 Flex";
 export type RegionType =
-  | "North America"
-  | "Europe West"
-  | "Europe Nordic & East"
-  | "Korea"
-  | "Brazil"
-  | "Latin America North"
-  | "Latin America South"
-  | "Oceania"
-  | "Turkey"
-  | "Russia"
-  | "Japan";
+  | "North America (NA)"
+  | "Europe (EUW/EUNE)"
+  | "Korea (KR)"
+  | "Japan (JP)"
+  | "Oceania (OCE)"
+  | "Latin America (LAN/LAS)"
+  | "China (CN)"
+  | "Southeast Asia (SEA)"
+  | "Brazil (BR)"
+  | "Turkey (TR)"
+  | "Middle East / North Africa (MENA)";

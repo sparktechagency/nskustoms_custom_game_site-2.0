@@ -21,12 +21,12 @@ const Herosectionfrom: React.FC = () => {
   const [orderType, setOrderType] = useState<OrderType>("rank-boost");
   const [desiredRank, setDesiredRank] = useState<RankType>("Challenger");
   const [queue, setQueue] = useState<QueueType>("Solo/Duo");
-  const [region, setRegion] = useState<RegionType>("North America");
+  const [region, setRegion] = useState<RegionType>("North America (NA)");
   const [previousSeasonRank, setPreviousSeasonRank] =
     useState<RankType>("Iron IV");
   const [placementQueue, setPlacementQueue] = useState<QueueType>("Solo/Duo");
   const [placementRegion, setPlacementRegion] =
-    useState<RegionType>("North America");
+    useState<RegionType>("North America (NA)");
   const [numberOfGames, setNumberOfGames] = useState<number>(1);
   const [currentLP, setCurrentLP] = useState<RankType>("Iron IV");
   const [customRequest, setCustomRequest] = useState<string>("");

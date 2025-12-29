@@ -38,8 +38,7 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
             <Image
               src={
-                rankData.find((rank) => rank.name === currentLP)
-                  ?.image || raja
+                rankData.find((rank) => rank.name === currentLP)?.image || raja
               }
               alt={currentLP}
               className="block"
@@ -47,12 +46,8 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
               height={106}
             />
             <div>
-              <h3 className="text-base sm:text-lg font-bold">
-                {currentLP}
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-400">
-                Current rank
-              </p>
+              <h3 className="text-base sm:text-lg font-bold">{currentLP}</h3>
+              <p className="text-xs sm:text-sm text-gray-400">Current rank</p>
             </div>
           </div>
 
@@ -62,9 +57,7 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
 
           <select
             value={currentLP}
-            onChange={(e) =>
-              setCurrentLP(e.target.value as RankType)
-            }
+            onChange={(e) => setCurrentLP(e.target.value as RankType)}
             className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
           >
             <option>Iron IV</option>
@@ -82,9 +75,7 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
               </label>
               <select
                 value={queue}
-                onChange={(e) =>
-                  setQueue(e.target.value as QueueType)
-                }
+                onChange={(e) => setQueue(e.target.value as QueueType)}
                 className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
               >
                 <option>Solo/Duo</option>
@@ -115,8 +106,8 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
             <Image
               src={
-                rankData.find((rank) => rank.name === desiredRank)
-                  ?.image || raja1
+                rankData.find((rank) => rank.name === desiredRank)?.image ||
+                raja1
               }
               alt={desiredRank}
               className="block"
@@ -124,12 +115,8 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
               height={106}
             />
             <div>
-              <h3 className="text-base sm:text-lg font-bold">
-                {desiredRank}
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-400">
-                Desired rank
-              </p>
+              <h3 className="text-base sm:text-lg font-bold">{desiredRank}</h3>
+              <p className="text-xs sm:text-sm text-gray-400">Desired rank</p>
             </div>
           </div>
 
@@ -139,12 +126,9 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
 
           <select
             value={desiredRank}
-            onChange={(e) =>
-              setDesiredRank(e.target.value as RankType)
-            }
+            onChange={(e) => setDesiredRank(e.target.value as RankType)}
             className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
           >
-            <option>Challenger</option>
             {ranks.map((rank) => (
               <option key={rank} value={rank}>
                 {rank}
@@ -158,9 +142,7 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
             </label>
             <select
               value={region}
-              onChange={(e) =>
-                setRegion(e.target.value as RegionType)
-              }
+              onChange={(e) => setRegion(e.target.value as RegionType)}
               className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
             >
               {regions.map((r) => (

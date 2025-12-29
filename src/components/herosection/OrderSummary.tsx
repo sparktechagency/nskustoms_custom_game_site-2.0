@@ -24,11 +24,14 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   offlineMode,
   setOfflineMode,
 }) => {
+  console.log(orderMode);
+  // duo solo
+
   return (
     <div className="space-y-2">
-      <div className="bg-[#282836] bg-opacity-50 backdrop-blur rounded-lg p-4 sm:p-6">
+      <div className="bg-[#282836] bg-opacity-50 backdrop-blur rounded-2xl p-4 sm:p-6">
         <h3 className="text-base sm:text-lg font-bold mb-2">CUSTOMIZE ORDER</h3>
-        <div className="bg-[#000000] p-3 sm:p-4 rounded-md">
+        <div className="bg-[#000000] p-3 sm:p-4 rounded-2xl">
           {/* Solo/Duo Toggle */}
           <div className="flex gap-2 mb-4">
             <button
@@ -53,54 +56,56 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             </button>
           </div>
 
-          {/* Options */}
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm">Stream</span>
-              <button
-                onClick={() => setStream(!stream)}
-                className={`w-10 h-5 rounded-full transition-colors ${
-                  stream ? "bg-blue-600" : "bg-gray-600"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                    stream ? "translate-x-5" : "translate-x-1"
+          {/* Options - Only show for solo mode */}
+          {orderMode === "solo" && (
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm">Stream</span>
+                <button
+                  onClick={() => setStream(!stream)}
+                  className={`w-10 h-5 rounded-full transition-colors ${
+                    stream ? "bg-blue-600" : "bg-gray-600"
                   }`}
-                ></div>
-              </button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm">Appear offline</span>
-              <button
-                onClick={() => setAppearOffline(!appearOffline)}
-                className={`w-10 h-5 rounded-full transition-colors ${
-                  appearOffline ? "bg-blue-600" : "bg-gray-600"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                    appearOffline ? "translate-x-5" : "translate-x-1"
+                >
+                  <div
+                    className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                      stream ? "translate-x-5" : "translate-x-1"
+                    }`}
+                  ></div>
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm">Appear offline</span>
+                <button
+                  onClick={() => setAppearOffline(!appearOffline)}
+                  className={`w-10 h-5 rounded-full transition-colors ${
+                    appearOffline ? "bg-blue-600" : "bg-gray-600"
                   }`}
-                ></div>
-              </button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm">Offline mode</span>
-              <button
-                onClick={() => setOfflineMode(!offlineMode)}
-                className={`w-10 h-5 rounded-full transition-colors ${
-                  offlineMode ? "bg-blue-600" : "bg-gray-600"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                    offlineMode ? "translate-x-5" : "translate-x-1"
+                >
+                  <div
+                    className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                      appearOffline ? "translate-x-5" : "translate-x-1"
+                    }`}
+                  ></div>
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm">Offline mode</span>
+                <button
+                  onClick={() => setOfflineMode(!offlineMode)}
+                  className={`w-10 h-5 rounded-full transition-colors ${
+                    offlineMode ? "bg-blue-600" : "bg-gray-600"
                   }`}
-                ></div>
-              </button>
+                >
+                  <div
+                    className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                      offlineMode ? "translate-x-5" : "translate-x-1"
+                    }`}
+                  ></div>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Get Offers Button */}
           <Link href="/boosting-request">

@@ -24,9 +24,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   offlineMode,
   setOfflineMode,
 }) => {
-  console.log(orderMode);
-  // duo solo
-
   return (
     <div className="space-y-2">
       <div className="bg-[#282836] bg-opacity-50 backdrop-blur rounded-2xl p-4 sm:p-6">

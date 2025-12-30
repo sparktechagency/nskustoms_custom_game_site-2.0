@@ -33,7 +33,7 @@ const Herosectionfrom: React.FC = () => {
   const [additionalInfo, setAdditionalInfo] = useState<string>("");
   const [orderMode, setOrderMode] = useState<"solo" | "duo">("solo");
   const [stream, setStream] = useState(false);
-  const [appearOffline, setAppearOffline] = useState(false);
+  const [soloqueue, setSoloqueue] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
 
   return (
@@ -107,8 +107,8 @@ const Herosectionfrom: React.FC = () => {
             setOrderMode={setOrderMode}
             stream={stream}
             setStream={setStream}
-            appearOffline={appearOffline}
-            setAppearOffline={setAppearOffline}
+            appearOffline={soloqueue}
+            setAppearOffline={setSoloqueue}
             offlineMode={offlineMode}
             setOfflineMode={setOfflineMode}
           />

@@ -1,6 +1,8 @@
 import React from "react";
 import Image from "next/image";
 import Ironiv from "@/src/Assets/Landing/Ironiv.png";
+import CurrentRankBg from "@/src/Assets/Landing/currnet_rank_bg.png";
+
 import raja from "@/src/Assets/Landing/raja.png";
 import raja1 from "@/src/Assets/Landing/raja1.png";
 import { RankType, QueueType, RegionType } from "@/src/types/components.types";
@@ -32,7 +34,7 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
       {/* ================= CURRENT RANK ================= */}
       <div
         className="w-full bg-no-repeat bg-cover rounded-md relative border border-[#A3A3A380] overflow-hidden"
-        style={{ backgroundImage: `url(${Ironiv.src})` }}
+        style={{ backgroundImage: `url(${CurrentRankBg.src})` }}
       >
         <div className="p-4 sm:p-6 ">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
@@ -60,7 +62,6 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
             onChange={(e) => setCurrentLP(e.target.value as RankType)}
             className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
           >
-            <option>Iron IV</option>
             {ranks.map((rank) => (
               <option key={rank} value={rank}>
                 {rank}

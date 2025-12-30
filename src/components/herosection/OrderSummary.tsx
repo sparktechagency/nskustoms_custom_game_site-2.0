@@ -72,7 +72,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 </button>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm">Appear offline</span>
+                <span className="text-xs sm:text-sm">Solo queue</span>
                 <button
                   onClick={() => setAppearOffline(!appearOffline)}
                   className={`w-10 h-5 rounded-full transition-colors ${

@@ -22,11 +22,6 @@ function Header() {
           <p className="text-white text-xs font-medium mt-6">
             League of Legends Boosting
           </p>
-          <div className="mt-5">
-            <span className="text-red-500 text-xs  border-b-2 border-red-500">
-              Boosting
-            </span>
-          </div>
         </div>
 
         {/* Right Section */}

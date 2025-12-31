@@ -40,7 +40,7 @@ const RankBoostForm: React.FC<RankBoostFormProps> = ({
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
             <Image
               src={
-                rankData.find((rank) => rank.name === currentLP)?.image || raja
+                rankData.find((rank) => rank.name === currentLP)?.image || raja1
               }
               alt={currentLP}
               className="block"

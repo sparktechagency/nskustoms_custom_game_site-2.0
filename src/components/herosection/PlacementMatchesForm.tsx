@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import herobg from "@/src/Assets/Landing/herobg.png";
-import raja from "@/src/Assets/Landing/raja.png";
+import raja1 from "@/src/Assets/Landing/raja1.png";
 import { RankType, QueueType, RegionType } from "@/src/types/components.types";
 import { rankData, ranks, regions } from "@/src/lib/ranks";
 
@@ -34,8 +34,8 @@ const PlacementMatchesForm: React.FC<PlacementMatchesFormProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
         <Image
           src={
-            rankData.find((rank) => rank.name === previousSeasonRank)
-              ?.image || raja
+            rankData.find((rank) => rank.name === previousSeasonRank)?.image ||
+            raja1
           }
           alt="Previous Season Rank"
           className=""
@@ -43,12 +43,8 @@ const PlacementMatchesForm: React.FC<PlacementMatchesFormProps> = ({
           height={106}
         />
         <div>
-          <h3 className="text-xs sm:text-sm font-bold">
-            Placement Matches
-          </h3>
-          <h3 className="text-lg sm:text-xl font-bold">
-            {previousSeasonRank}
-          </h3>
+          <h3 className="text-xs sm:text-sm font-bold">Placement Matches</h3>
+          <h3 className="text-lg sm:text-xl font-bold">{previousSeasonRank}</h3>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -58,12 +54,9 @@ const PlacementMatchesForm: React.FC<PlacementMatchesFormProps> = ({
           </label>
           <select
             value={previousSeasonRank}
-            onChange={(e) =>
-              setPreviousSeasonRank(e.target.value as RankType)
-            }
+            onChange={(e) => setPreviousSeasonRank(e.target.value as RankType)}
             className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
           >
-            <option>Iron IV</option>
             {ranks.map((rank) => (
               <option key={rank} value={rank}>
                 {rank}
@@ -77,9 +70,7 @@ const PlacementMatchesForm: React.FC<PlacementMatchesFormProps> = ({
           </label>
           <select
             value={placementRegion}
-            onChange={(e) =>
-              setPlacementRegion(e.target.value as RegionType)
-            }
+            onChange={(e) => setPlacementRegion(e.target.value as RegionType)}
             className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
           >
             {regions.map((r) => (
@@ -95,9 +86,7 @@ const PlacementMatchesForm: React.FC<PlacementMatchesFormProps> = ({
           </label>
           <select
             value={placementQueue}
-            onChange={(e) =>
-              setPlacementQueue(e.target.value as QueueType)
-            }
+            onChange={(e) => setPlacementQueue(e.target.value as QueueType)}
             className="w-full bg-[#282836] border border-gray-600 rounded px-3 py-2 text-white text-sm"
           >
             <option>Solo/Duo</option>

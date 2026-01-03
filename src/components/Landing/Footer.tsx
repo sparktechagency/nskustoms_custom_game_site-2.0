@@ -33,8 +33,8 @@ export default function Footer() {
 
   const accountWarrantyLinks = [
     { name: "Account Warranty", href: "#" },
-    { name: "Tradeshield(Buying)", href: "#" },
-    { name: "Tradeshield(Selling)", href: "#" },
+    { name: "RankGuard (Buying)", href: "#" },
+    { name: "RankGuard (Selling)", href: "#" },
     { name: "Deposited", href: "#" },
     { name: "Withdrawal", href: "#" },
   ];
@@ -156,7 +156,14 @@ export default function Footer() {
                   />
                 </svg>
                 <span>
-                  {language} | {currency} - {currency === "CAD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$"}
+                  {language} | {currency} -{" "}
+                  {currency === "CAD"
+                    ? "$"
+                    : currency === "EUR"
+                    ? "€"
+                    : currency === "GBP"
+                    ? "£"
+                    : "$"}
                 </span>
                 <svg
                   className={`w-4 h-4 ml-1 transition-transform ${
@@ -296,13 +303,22 @@ export default function Footer() {
             © 2025. The Auraboost website is operated by GWD Processing FZCO.
           </p>
           <div className="mt-2 flex justify-center space-x-4">
-            <a href="#" className="text-[#A3A3A3] hover:text-white transition-colors">
+            <a
+              href="#"
+              className="text-[#A3A3A3] hover:text-white transition-colors"
+            >
               Privacy Policy
             </a>
-            <a href="#" className="text-[#A3A3A3] hover:text-white transition-colors">
+            <a
+              href="#"
+              className="text-[#A3A3A3] hover:text-white transition-colors"
+            >
               Terms & Condition
             </a>
-            <a href="#" className="text-[#A3A3A3] hover:text-white transition-colors">
+            <a
+              href="#"
+              className="text-[#A3A3A3] hover:text-white transition-colors"
+            >
               DMCA
             </a>
           </div>

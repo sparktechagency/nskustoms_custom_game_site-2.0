@@ -112,7 +112,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           </Link>
 
           <div className="text-center text-xs sm:text-sm text-gray-400">
-            🔒 Powered by <span className="text-yellow-400">Trustpilot</span>
+            🔒 Supported by <span className="text-yellow-400">Trustpilot</span>
           </div>
         </div>
       </div>

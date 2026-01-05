@@ -117,8 +117,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         </div>
       </div>
 
-      {/* Savings Info */}
-      <div className="p-4 sm:p-6 border border-[#A3A3A380] rounded-md">
+      {/* TODO: hide Savings Info */}
+      {/* <div className="p-4 sm:p-6 border border-[#A3A3A380] rounded-md">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-center sm:text-left">
             <div className="flex flex-wrap justify-center sm:justify-start gap-2">
@@ -139,7 +139,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             className="w-12 h-12 md:w-16 md:h-16"
           />
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -10,7 +10,7 @@ const RankUpProcess = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <h2 className="text-2xl font-bold text-center mb-12">
-          Effortless rank-up process
+          An easy, streamlined rank-up process
         </h2>
 
         {/* Process Steps */}

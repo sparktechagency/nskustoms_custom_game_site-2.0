@@ -28,11 +28,9 @@ export default function Footer() {
   const helpCenterLinks = [
     { name: "Help Center", href: "/docs" },
     { name: "Contact Us", href: "#" },
-    { name: "Become a Partner", href: "#" },
   ];
 
   const accountWarrantyLinks = [
-    { name: "Account Warranty", href: "#" },
     { name: "RankGuard (Buying)", href: "#" },
     { name: "RankGuard (Selling)", href: "#" },
     { name: "Deposited", href: "#" },
@@ -40,7 +38,6 @@ export default function Footer() {
   ];
 
   const accountSellerRulesLinks = [
-    { name: "Account seller Rules", href: "#" },
     { name: "Seller Rules", href: "#" },
     { name: "Changing Username", href: "#" },
     { name: "Fees", href: "#" },

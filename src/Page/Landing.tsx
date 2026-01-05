@@ -10,6 +10,7 @@ import BoostSection from "@/src/components/Landing/BoostSection";
 import Boostersbacked from "@/src/components/Landing/Boostersbacked";
 import Footer from "../components/Landing/Footer";
 import AOS from "aos";
+import TopFooterText from "../components/Landing/TopFooterText";
 
 function LandingPage() {
   useEffect(() => {
@@ -26,6 +27,7 @@ function LandingPage() {
       <BoostSection />
       <FAQSection />
       <ServicesSection />
+      <TopFooterText />
       <Footer />
     </div>
   );

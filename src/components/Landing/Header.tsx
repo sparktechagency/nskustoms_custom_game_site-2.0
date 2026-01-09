@@ -12,9 +12,9 @@ function Header() {
             <div className="py-1">
               <Image
                 src={Logo}
-                height={100}
-                width={100}
-                className="w-[130px] h-[55px] object-center"
+                height={150}
+                width={150}
+                className="w-[150px] h-[65px] object-center"
                 alt="Best Boosting Platform League of Legends Boosting"
               />
             </div>

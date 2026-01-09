@@ -54,13 +54,13 @@ export default function Footer() {
               <Image
                 src={logo}
                 alt="Auraboost"
-                className="h-12 w-auto"
-                width={150}
-                height={48}
+                className="h-16 w-auto"
+                width={200}
+                height={70}
               />
             </div>
             <p className="text-gray-400 text-center lg:text-left max-w-xs">
-              Join us today to level up your gaming experience!
+              Join us now and elevate the way you game!
             </p>
           </div>
 
@@ -72,8 +72,8 @@ export default function Footer() {
               <ul className="space-y-2">
                 {helpCenterLinks.map((link, index) => (
                   <li key={index}>
-                    <Link href={link.href} className="text-[#A3A3A3] text-sm">
-                      {link.name}
+                    <Link href={link.href} className="text-blue-300 text-sm">
+                      <span className="text-blue-300">{link.name}</span>
                     </Link>
                   </li>
                 ))}
@@ -88,9 +88,9 @@ export default function Footer() {
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-[#A3A3A3] text-sm hover:text-white transition-colors"
+                      className="text-blue-300 text-sm hover:text-white transition-colors"
                     >
-                      {link.name}
+                      <span className="text-blue-300">{link.name}</span>
                     </a>
                   </li>
                 ))}
@@ -99,15 +99,15 @@ export default function Footer() {
 
             {/* Account Seller Rules */}
             <div>
-              <h3 className="font-semibold mb-4">Account seller Rules</h3>
+              <h3 className="font-semibold mb-4">Seller Rules</h3>
               <ul className="space-y-2">
                 {accountSellerRulesLinks.map((link, index) => (
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-[#A3A3A3] text-sm hover:text-white transition-colors"
+                      className="text-blue-300 text-sm hover:text-white transition-colors"
                     >
-                      {link.name}
+                      <span className="text-blue-300">{link.name}</span>
                     </a>
                   </li>
                 ))}

@@ -8,6 +8,7 @@ const boostingPostApi = baseApi.injectEndpoints({
         method: "POST",
         body: boostingBody,
       }),
+      transformResponse: (res) => res.data?.data,
     }),
   }),
 });

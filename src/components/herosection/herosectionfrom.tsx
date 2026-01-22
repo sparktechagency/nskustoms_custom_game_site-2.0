@@ -17,13 +17,19 @@ import CustomRequestForm from "./CustomRequestForm";
 import AdditionalInfo from "./AdditionalInfo";
 import WhyTrustSection from "./WhyTrustSection";
 import OrderSummary from "./OrderSummary";
-import { useCreateBoostingPostMutation } from "@/src/redux/features/boosting-post/authApi";
+import { useCreateBoostingPostMutation } from "@/src/redux/features/boosting-post/boostingApi";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 
 // Helper function to convert queue type to API format
 const formatQueueForApi = (queue: QueueType): "solo/duo" | "5v5_flex" => {
   return queue === "Solo/Duo" ? "solo/duo" : "5v5_flex";
+};
+
+const StaticsSoloNot = {
+  stream: false,
+  soloQueue: false,
+  offlineMode: false,
 };
 
 // Helper function to convert region to API format (short code)
@@ -102,7 +108,7 @@ const Herosectionfrom: React.FC = () => {
                       soloQueue: soloqueue,
                       offlineMode: offlineMode,
                     }
-                  : false,
+                  : StaticsSoloNot,
               duo: orderMode === "duo",
             },
             additionInfo: additionalInfo,
@@ -119,6 +125,14 @@ const Herosectionfrom: React.FC = () => {
               numberOfGames: numberOfGames,
             },
             customizeOrder: {
+              solo:
+                orderMode === "solo"
+                  ? {
+                      stream: stream,
+                      soloQueue: soloqueue,
+                      offlineMode: offlineMode,
+                    }
+                  : StaticsSoloNot,
               duo: orderMode === "duo",
             },
             additionInfo: additionalInfo,
@@ -134,6 +148,17 @@ const Herosectionfrom: React.FC = () => {
               queue: formatQueueForApi(placementQueue),
               numberOfWins: numberOfGames,
             },
+            customizeOrder: {
+              solo:
+                orderMode === "solo"
+                  ? {
+                      stream: stream,
+                      soloQueue: soloqueue,
+                      offlineMode: offlineMode,
+                    }
+                  : StaticsSoloNot,
+              duo: orderMode === "duo",
+            },
             additionInfo: additionalInfo,
           };
           break;
@@ -145,16 +170,26 @@ const Herosectionfrom: React.FC = () => {
               gameType: "League of Legends",
               requestDescription: customRequest,
             },
+            customizeOrder: {
+              solo:
+                orderMode === "solo"
+                  ? {
+                      stream: stream,
+                      soloQueue: soloqueue,
+                      offlineMode: offlineMode,
+                    }
+                  : StaticsSoloNot,
+              duo: orderMode === "duo",
+            },
             additionalInfo: additionalInfo,
           };
           break;
       }
 
       const response = await createBoostingPost(requestBody).unwrap();
-      console.log("Boosting post created:", response);
-
       // Redirect to offers or success page
-      router.push("/offers");
+      console.log(response);
+      router.push(`/boosting-request?boostingId=${response?.data?._id}`);
     } catch (err: unknown) {
       const apiError = err as { data?: { message?: string }; message?: string };
       const errorMessage =

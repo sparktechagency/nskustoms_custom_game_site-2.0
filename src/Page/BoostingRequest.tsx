@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Header from "@/src/components/Landing/Header";
 import OfferSection from "@/src/components/BoostingRequestPage/OfferSection";
-import ChatSection from "@/src/components/BoostingRequestPage/ChatSection";
 import RequestDetailsSection from "@/src/components/BoostingRequestPage/RequestDetailsSection";
 import Footer from "@/src/components/Landing/Footer";
 import Conversations from "@/src/components/Conversations/Conversations";

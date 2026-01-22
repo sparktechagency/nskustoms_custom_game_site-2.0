@@ -38,7 +38,13 @@ const offersApi = baseApi.injectEndpoints({
 
     // Update offer as seller
     updateOfferSeller: builder.mutation({
-      query: ({ id, offersBody }: { id: string; offersBody: UpdateOfferBody }) => ({
+      query: ({
+        id,
+        offersBody,
+      }: {
+        id: string;
+        offersBody: UpdateOfferBody;
+      }) => ({
         url: `/offers/${id}`,
         method: "PUT",
         body: offersBody,
@@ -52,11 +58,18 @@ const offersApi = baseApi.injectEndpoints({
         method: "GET",
         params: params || { page: 1, limit: 10 },
       }),
+      transformResponse: (r) => r.data,
     }),
 
     // Get offers for a post (Buyer)
     getOffersForPost: builder.query({
-      query: ({ postId, params }: { postId: string; params?: OfferParams }) => ({
+      query: ({
+        postId,
+        params,
+      }: {
+        postId: string;
+        params?: OfferParams;
+      }) => ({
         url: `/offers/post/${postId}`,
         method: "GET",
         params: params || { page: 1, limit: 10 },

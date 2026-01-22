@@ -5,8 +5,11 @@ import { IoIosSend } from "react-icons/io";
 import { X } from "lucide-react";
 import goldie from "@/src/Assets/seller/goldie.png";
 import Image from "next/image";
+import { useGetMyOffersAsSellerQuery } from "@/src/redux/features/offers/offersApi";
 
 const Page = () => {
+  const { data: offersData } = useGetMyOffersAsSellerQuery({});
+  console.log(offersData);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deliveryTime, setDeliveryTime] = useState("");
   const [price, setPrice] = useState("");

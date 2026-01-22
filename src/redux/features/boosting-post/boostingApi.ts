@@ -58,6 +58,11 @@ const boostingPostApi = baseApi.injectEndpoints({
       }),
       transformResponse: (res: ApiResponse<unknown>) => res.data,
     }),
+    // All Bossting For seller to Browse
+    // get request /boosting-posts/seller/browse?page=1&limit=10&type=offer_submitted (waiting_for_offer, offer_accepted, offer_submitted, offer_lost)
+
+    // Get Boosting Details By ID
+    //get /boosting-posts/:id
   }),
 });
 

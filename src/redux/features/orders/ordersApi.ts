@@ -53,6 +53,14 @@ const ordersApi = baseApi.injectEndpoints({
         params: params || { page: 1, limit: 10 },
       }),
     }),
+    // Get my orders as Seller
+    getMyOrdersAsSeller: builder.query({
+      query: (params: OrderParams | void) => ({
+        url: "/orders/my-orders/buyer",
+        method: "GET",
+        params: params || { page: 1, limit: 10 },
+      }),
+    }),
 
     // Get single order by ID
     getOrderById: builder.query({

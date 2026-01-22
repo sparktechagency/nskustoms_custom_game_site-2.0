@@ -9,7 +9,6 @@ const authApi = baseApi.injectEndpoints({
         body: userInfo,
       }),
     }),
-
     register: builder.mutation({
       query: (userInfo) => ({
         url: "/auth/register",
@@ -17,7 +16,6 @@ const authApi = baseApi.injectEndpoints({
         body: userInfo,
       }),
     }),
-
     forgetPassword: builder.mutation({
       query: (data) => ({
         url: "/auth/forgot-password",
@@ -25,7 +23,6 @@ const authApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
-
     resitPassword: builder.mutation({
       query: (data) => ({
         url: `/auth/reset-password`,
@@ -33,7 +30,6 @@ const authApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
-
     changePassword: builder.mutation({
       query: (data) => ({
         url: `/auth/change-password`,
@@ -54,22 +50,11 @@ const authApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
-
     checkUserExist: builder.mutation({
       query: ({ email }) => ({
         url: `/auth//check-user/${email}`,
         method: "GET",
       }),
-    }),
-    GoogleLogin: builder.mutation({
-      query: (data) => {
-        // console.log("Google login data:", data);
-        return {
-          url: `/auth/google`,
-          method: "POST",
-          body: data,
-        };
-      },
     }),
   }),
 });
@@ -81,7 +66,6 @@ export const {
   useResitPasswordMutation,
   useChangePasswordMutation,
   useVerifyEmailMutation,
-  useGoogleLoginMutation,
   useResendVerificationMutation,
   useCheckUserExistMutation,
 } = authApi;

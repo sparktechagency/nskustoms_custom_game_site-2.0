@@ -15,38 +15,33 @@ import {
 import profile from "@/src/Assets/seller/profile.png";
 import Image from "next/image";
 import { CgMenuBoxed } from "react-icons/cg";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 
 // Profile component for reuse
-const ProfileSection = () => {
-  const user = useSelector(selectCurrentUser);
-  console.log(user?.image);
-  return (
-    <div className="flex items-center gap-1 p-2 bg-gradient-to-br from-slate-800 to-[#282836] rounded-lg border border-slate-700">
-      {/* Avatar/Logo */}
-      <div className="relative w-14 h-14  flex-shrink-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full opacity-20 blur-xl"></div>
-        <div className="relative w-full h-full bg-gradient-to-br from-indigo-900 to-purple-900 rounded-full flex items-center justify-center border-2 border-purple-500/30 overflow-hidden">
-          <Image
-            src={user?.image as string}
-            alt="Profile"
-            width={200}
-            height={200}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-
-      {/* Text Content */}
-      <div className="flex flex-col min-w-0">
-        <h2 className="text-sm sm:text-md font-bold text-white mb-1 truncate">
-          {user?.name || "N/A"}
-        </h2>
+const ProfileSection = () => (
+  <div className="flex items-center gap-1 p-2 bg-gradient-to-br from-slate-800 to-[#282836] rounded-lg border border-slate-700">
+    {/* Avatar/Logo */}
+    <div className="relative w-14 h-14  flex-shrink-0">
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full opacity-20 blur-xl"></div>
+      <div className="relative w-full h-full bg-gradient-to-br from-indigo-900 to-purple-900 rounded-full flex items-center justify-center border-2 border-purple-500/30 overflow-hidden">
+        <Image
+          src={profile}
+          alt="Profile"
+          className="w-full h-full object-cover"
+        />
       </div>
     </div>
-  );
-};
+
+    {/* Text Content */}
+    <div className="flex flex-col min-w-0">
+      <h2 className="text-sm sm:text-md font-bold text-white mb-1 truncate">
+        Hardy Magic
+      </h2>
+      <p className="text-slate-400 text-xs sm:text-sm">
+        Registered - 7/12/2025
+      </p>
+    </div>
+  </div>
+);
 
 const SellerSidebar = () => {
   const pathname = usePathname();
@@ -56,11 +51,11 @@ const SellerSidebar = () => {
   const normalizedPathname = pathname?.replace(/\/$/, "");
 
   const menuItems = [
-    { label: "Boosting", path: "/seller/sellerboosting", icon: FaRocket },
-    { label: "Offers", path: "/seller/offers", icon: FaTags },
-    { label: "Messages", path: "/seller/message", icon: FaEnvelope },
-    { label: "Notifications", path: "/seller/notifications", icon: FaBell },
-    { label: "Feedback", path: "/seller/feedback", icon: FaStar },
+    { label: "Boosting", path: "/sellerboosting", icon: FaRocket },
+    { label: "Offers", path: "/offers", icon: FaTags },
+    { label: "Messages", path: "/message", icon: FaEnvelope },
+    { label: "Notifications", path: "/notifications", icon: FaBell },
+    { label: "Feedback", path: "/feedback", icon: FaStar },
     { label: "Settings", path: "/accountsetting", icon: FaCog },
   ];
 

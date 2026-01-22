@@ -14,7 +14,7 @@ import storage from "redux-persist/lib/storage";
 import { baseApi } from "@/src/redux/baseApi/baseApi";
 
 const persistConfig = {
-  key: "auth",
+  key: "auth-auraboost",
   storage,
 };
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);

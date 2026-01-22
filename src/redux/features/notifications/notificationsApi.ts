@@ -1,24 +1,65 @@
 import { baseApi } from "@/src/redux/baseApi/baseApi";
 
+interface NotificationParams {
+  page?: number;
+  limit?: number;
+}
+
+interface CreateNotificationBody {
+  title: string;
+  message: string;
+  type?: string;
+  [key: string]: unknown;
+}
+
+interface MarkReadBody {
+  notificationIds?: string[];
+  markAll?: boolean;
+}
+
 const notificationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    createNotifications: builder.mutation({
-      query: (notificationsBody) => ({
+    // Create notification
+    createNotification: builder.mutation({
+      query: (notificationBody: CreateNotificationBody) => ({
         url: "/notifications",
         method: "POST",
-        body: notificationsBody,
+        body: notificationBody,
       }),
     }),
 
     // Get my notifications
-    // get request /notifications?page=1&limit=10
+    getMyNotifications: builder.query({
+      query: (params?: NotificationParams) => ({
+        url: "/notifications",
+        method: "GET",
+        params: params || { page: 1, limit: 10 },
+      }),
+    }),
 
-    //  delete notification
-    // delete request /notifications/:id
+    // Delete notification by ID
+    deleteNotification: builder.mutation({
+      query: (id: string) => ({
+        url: `/notifications/${id}`,
+        method: "DELETE",
+      }),
+    }),
 
-    // mark notifications as read
-    // post request /notifications/mark-read
+    // Mark notifications as read
+    markNotificationsAsRead: builder.mutation({
+      query: (body?: MarkReadBody) => ({
+        url: "/notifications/mark-read",
+        method: "POST",
+        body: body,
+      }),
+    }),
   }),
 });
 
-export const { useCreateNotificationsMutation } = notificationsApi;
+export const {
+  useCreateNotificationMutation,
+  useGetMyNotificationsQuery,
+  useDeleteNotificationMutation,
+  useMarkNotificationsAsReadMutation,
+  useLazyGetMyNotificationsQuery,
+} = notificationsApi;

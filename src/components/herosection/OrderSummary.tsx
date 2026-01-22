@@ -1,7 +1,4 @@
 import React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import Vector from "@/src/Assets/Landing/Vector.png";
 
 interface OrderSummaryProps {
   orderMode: "solo" | "duo";
@@ -12,6 +9,9 @@ interface OrderSummaryProps {
   setAppearOffline: (appearOffline: boolean) => void;
   offlineMode: boolean;
   setOfflineMode: (offlineMode: boolean) => void;
+  onSubmit: () => void;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -23,6 +23,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   setAppearOffline,
   offlineMode,
   setOfflineMode,
+  onSubmit,
+  isLoading,
+  error,
 }) => {
   return (
     <div className="space-y-2">
@@ -104,12 +107,25 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             </div>
           )}
 
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 text-red-400 px-3 py-2 rounded-lg text-xs mb-3">
+              {error}
+            </div>
+          )}
+
           {/* Get Offers Button */}
-          <Link href="/boosting-request">
-            <button className="w-full bg-[#AC2212] hover:bg-red-700 text-white font-bold py-3 rounded mb-3 text-sm">
-              Get offers now
-            </button>
-          </Link>
+          <button
+            onClick={onSubmit}
+            disabled={isLoading}
+            className={`w-full bg-[#AC2212] text-white font-bold py-3 rounded mb-3 text-sm transition-all ${
+              isLoading
+                ? "opacity-60 cursor-not-allowed"
+                : "hover:bg-red-700"
+            }`}
+          >
+            {isLoading ? "Creating Order..." : "CUSTOMIZE ORDER"}
+          </button>
 
           <div className="text-center text-xs sm:text-sm text-gray-400">
             🔒 Supported by <span className="text-yellow-400">Trustpilot</span>

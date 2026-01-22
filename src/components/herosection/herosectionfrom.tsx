@@ -6,6 +6,7 @@ import {
   RankType,
   RegionType,
 } from "@/src/types/components.types";
+import { useRouter } from "next/navigation";
 
 // Import subcomponents
 import OrderTypeButtons from "./OrderTypeButtons";
@@ -16,8 +17,37 @@ import CustomRequestForm from "./CustomRequestForm";
 import AdditionalInfo from "./AdditionalInfo";
 import WhyTrustSection from "./WhyTrustSection";
 import OrderSummary from "./OrderSummary";
+import { useCreateBoostingPostMutation } from "@/src/redux/features/boosting-post/authApi";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
+
+// Helper function to convert queue type to API format
+const formatQueueForApi = (queue: QueueType): "solo/duo" | "5v5_flex" => {
+  return queue === "Solo/Duo" ? "solo/duo" : "5v5_flex";
+};
+
+// Helper function to convert region to API format (short code)
+const formatRegionForApi = (region: RegionType): string => {
+  const regionMap: Record<RegionType, string> = {
+    "North America (NA)": "NA",
+    "Europe (EUW/EUNE)": "EUW",
+    "Europe West (EUW)": "EUW",
+    "Korea (KR)": "KR",
+    "Japan (JP)": "JP",
+    "Oceania (OCE)": "OCE",
+    "Latin America (LAN/LAS)": "LAN",
+    "China (CN)": "CN",
+    "Southeast Asia (SEA)": "SEA",
+    "Brazil (BR)": "BR",
+    "Turkey (TR)": "TR",
+    "Middle East / North Africa (MENA)": "MENA",
+  };
+  return regionMap[region] || "NA";
+};
 
 const Herosectionfrom: React.FC = () => {
+  const currentUser = useSelector(selectCurrentUser);
+  const router = useRouter();
   const [orderType, setOrderType] = useState<OrderType>("rank-boost");
   const [desiredRank, setDesiredRank] = useState<RankType>("Challenger");
   const [queue, setQueue] = useState<QueueType>("Solo/Duo");
@@ -35,6 +65,105 @@ const Herosectionfrom: React.FC = () => {
   const [stream, setStream] = useState(false);
   const [soloqueue, setSoloqueue] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [createBoostingPost, { isLoading }] = useCreateBoostingPostMutation();
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    // Check if user is logged in
+    if (!currentUser) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      let requestBody: Record<string, unknown> = {};
+
+      switch (orderType) {
+        case "rank-boost":
+          requestBody = {
+            boostingType: "rank_boost",
+            currentRank: {
+              currentRank: currentLP,
+              queue: formatQueueForApi(queue),
+              currentLp: "0",
+            },
+            desiredRank: {
+              desiredRank: desiredRank,
+              region: formatRegionForApi(region),
+            },
+            customizeOrder: {
+              solo:
+                orderMode === "solo"
+                  ? {
+                      stream: stream,
+                      soloQueue: soloqueue,
+                      offlineMode: offlineMode,
+                    }
+                  : false,
+              duo: orderMode === "duo",
+            },
+            additionInfo: additionalInfo,
+          };
+          break;
+
+        case "placement-matches":
+          requestBody = {
+            boostingType: "placement_matches",
+            placementMatches: {
+              previousRank: previousSeasonRank,
+              region: formatRegionForApi(placementRegion),
+              queue: formatQueueForApi(placementQueue),
+              numberOfGames: numberOfGames,
+            },
+            customizeOrder: {
+              duo: orderMode === "duo",
+            },
+            additionInfo: additionalInfo,
+          };
+          break;
+
+        case "net-wins":
+          requestBody = {
+            boostingType: "net_wins",
+            netWins: {
+              currentRank: previousSeasonRank,
+              region: formatRegionForApi(placementRegion),
+              queue: formatQueueForApi(placementQueue),
+              numberOfWins: numberOfGames,
+            },
+            additionInfo: additionalInfo,
+          };
+          break;
+
+        case "custom-request":
+          requestBody = {
+            boostingType: "custom_request",
+            customRequest: {
+              gameType: "League of Legends",
+              requestDescription: customRequest,
+            },
+            additionalInfo: additionalInfo,
+          };
+          break;
+      }
+
+      const response = await createBoostingPost(requestBody).unwrap();
+      console.log("Boosting post created:", response);
+
+      // Redirect to offers or success page
+      router.push("/offers");
+    } catch (err: unknown) {
+      const apiError = err as { data?: { message?: string }; message?: string };
+      const errorMessage =
+        apiError?.data?.message ||
+        apiError?.message ||
+        "Failed to create order. Please try again.";
+      setError(errorMessage);
+    }
+  };
 
   return (
     <div className="py-2">
@@ -111,6 +240,9 @@ const Herosectionfrom: React.FC = () => {
             setAppearOffline={setSoloqueue}
             offlineMode={offlineMode}
             setOfflineMode={setOfflineMode}
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+            error={error}
           />
         </div>
       </div>

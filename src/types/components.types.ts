@@ -39,6 +39,7 @@ export type QueueType = "Solo/Duo" | "5v5 Flex";
 export type RegionType =
   | "North America (NA)"
   | "Europe (EUW/EUNE)"
+  | "Europe West (EUW)"
   | "Korea (KR)"
   | "Japan (JP)"
   | "Oceania (OCE)"

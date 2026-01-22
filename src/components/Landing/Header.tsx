@@ -1,8 +1,11 @@
 import Logo from "@/src/Assets/Landing/logo.png";
+import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 import Image from "next/image";
 import Link from "next/link";
+import { useSelector } from "react-redux";
 
 function Header() {
+  const user = useSelector(selectCurrentUser);
   return (
     <div className="w-full bg-[#282836]/90 h-fit flex items-center sticky top-0 z-50">
       <nav className="md:container mx-auto flex justify-between items-center px-4">
@@ -26,12 +29,21 @@ function Header() {
 
         {/* Right Section */}
         <div>
-          <Link
-            href={"/login"}
-            className="bg-red-500 text-white  px-4 py-2 rounded"
-          >
-            <span className="text-white">Log in</span>
-          </Link>
+          {user ? (
+            <Link
+              href={"/offers"}
+              className="bg-red-500 text-white  px-4 py-2 rounded"
+            >
+              <span className="text-white">Dashboard</span>
+            </Link>
+          ) : (
+            <Link
+              href={"/login"}
+              className="bg-red-500 text-white  px-4 py-2 rounded"
+            >
+              <span className="text-white">Log in</span>
+            </Link>
+          )}
         </div>
       </nav>
     </div>

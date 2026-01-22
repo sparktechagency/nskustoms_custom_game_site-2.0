@@ -8,6 +8,7 @@ import googleLogo from "@/src/Assets/Auth/google_logo.png";
 import logo from "@/src/Assets/Landing/logo.png";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/src/redux/features/auth/authApi";
 
 interface FormData {
   email: string;
@@ -21,25 +22,36 @@ export default function Login() {
   });
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [login, { isLoading: isSubmitting }] = useLoginMutation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Login submitted:", formData);
-      setIsSubmitting(false);
-      // Here you would typically handle the actual login logic
-    }, 1000);
+    try {
+      const response = await login({
+        email: formData.email,
+        password: formData.password,
+      }).unwrap();
 
-    router.push("/offers");
+      console.log("Login successful:", response);
+      router.push("/offers");
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string }; message?: string };
+      const errorMessage =
+        error?.data?.message ||
+        error?.message ||
+        "Login failed. Please try again.";
+      setError(errorMessage);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -95,6 +107,13 @@ export default function Login() {
 
       {/* Sign In Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-500/20 border border-red-500 text-red-400 px-4 py-2 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="flex flex-col items-start space-y-2">
           <label
             htmlFor="email"

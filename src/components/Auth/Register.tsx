@@ -7,6 +7,8 @@ import appleLogo from "@/src/Assets/Auth/apple_logo.png";
 import googleLogo from "@/src/Assets/Auth/google_logo.png";
 import logo from "@/src/Assets/Landing/logo.png";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRegisterMutation } from "@/src/redux/features/auth/authApi";
 
 interface FormData {
   name: string;
@@ -26,23 +28,52 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const [register, { isLoading: isSubmitting }] = useRegisterMutation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // Format date from YYYY-MM-DD to DD-MM-YYYY
+  const formatDateForApi = (date: string) => {
+    const [year, month, day] = date.split("-");
+    return `${day}-${month}-${year}`;
+  };
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Form submitted:", formData);
-      setIsSubmitting(false);
-      // Here you would typically handle the actual sign up logic
-    }, 1000);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        dateOfBirth: formatDateForApi(formData.dateOfBirth),
+      }).unwrap();
+
+      console.log("Registration successful:", response);
+      // Redirect to OTP verification page with email
+      router.push(`/opt-verifications?email=${encodeURIComponent(formData.email)}`);
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string }; message?: string };
+      const errorMessage =
+        error?.data?.message ||
+        error?.message ||
+        "Registration failed. Please try again.";
+      setError(errorMessage);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -98,6 +129,13 @@ export default function Register() {
 
       {/* Sign Up Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-500/20 border border-red-500 text-red-400 px-4 py-2 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="flex flex-col items-start space-y-2">
           <label htmlFor="name" className="text-sm font-medium text-gray-300">
             Name

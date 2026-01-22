@@ -9,6 +9,8 @@ import logo from "@/src/Assets/Landing/logo.png";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLoginMutation } from "@/src/redux/features/auth/authApi";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/src/redux/features/auth/authSlice";
 
 interface FormData {
   email: string;
@@ -16,6 +18,7 @@ interface FormData {
 }
 
 export default function Login() {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -41,6 +44,23 @@ export default function Login() {
         email: formData.email,
         password: formData.password,
       }).unwrap();
+
+      const { user, accessToken } = response.data;
+
+      dispatch(
+        setUser({
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            role: user.role,
+            dateOfBirth: user.dateOfBirth,
+            isEmailVerified: user.isEmailVerified,
+          },
+          token: accessToken,
+        })
+      );
 
       console.log("Login successful:", response);
       router.push("/offers");

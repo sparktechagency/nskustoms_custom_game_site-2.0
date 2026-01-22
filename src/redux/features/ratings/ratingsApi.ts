@@ -41,8 +41,22 @@ const ratingsApi = baseApi.injectEndpoints({
 
     // Get ratings for a seller
     getRatingsForSeller: builder.query({
-      query: ({ sellerId, params }: { sellerId: string; params?: SellerRatingsParams }) => ({
+      query: ({
+        sellerId,
+        params,
+      }: {
+        sellerId: string;
+        params?: SellerRatingsParams;
+      }) => ({
         url: `/ratings/seller/${sellerId}`,
+        method: "GET",
+        params: params || { page: 1, limit: 10 },
+      }),
+    }),
+    // Get ratings for a seller
+    getSellerRatingStats: builder.query({
+      query: ({ params }) => ({
+        url: `/ratings/seller/feedback-stats`,
         method: "GET",
         params: params || { page: 1, limit: 10 },
       }),
@@ -50,7 +64,13 @@ const ratingsApi = baseApi.injectEndpoints({
 
     // Update rating by ID
     updateRating: builder.mutation({
-      query: ({ id, ratingBody }: { id: string; ratingBody: UpdateRatingBody }) => ({
+      query: ({
+        id,
+        ratingBody,
+      }: {
+        id: string;
+        ratingBody: UpdateRatingBody;
+      }) => ({
         url: `/ratings/${id}`,
         method: "PUT",
         body: ratingBody,
@@ -75,4 +95,5 @@ export const {
   useDeleteRatingMutation,
   useLazyGetRatingByOrderIdQuery,
   useLazyGetRatingsForSellerQuery,
+  useGetSellerRatingStatsQuery,
 } = ratingsApi;

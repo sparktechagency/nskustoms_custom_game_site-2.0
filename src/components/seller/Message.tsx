@@ -1,66 +1,176 @@
 "use client";
-import React, { useState } from "react";
-import Link from "next/link";
-import { FaUser, FaCheckCircle, FaCopy } from "react-icons/fa";
-import { AiFillLike } from "react-icons/ai";
+
+import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { FaUser } from "react-icons/fa";
+import { Loader2, Send, MessageCircle } from "lucide-react";
 import {
   useGetMyConversationsQuery,
   useGetMessagesByConversationIdQuery,
+  useSendMessageMutation,
 } from "@/src/redux/features/conversations/conversationsApi";
+import { useAppSelector } from "@/src/redux/hooks";
 
-interface Message {
-  id: string;
-  user: string;
-  text: string;
-  timestamp: string;
-  isVerified?: boolean;
+type ConversationType = "boosting" | "support";
+
+interface Participant {
+  _id: string;
+  name: string;
+  image: string;
 }
 
 interface Conversation {
-  id: string;
-  user: string;
-  lastMessage: string;
-  timestamp: string;
+  _id: string;
+  participants: Participant[];
+  type: string;
+  referenceId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastMessage?: string;
 }
 
+interface ConversationsResponse {
+  conversations: Conversation[];
+  total: number;
+  pages: number;
+}
+
+interface Message {
+  _id: string;
+  conversationId: string;
+  author: {
+    _id: string;
+    name: string;
+    image: string;
+  };
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface MessagesResponse {
+  messages: Message[];
+  total: number;
+  pages: number;
+}
+
+const tabs: { id: ConversationType; label: string }[] = [
+  { id: "boosting", label: "Boosting" },
+  { id: "support", label: "Support" },
+];
+
+const formatRelativeTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 604800)
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  return date.toLocaleDateString();
+};
+
+const formatMessageTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 const Message: React.FC = () => {
-  const [selectedConversation, setSelectedConversation] =
-    useState<string>("rush007");
-  const { data: userConversations } = useGetMyConversationsQuery({});
-  console.log(userConversations);
-  // console.log()
-
+  const [activeTab, setActiveTab] = useState<ConversationType>("boosting");
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const [messageInput, setMessageInput] = useState("");
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const conversations: Conversation[] = [
-    {
-      id: "1",
-      user: "rush007",
-      lastMessage: "hi brother, can i start your order?",
-      timestamp: "2days ago",
-    },
-    {
-      id: "2",
-      user: "rush007",
-      lastMessage: "hi brother, can i start your order?",
-      timestamp: "8h ago",
-    },
-    {
-      id: "3",
-      user: "rush007",
-      lastMessage: "hi brother, can i start your order?",
-      timestamp: "22h ago",
-    },
-    {
-      id: "4",
-      user: "rush007",
-      lastMessage: "hi brother, can i start your order?",
-      timestamp: "23h ago",
-    },
-  ];
+  const currentUser = useAppSelector((state) => state.auth.user);
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText("45068056850#7u0rhvmc dcvjkrug3045t-3-0orr");
+  const { data: conversationsData, isLoading: isLoadingConversations } =
+    useGetMyConversationsQuery({
+      page: 1,
+      limit: 100,
+      type: activeTab,
+    });
+
+  const {
+    data: messagesData,
+    isLoading: isLoadingMessages,
+    refetch: refetchMessages,
+  } = useGetMessagesByConversationIdQuery(
+    {
+      id: selectedConversationId || "",
+      params: { page: 1, limit: 50 },
+    },
+    { skip: !selectedConversationId },
+  );
+
+  console.log(messagesData);
+
+  const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
+
+  const conversations =
+    (conversationsData as ConversationsResponse)?.conversations || [];
+  const messages = (messagesData as MessagesResponse)?.messages || [];
+
+  const selectedConversation = conversations.find(
+    (c) => c._id === selectedConversationId,
+  );
+
+  const getOtherParticipant = (conversation: Conversation) => {
+    return (
+      conversation.participants.find((p) => p._id !== currentUser?._id) ||
+      conversation.participants[0]
+    );
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleTabChange = (tab: ConversationType) => {
+    setActiveTab(tab);
+    setSelectedConversationId(null);
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageInput.trim() || !selectedConversationId) return;
+
+    try {
+      await sendMessage({
+        id: selectedConversationId,
+        messageBody: {
+          message: messageInput.trim(),
+        },
+      }).unwrap();
+      setMessageInput("");
+      refetchMessages();
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleCopyCode = (text: string) => {
+    navigator.clipboard.writeText(text);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
@@ -68,156 +178,234 @@ const Message: React.FC = () => {
   return (
     <section className="">
       {/* Navigation Tabs */}
-      <div className="pt-5 w-[50px] flex space-x-1 md:space-x-3 border-b border-gray-700">
-        <button className="flex-1 px-4 py-3 text-sm font-medium bg-[#AC2212] hover:bg-red-700 transition-colors rounded-md">
-          All
-        </button>
-        <button className="flex-1 px-4 py-3 text-sm font-medium text-gray-300 hover:bg-[#AC2212] bg-[#282836] transition-colors rounded-md">
-          Boosting
-        </button>
-        <button className="flex-1 px-4 py-3 text-sm font-medium text-gray-300 hover:bg-[#AC2212] bg-[#282836] transition-colors rounded-md">
-          Orders
-        </button>
-        <button className="flex-1 px-4 py-3 text-sm font-medium text-gray-300 hover:bg-[#AC2212] bg-[#282836] transition-colors rounded-md">
-          Support
-        </button>
+      <div className="flex flex-wrap gap-3 md:gap-2 mb-4">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 border rounded text-sm font-medium transition-colors relative ${
+              activeTab === tab.id
+                ? "text-white bg-[#282836] border-orange-500"
+                : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 border-gray-700"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
-      <div className="flex  my-5">
-        {/* Sidebar */}
-        <div className="w-64 rounded-l-md bg-[#282836] border-r border-gray-700">
-          {/* Browse message header */}
-          <div className="bg-[#ac21128f] rounded-tl-md text-white px-4 py-3 bg-gray-750 text-sm font-medium border-b border-gray-700">
-            Browse message
+
+      <div className="flex h-[600px] rounded-lg overflow-hidden border border-gray-700">
+        {/* Sidebar - Conversations List */}
+        <div className="w-72 bg-[#282836] border-r border-gray-700 flex flex-col">
+          {/* Header */}
+          <div className="bg-[#ac21128f] text-white px-4 py-3 text-sm font-medium border-b border-gray-700">
+            Browse Messages
           </div>
 
           {/* Conversations List */}
-          <div className="overflow-y-auto">
-            {conversations.map((conv) => (
-              <div
-                key={conv.id}
-                onClick={() => setSelectedConversation(conv.user)}
-                className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-[#282836] transition-colors border-b border-gray-750 ${
-                  selectedConversation === conv.user ? "bg-[#282836]" : ""
-                }`}
-              >
-                <div className="w-10 h-10 rounded-full bg-[#282836] flex items-center justify-center flex-shrink-0">
-                  <FaUser className="text-gray-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-sm font-medium text-white">
-                      {conv.user}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {conv.timestamp}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400 truncate">{conv.user}</p>
-                  <p className="text-xs text-gray-300 mt-1">
-                    {conv.lastMessage}
-                  </p>
-                </div>
+          <div className="flex-1 overflow-y-auto">
+            {isLoadingConversations ? (
+              <div className="flex flex-col items-center justify-center py-10">
+                <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                <p className="text-gray-500 text-xs mt-2">Loading...</p>
               </div>
-            ))}
+            ) : conversations.length > 0 ? (
+              conversations.map((conv) => {
+                const otherUser = getOtherParticipant(conv);
+                return (
+                  <div
+                    key={conv._id}
+                    onClick={() => setSelectedConversationId(conv._id)}
+                    className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-800/50 transition-colors border-b border-gray-700/50 ${
+                      selectedConversationId === conv._id
+                        ? "bg-gray-800/50"
+                        : ""
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                      {otherUser?.image ? (
+                        <Image
+                          src={otherUser.image}
+                          alt={otherUser.name}
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FaUser className="text-white text-sm" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-sm font-medium text-white truncate">
+                          {otherUser?.name || "Unknown"}
+                        </span>
+                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                          {formatRelativeTime(conv.updatedAt)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 truncate">
+                        {conv.lastMessage || "No messages yet"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 px-4">
+                <MessageCircle className="w-10 h-10 text-gray-600 mb-2" />
+                <p className="text-gray-500 text-sm text-center">
+                  No {activeTab} conversations
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col bg-gray-900 ">
-          {/* Chat Header */}
-          <div className="flex items-center gap-3  px-6 py-4 bg-[#282836] border-b border-gray-700">
-            <div className="w-10 h-10 rounded-full bg-[#282836] flex items-center justify-center">
-              <FaUser className="text-gray-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-white">
-                  {selectedConversation}
-                </span>
-                <FaCheckCircle className="text-blue-400 text-sm" />
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <AiFillLike size={20} />
-                <span>100%</span>
-                <span className="text-blue-400 underline">25 reviews</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-            {/* Boosting Request Card */}
-            <div className="bg-[#282836] rounded-lg p-4 max-w-2xl">
-              <h3 className="text-sm font-medium mb-3">
-                Boosting request chat started
-              </h3>
-              <Link
-                href="https://www.middlegihovccwlfpgudftglxvhmhr.dmmrfewkmidchs.p304358m"
-                className="text-xs text-blue-400 hover:underline block mb-3 break-all"
-              >
-                https://www.middlegihovccwlfpgudftglxvhmhr.dmmrfewkmidchs.p304358m
-              </Link>
-              <div className="bg-gray-900 rounded p-3 flex items-center justify-between">
-                <code className="text-xs text-gray-300 font-mono break-all">
-                  45068056850#7u0rhvmc dcvjkrug3045t-3-0orr
-                </code>
-                <button
-                  onClick={handleCopyCode}
-                  className="ml-3 text-gray-400 hover:text-white transition-colors flex-shrink-0"
-                  title="Copy code"
-                >
-                  <FaCopy className="text-sm" />
-                </button>
-              </div>
-              <Link
-                href="http://www.dfdvmnhlfch.gg"
-                className="text-xs text-blue-400 hover:underline block mt-2"
-              >
-                www.dfdvmnhlfch.gg
-              </Link>
-            </div>
-
-            {/* User Message */}
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#282836] flex items-center justify-center flex-shrink-0">
-                <FaUser className="text-gray-400 text-sm" />
-              </div>
-              <div>
-                <div className="bg-[#282836] rounded-lg px-4 py-2 inline-block">
-                  <p className="text-sm">hi brother,</p>
-                  <p className="text-sm">can i start your order?</p>
+        <div className="flex-1 flex flex-col bg-gray-900">
+          {selectedConversationId && selectedConversation ? (
+            <>
+              {/* Chat Header */}
+              <div className="flex items-center gap-3 px-6 py-4 bg-[#282836] border-b border-gray-700">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+                  {getOtherParticipant(selectedConversation)?.image ? (
+                    <Image
+                      src={getOtherParticipant(selectedConversation).image}
+                      alt={getOtherParticipant(selectedConversation).name}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <FaUser className="text-white" />
+                  )}
                 </div>
-                <span className="text-xs text-gray-500 ml-2 mt-1 inline-block">
-                  2 day
-                </span>
+                <div>
+                  <span className="text-sm font-medium text-white block">
+                    {getOtherParticipant(selectedConversation)?.name ||
+                      "Unknown"}
+                  </span>
+                  <span
+                    className={`text-xs ${selectedConversation.isActive ? "text-green-400" : "text-gray-500"}`}
+                  >
+                    {selectedConversation.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Inactive Notice */}
-            <div className="text-center py-4">
-              <p className="text-xs text-gray-500">
-                this conversation is no longer active
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+                {isLoadingMessages ? (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+                    <p className="text-gray-500 text-sm mt-2">
+                      Loading messages...
+                    </p>
+                  </div>
+                ) : messages.length > 0 ? (
+                  <>
+                    {[...messages].reverse().map((msg) => {
+                      const isCurrentUser =
+                        msg.author._id === currentUser?._id;
+                      return (
+                        <div
+                          key={msg._id}
+                          className={`flex items-start gap-3 ${isCurrentUser ? "flex-row-reverse" : ""}`}
+                        >
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                            {msg.author.image ? (
+                              <Image
+                                src={msg.author.image}
+                                alt={msg.author.name}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <FaUser className="text-white text-xs" />
+                            )}
+                          </div>
+                          <div
+                            className={`max-w-xs md:max-w-md ${isCurrentUser ? "text-right" : ""}`}
+                          >
+                            <div
+                              className={`rounded-lg px-4 py-2 inline-block ${
+                                isCurrentUser
+                                  ? "bg-red-600 text-white"
+                                  : "bg-[#282836] text-gray-200"
+                              }`}
+                            >
+                              <p className="text-sm whitespace-pre-wrap">
+                                {msg.message}
+                              </p>
+                            </div>
+                            <span className="text-xs text-gray-500 mt-1 block">
+                              {formatMessageTime(msg.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div ref={messagesEndRef} />
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <MessageCircle className="w-12 h-12 text-gray-600 mb-3" />
+                    <p className="text-gray-500 text-sm">
+                      No messages yet. Start the conversation!
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Input Area */}
+              <div className="px-6 py-4 bg-[#282836] border-t border-gray-700">
+                {selectedConversation.isActive ? (
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Type a message..."
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      disabled={isSending}
+                      className="flex-1 bg-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={isSending || !messageInput.trim()}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isSending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      Send
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-2">
+                    <p className="text-gray-500 text-sm">
+                      This conversation is no longer active
+                    </p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            /* No Conversation Selected */
+            <div className="flex-1 flex flex-col items-center justify-center bg-[#282836]">
+              <MessageCircle className="w-16 h-16 text-gray-600 mb-4" />
+              <h3 className="text-gray-300 text-lg font-medium mb-2">
+                Select a Conversation
+              </h3>
+              <p className="text-gray-500 text-sm text-center max-w-xs">
+                Choose a conversation from the list to view messages
               </p>
             </div>
-          </div>
-
-          {/* Input Area (Disabled) */}
-          <div className="px-6 py-4  bg-[#282836] border-t border-gray-700">
-            <div className="flex items-center gap-3 opacity-50 cursor-not-allowed">
-              <input
-                type="text"
-                placeholder="Type a message..."
-                disabled
-                className="flex-1 bg-[#282836] rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none"
-              />
-              <button
-                disabled
-                className="px-6 py-2 bg-red-600 text-white text-sm font-medium rounded-lg"
-              >
-                Send
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Copy notification */}

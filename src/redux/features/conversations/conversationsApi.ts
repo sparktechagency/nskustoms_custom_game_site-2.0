@@ -3,6 +3,7 @@ import { baseApi } from "@/src/redux/baseApi/baseApi";
 interface ConversationParams {
   page?: number;
   limit?: number;
+  type?: "boosting" | "support";
 }
 
 interface MessageParams {
@@ -17,9 +18,7 @@ interface CreateConversationBody {
 }
 
 interface SendMessageBody {
-  content: string;
-  type?: "text" | "image" | "file";
-  [key: string]: unknown;
+  message: string;
 }
 
 const conversationsApi = baseApi.injectEndpoints({

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { FaCircle } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,43 +8,38 @@ import { useParams } from "next/navigation";
 import { useGetBoostingPostByIdQuery } from "@/src/redux/features/boosting-post/boostingApi";
 import { Loader2, MessageCircle } from "lucide-react";
 import { BoostingPost } from "@/src/types/page.types";
-// Format date
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
-
-// Format boosting type
-const formatBoostingType = (type: string): string => {
-  const typeMap: Record<string, string> = {
-    rank_boost: "Rank Boost",
-    placement_matches: "Placement Matches",
-    net_wins: "Net Wins",
-    custom_request: "Custom Request",
-  };
-  return typeMap[type] || type;
-};
-
-// Get completion method
-const getCompletionMethod = (
-  customizeOrder?: BoostingPost["customizeOrder"],
-): string => {
-  if (!customizeOrder) return "-";
-  if (customizeOrder.duo) return "Duo";
-  if (customizeOrder.solo) return "Solo";
-  return "-";
-};
+import {
+  formatBoostingType,
+  formatDate,
+  getCompletionMethod,
+} from "@/src/utils/pageHealper";
+import { useCreateOfferSellerMutation } from "@/src/redux/features/offers/offersApi";
+import CreateOfferModel from "@/src/components/seller/CreateofferModel";
+import { useCreateConversationMutation } from "@/src/redux/features/conversations/conversationsApi";
 
 const Page = () => {
   const { id } = useParams<{ id: string }>();
   const { data: boostingDetails, isLoading } = useGetBoostingPostByIdQuery(id);
+  const [createOffers, { isLoading: isCreatingOffer }] =
+    useCreateOfferSellerMutation();
+  const [createConversations, { isLoading: isCreateConversations }] =
+    useCreateConversationMutation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCreateOffer = async (data: {
+    boostingPostId: string;
+    deliverTime: string;
+    price: number;
+    message: string;
+  }) => {
+    try {
+      await createOffers(data).unwrap();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Failed to create offer:", error);
+      throw error;
+    }
+  };
 
   const details = boostingDetails as BoostingPost | undefined;
 
@@ -382,12 +378,25 @@ const Page = () => {
         <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
           <div className="text-center py-8">
             <p className="text-gray-400 mb-4">Create your offer here.</p>
-            <button className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded transition-colors duration-200">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded transition-colors duration-200"
+            >
               Create an offer
             </button>
           </div>
         </div>
       </div>
+
+      {/* Create Offer Modal */}
+      {isModalOpen && (
+        <CreateOfferModel
+          boostingPostId={id}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreateOffer}
+          isLoading={isCreatingOffer}
+        />
+      )}
     </div>
   );
 };

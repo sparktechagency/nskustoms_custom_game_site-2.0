@@ -43,7 +43,7 @@ const ProfileSection = () => (
   </div>
 );
 
-const SellerSidebar = () => {
+const BuyerSidebar = () => {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -51,8 +51,7 @@ const SellerSidebar = () => {
   const normalizedPathname = pathname?.replace(/\/$/, "");
 
   const menuItems = [
-    { label: "Boosting", path: "/sellerboosting", icon: FaRocket },
-    { label: "Offers", path: "/offers", icon: FaTags },
+    { label: "Boosting", path: "/boosting", icon: FaRocket },
     { label: "Messages", path: "/message", icon: FaEnvelope },
     { label: "Notifications", path: "/notifications", icon: FaBell },
     { label: "Feedback", path: "/feedback", icon: FaStar },
@@ -162,4 +161,4 @@ const SellerSidebar = () => {
   );
 };
 
-export default SellerSidebar;
+export default BuyerSidebar;

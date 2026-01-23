@@ -1,8 +1,8 @@
-'use client';
+"use client";
 import Footer from "@/src/components/Landing/Footer";
 import React from "react";
 import herobg from "@/src/Assets/seller/sellerBackground.png";
-import SellerSidebar from "@/src/components/SellerSidebar/SellerSidebar";
+import BuyerSidebar from "@/src/components/Buyer/BuyerSidebar";
 
 const Dashboard = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -16,7 +16,7 @@ const Dashboard = ({ children }: { children: React.ReactNode }) => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-6 lg:gap-0 xl:gap-8  py-8">
           {/* Sidebar */}
           <div className="md:col-span-3 lg:col-span-3 xl:col-span-2">
-            <SellerSidebar />
+            <BuyerSidebar />
           </div>
 
           {/* Main Content */}

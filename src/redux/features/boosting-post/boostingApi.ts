@@ -9,7 +9,11 @@ interface BoostingPostParams {
 interface SellerBrowseParams {
   page?: number;
   limit?: number;
-  type?: "waiting_for_offer" | "offer_accepted" | "offer_submitted" | "offer_lost";
+  type?:
+    | "waiting_for_offer"
+    | "offer_accepted"
+    | "offer_submitted"
+    | "offer_lost";
 }
 
 const boostingPostApi = baseApi.injectEndpoints({
@@ -71,6 +75,7 @@ const boostingPostApi = baseApi.injectEndpoints({
         method: "GET",
         params: params || { page: 1, limit: 10 },
       }),
+      transformResponse: (res) => res?.data,
     }),
   }),
 });

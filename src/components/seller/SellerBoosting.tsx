@@ -1,29 +1,102 @@
-"use client"
-import { useState } from 'react';
-import Link from 'next/link';
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { useGetBoostingPostsForSellerQuery } from "@/src/redux/features/boosting-post/boostingApi";
 const SellerBoosting = () => {
-  const [activeTab, setActiveTab] = useState('all');
-  
+  const { data: browseBoosting } = useGetBoostingPostsForSellerQuery({});
+  console.log(browseBoosting);
+  const [activeTab, setActiveTab] = useState("all");
+
   const tabs = [
-    { id: 'all', label: 'All Requests' },
-    { id: 'progress', label: 'In Progress' },
-    { id: 'completed', label: 'Completed' },
-    { id: 'disputed', label: 'Disputed' },
-    { id: 'cancelled', label: 'Cancelled' }
+    { id: "all", label: "All Requests" },
+    { id: "progress", label: "In Progress" },
+    { id: "completed", label: "Completed" },
+    { id: "disputed", label: "Disputed" },
+    { id: "cancelled", label: "Cancelled" },
   ];
 
   const tableData = [
-  { id: 1, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 8, 2025, 9:45AM', status: 'Viewed' },
-  { id: 2, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 8, 2025, 9:45AM', status: 'Viewed' },
-  { id: 3, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 8, 2025, 9:45AM', status: 'Viewed' },
-  { id: 4, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 8, 2025, 9:45AM', status: '' },
-  { id: 5, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 8, 2025, 9:45AM', status: '' },
-  { id: 6, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 9, 2025, 10:30AM', status: 'Viewed' },
-  { id: 7, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 9, 2025, 11:15AM', status: '' },
-  { id: 8, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 10, 2025, 8:20AM', status: 'Viewed' },
-  { id: 9, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 10, 2025, 2:45PM', status: '' },
-  { id: 10, gene: 'Gene', buyer: 'afnan90', category: 'Real Boost', date: 'Dec 11, 2025, 4:00PM', status: 'Viewed' }
-];
+    {
+      id: 1,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 8, 2025, 9:45AM",
+      status: "Viewed",
+    },
+    {
+      id: 2,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 8, 2025, 9:45AM",
+      status: "Viewed",
+    },
+    {
+      id: 3,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 8, 2025, 9:45AM",
+      status: "Viewed",
+    },
+    {
+      id: 4,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 8, 2025, 9:45AM",
+      status: "",
+    },
+    {
+      id: 5,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 8, 2025, 9:45AM",
+      status: "",
+    },
+    {
+      id: 6,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 9, 2025, 10:30AM",
+      status: "Viewed",
+    },
+    {
+      id: 7,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 9, 2025, 11:15AM",
+      status: "",
+    },
+    {
+      id: 8,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 10, 2025, 8:20AM",
+      status: "Viewed",
+    },
+    {
+      id: 9,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 10, 2025, 2:45PM",
+      status: "",
+    },
+    {
+      id: 10,
+      gene: "Gene",
+      buyer: "afnan90",
+      category: "Real Boost",
+      date: "Dec 11, 2025, 4:00PM",
+      status: "Viewed",
+    },
+  ];
 
   return (
     <div className="">
@@ -36,17 +109,14 @@ const SellerBoosting = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 border rounded text-sm font-medium transition-colors relative ${
                 activeTab === tab.id
-                  ? 'text-white bg-[#282836]'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+                  ? "text-white bg-[#282836]"
+                  : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
               }`}
             >
               {tab.label}
-              
             </button>
           ))}
         </div>
-
-       
 
         {/* Table */}
         <div className="bg-[#282836] rounded-lg overflow-hidden border border-gray-700">
@@ -54,19 +124,27 @@ const SellerBoosting = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Gene</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Buyer</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Category</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Request creation date</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">
+                    Gene
+                  </th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">
+                    Buyer
+                  </th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">
+                    Category
+                  </th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">
+                    Request creation date
+                  </th>
                   <th className="text-right px-6 py-4 text-sm font-medium text-gray-400"></th>
                 </tr>
               </thead>
               <tbody>
                 {tableData.map((row, index) => (
-                  <tr 
-                    key={row.id} 
+                  <tr
+                    key={row.id}
                     className={`border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors ${
-                      index === tableData.length - 1 ? 'border-b-0' : ''
+                      index === tableData.length - 1 ? "border-b-0" : ""
                     }`}
                   >
                     <td className="px-6 py-4">
@@ -77,12 +155,23 @@ const SellerBoosting = () => {
                         <span className="text-sm text-white">{row.gene}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">{row.buyer}</td>
-                    <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
-                    <td className="px-6 py-4 text-sm text-gray-300">{row.date}</td>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      {row.buyer}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      {row.category}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      {row.date}
+                    </td>
                     <td className="px-6 py-4 text-right">
                       {row.status && (
-                        <Link href={`/sellerboosting/${1}`} className="text-sm text-blue-400 font-medium">{row.status}</Link>
+                        <Link
+                          href={`/sellerboosting/${1}`}
+                          className="text-sm text-blue-400 font-medium"
+                        >
+                          {row.status}
+                        </Link>
                       )}
                     </td>
                   </tr>
@@ -102,6 +191,6 @@ const SellerBoosting = () => {
       </div>
     </div>
   );
-}
+};
 
-export default SellerBoosting
+export default SellerBoosting;

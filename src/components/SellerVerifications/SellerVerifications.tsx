@@ -7,6 +7,19 @@ import SellerSelfieImageVerification from "./SellerSelfieImageVerification";
 import AccountReviewInProgress from "./AccountReviewInProgress";
 import { useApplyBecomeSellerMutation } from "@/src/redux/features/become-seller/becomeSellerApi";
 
+export const SellerTypes = {
+  INDIVIDUAL: "individual",
+  COMPANY: "company",
+} as const;
+
+export const SellerCategories = {
+  BOOSTING: "boosting",
+} as const;
+
+type SellerTypeValue = (typeof SellerTypes)[keyof typeof SellerTypes];
+type SellerCategoryValue =
+  (typeof SellerCategories)[keyof typeof SellerCategories];
+
 type Step =
   | "sellerType"
   | "sellingCategory"
@@ -31,8 +44,8 @@ interface FormDataType {
 }
 
 interface VerificationData {
-  sellerType: string | null;
-  sellingCategory: string | null;
+  sellerType: SellerTypeValue | null;
+  sellingCategory: SellerCategoryValue | null;
   formData: FormDataType | null;
   idImages: {
     frontImage: File | null;
@@ -52,14 +65,14 @@ const SellerVerificationsPage = () => {
     selfieImage: null,
   });
 
-  const handleSellerTypeSelect = (type: string) => {
+  const handleSellerTypeSelect = (type: SellerTypeValue) => {
     setVerificationData((prev) => ({
       ...prev,
       sellerType: type,
     }));
   };
 
-  const handleSellingCategorySelect = (category: string) => {
+  const handleSellingCategorySelect = (category: SellerCategoryValue) => {
     setVerificationData((prev) => ({
       ...prev,
       sellingCategory: category,
@@ -94,14 +107,14 @@ const SellerVerificationsPage = () => {
     switch (currentStep) {
       case "sellerType":
         return (
-          <SellerType
+          <SellerTypeStep
             onSelect={handleSellerTypeSelect}
             onNext={() => setCurrentStep("sellingCategory")}
           />
         );
       case "sellingCategory":
         return (
-          <SellingCategory
+          <SellingCategoryStep
             onSelect={handleSellingCategorySelect}
             onNext={() => setCurrentStep("idForm")}
           />
@@ -133,7 +146,7 @@ const SellerVerificationsPage = () => {
         return <AccountReviewInProgress />;
       default:
         return (
-          <SellerType
+          <SellerTypeStep
             onSelect={handleSellerTypeSelect}
             onNext={() => setCurrentStep("sellingCategory")}
           />
@@ -150,15 +163,15 @@ const SellerVerificationsPage = () => {
 
 export default SellerVerificationsPage;
 
-interface SellerTypeProps {
-  onSelect: (type: string) => void;
+type SellerTypeStepProps = {
+  onSelect: (type: (typeof SellerTypes)[keyof typeof SellerTypes]) => void;
   onNext: () => void;
-}
+};
 
-const SellerType: React.FC<SellerTypeProps> = ({ onSelect, onNext }) => {
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+const SellerTypeStep: React.FC<SellerTypeStepProps> = ({ onSelect, onNext }) => {
+  const [selectedType, setSelectedType] = useState<SellerTypeValue | null>(null);
 
-  const handleTypeSelect = (type: string) => {
+  const handleTypeSelect = (type: SellerTypeValue) => {
     setSelectedType(type);
     onSelect(type);
   };
@@ -188,17 +201,17 @@ const SellerType: React.FC<SellerTypeProps> = ({ onSelect, onNext }) => {
       <div className="flex items-center space-x-4">
         <button
           className={`cursor-pointer px-8 py-2 ${
-            selectedType === "individual" ? "bg-[#AC2212]" : "bg-[#A3A3A31A]"
+            selectedType === SellerTypes.INDIVIDUAL ? "bg-[#AC2212]" : "bg-[#A3A3A31A]"
           } text-sm`}
-          onClick={() => handleTypeSelect("individual")}
+          onClick={() => handleTypeSelect(SellerTypes.INDIVIDUAL)}
         >
           Individual
         </button>
         <button
           className={`cursor-pointer px-8 py-2 rounded- ${
-            selectedType === "company" ? "bg-[#AC2212]" : "bg-[#A3A3A31A]"
+            selectedType === SellerTypes.COMPANY ? "bg-[#AC2212]" : "bg-[#A3A3A31A]"
           } text-white text-sm font-normal`}
-          onClick={() => handleTypeSelect("company")}
+          onClick={() => handleTypeSelect(SellerTypes.COMPANY)}
         >
           Company
         </button>
@@ -216,18 +229,18 @@ const SellerType: React.FC<SellerTypeProps> = ({ onSelect, onNext }) => {
   );
 };
 
-interface SellingCategoryProps {
-  onSelect: (category: string) => void;
+type SellingCategoryStepProps = {
+  onSelect: (category: (typeof SellerCategories)[keyof typeof SellerCategories]) => void;
   onNext: () => void;
-}
+};
 
-const SellingCategory: React.FC<SellingCategoryProps> = ({
+const SellingCategoryStep: React.FC<SellingCategoryStepProps> = ({
   onSelect,
   onNext,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<SellerCategoryValue | null>(null);
 
-  const handleCategorySelect = (category: string) => {
+  const handleCategorySelect = (category: SellerCategoryValue) => {
     setSelectedCategory(category);
     onSelect(category);
   };
@@ -257,9 +270,9 @@ const SellingCategory: React.FC<SellingCategoryProps> = ({
       <div className="">
         <button
           className={`cursor-pointer px-8 py-2 rounded- ${
-            selectedCategory === "games" ? "bg-[#AC2212]" : "bg-[#A3A3A31A]"
+            selectedCategory === SellerCategories.BOOSTING ? "bg-[#AC2212]" : "bg-[#A3A3A31A]"
           } text-white text-sm font-normal`}
-          onClick={() => handleCategorySelect("games")}
+          onClick={() => handleCategorySelect(SellerCategories.BOOSTING)}
         >
           Boosting
         </button>

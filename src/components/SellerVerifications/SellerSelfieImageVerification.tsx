@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { CheckCircle, X, Image, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { SellerTypes, SellerCategories } from "./SellerVerifications";
 
 interface FormDataType {
   firstName: string;
@@ -19,9 +20,13 @@ interface FormDataType {
   zipCode: string;
 }
 
+type SellerTypeValue = (typeof SellerTypes)[keyof typeof SellerTypes];
+type SellerCategoryValue =
+  (typeof SellerCategories)[keyof typeof SellerCategories];
+
 interface VerificationData {
-  sellerType: string | null;
-  sellingCategory: string | null;
+  sellerType: SellerTypeValue | null;
+  sellingCategory: SellerCategoryValue | null;
   formData: FormDataType | null;
   idImages: {
     frontImage: File | null;

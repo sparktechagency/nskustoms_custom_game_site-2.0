@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { CheckCircle, X, Image } from "lucide-react";
 
 interface SellerIDImageVerificationsProps {
-  onSubmit: (frontImage: string | null, backImage: string | null) => void;
+  onSubmit: (frontImage: File | null, backImage: File | null) => void;
   onNext: () => void;
 }
 
@@ -12,30 +12,36 @@ export default function SellerIDImageVerifications({
   onSubmit,
   onNext,
 }: SellerIDImageVerificationsProps) {
-  const [frontImage, setFrontImage] = useState<string | null>(null);
-  const [backImage, setBackImage] = useState<string | null>(null);
+  const [frontImage, setFrontImage] = useState<File | null>(null);
+  const [frontPreview, setFrontPreview] = useState<string | null>(null);
+  const [backImage, setBackImage] = useState<File | null>(null);
+  const [backPreview, setBackPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
-    setImage: React.Dispatch<React.SetStateAction<string | null>>
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setPreview: React.Dispatch<React.SetStateAction<string | null>>
   ) => {
     const file = event.target.files?.[0];
     if (file) {
+      setFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImage(e.target?.result as string);
+        setPreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleRemoveImage = (
-    setImage: React.Dispatch<React.SetStateAction<string | null>>
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setPreview: React.Dispatch<React.SetStateAction<string | null>>
   ) => {
-    setImage(null);
+    setFile(null);
+    setPreview(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,14 +58,8 @@ export default function SellerIDImageVerifications({
     // Submit images to parent component
     onSubmit(frontImage, backImage);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Front image:", frontImage);
-      console.log("Back image:", backImage);
-      setIsSubmitting(false);
-      onNext(); // Move to next step
-      // Here you would typically handle the actual verification logic
-    }, 1000);
+    setIsSubmitting(false);
+    onNext(); // Move to next step
   };
 
   const handleFrontImageClick = () => {
@@ -90,23 +90,23 @@ export default function SellerIDImageVerifications({
           <div className="relative">
             <div
               className={`border-2 border-dashed rounded-lg p-4 cursor-pointer transition-all ${
-                frontImage
+                frontPreview
                   ? "border-green-500 bg-green-900/20"
                   : "border-gray-600 hover:border-gray-500"
               }`}
               onClick={handleFrontImageClick}
             >
-              {frontImage ? (
+              {frontPreview ? (
                 <div className="relative">
                   <img
-                    src={frontImage}
+                    src={frontPreview}
                     alt="Front ID"
                     className="w-full h-32 object-cover rounded"
                   />
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleRemoveImage(setFrontImage);
+                      handleRemoveImage(setFrontImage, setFrontPreview);
                     }}
                     className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 transition-colors"
                   >
@@ -124,7 +124,7 @@ export default function SellerIDImageVerifications({
               ref={frontInputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif"
-              onChange={(e) => handleImageUpload(e, setFrontImage)}
+              onChange={(e) => handleImageUpload(e, setFrontImage, setFrontPreview)}
               className="hidden"
             />
           </div>
@@ -133,23 +133,23 @@ export default function SellerIDImageVerifications({
           <div className="relative">
             <div
               className={`border-2 border-dashed rounded-lg p-4 cursor-pointer transition-all ${
-                backImage
+                backPreview
                   ? "border-green-500 bg-green-900/20"
                   : "border-gray-600 hover:border-gray-500"
               }`}
               onClick={handleBackImageClick}
             >
-              {backImage ? (
+              {backPreview ? (
                 <div className="relative">
                   <img
-                    src={backImage}
+                    src={backPreview}
                     alt="Back ID"
                     className="w-full h-32 object-cover rounded"
                   />
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleRemoveImage(setBackImage);
+                      handleRemoveImage(setBackImage, setBackPreview);
                     }}
                     className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 transition-colors"
                   >
@@ -167,7 +167,7 @@ export default function SellerIDImageVerifications({
               ref={backInputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif"
-              onChange={(e) => handleImageUpload(e, setBackImage)}
+              onChange={(e) => handleImageUpload(e, setBackImage, setBackPreview)}
               className="hidden"
             />
           </div>

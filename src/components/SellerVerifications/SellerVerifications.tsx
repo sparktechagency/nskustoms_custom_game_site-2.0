@@ -5,6 +5,7 @@ import SellerIDVerificationForm from "./SellerIDVerificationForm";
 import SellerIDImageVerifications from "./SellerIDImageVerifications";
 import SellerSelfieImageVerification from "./SellerSelfieImageVerification";
 import AccountReviewInProgress from "./AccountReviewInProgress";
+import { useApplyBecomeSellerMutation } from "@/src/redux/features/become-seller/becomeSellerApi";
 
 type Step =
   | "sellerType"
@@ -14,7 +15,7 @@ type Step =
   | "selfie"
   | "review";
 
-interface FormData {
+interface FormDataType {
   firstName: string;
   lastName: string;
   dateOfBirth: {
@@ -32,16 +33,17 @@ interface FormData {
 interface VerificationData {
   sellerType: string | null;
   sellingCategory: string | null;
-  formData: FormData | null;
+  formData: FormDataType | null;
   idImages: {
-    frontImage: string | null;
-    backImage: string | null;
+    frontImage: File | null;
+    backImage: File | null;
   } | null;
-  selfieImage: string | null;
+  selfieImage: File | null;
 }
 
 const SellerVerificationsPage = () => {
   const [currentStep, setCurrentStep] = useState<Step>("sellerType");
+  const [applyVerification] = useApplyBecomeSellerMutation();
   const [verificationData, setVerificationData] = useState<VerificationData>({
     sellerType: null,
     sellingCategory: null,
@@ -64,7 +66,7 @@ const SellerVerificationsPage = () => {
     }));
   };
 
-  const handleFormSubmit = (data: FormData) => {
+  const handleFormSubmit = (data: FormDataType) => {
     setVerificationData((prev) => ({
       ...prev,
       formData: data,
@@ -72,8 +74,8 @@ const SellerVerificationsPage = () => {
   };
 
   const handleIdImagesSubmit = (
-    frontImage: string | null,
-    backImage: string | null
+    frontImage: File | null,
+    backImage: File | null,
   ) => {
     setVerificationData((prev) => ({
       ...prev,
@@ -81,16 +83,11 @@ const SellerVerificationsPage = () => {
     }));
   };
 
-  const handleSelfieSubmit = (image: string | null) => {
+  const handleSelfieSubmit = (image: File | null) => {
     setVerificationData((prev) => ({
       ...prev,
       selfieImage: image,
     }));
-  };
-
-  const handleSubmitAll = () => {
-    console.log("All verification data:", verificationData);
-    setCurrentStep("review");
   };
 
   const renderCurrentStep = () => {
@@ -127,7 +124,9 @@ const SellerVerificationsPage = () => {
         return (
           <SellerSelfieImageVerification
             onSubmit={handleSelfieSubmit}
-            onSubmitAll={handleSubmitAll}
+            verificationData={verificationData}
+            applyVerification={applyVerification}
+            onSuccess={() => setCurrentStep("review")}
           />
         );
       case "review":

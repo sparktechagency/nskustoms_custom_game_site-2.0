@@ -1,45 +1,90 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { CheckCircle, X, Image } from "lucide-react";
+import { CheckCircle, X, Image, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-interface SellerSelfieImageVerificationProps {
-  onSubmit: (image: string | null) => void;
-  onSubmitAll: () => void;
+interface FormDataType {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: {
+    year: string;
+    month: string;
+    day: string;
+  };
+  nationality: string;
+  streetAddress: string;
+  city: string;
+  country: string;
+  zipCode: string;
 }
 
-export default function SellerSelfieImageVerification({ onSubmit, onSubmitAll }: SellerSelfieImageVerificationProps) {
-  const [image, setImage] = useState<string | null>(null);
+interface VerificationData {
+  sellerType: string | null;
+  sellingCategory: string | null;
+  formData: FormDataType | null;
+  idImages: {
+    frontImage: File | null;
+    backImage: File | null;
+  } | null;
+  selfieImage: File | null;
+}
+
+interface SellerSelfieImageVerificationProps {
+  onSubmit: (image: File | null) => void;
+  verificationData: VerificationData;
+  applyVerification: ReturnType<typeof import("@/src/redux/features/become-seller/becomeSellerApi").useApplyBecomeSellerMutation>[0];
+  onSuccess: () => void;
+}
+
+export default function SellerSelfieImageVerification({
+  onSubmit,
+  verificationData,
+  applyVerification,
+  onSuccess,
+}: SellerSelfieImageVerificationProps) {
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    setImage: React.Dispatch<React.SetStateAction<string | null>>
-  ) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImage(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImage(e.target?.result as string);
+        setPreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleRemoveImage = (
-    setImage: React.Dispatch<React.SetStateAction<string | null>>
-  ) => {
+  const handleRemoveImage = () => {
     setImage(null);
+    setPreview(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     // Validate that the image is uploaded
     if (!image) {
-      alert("Please upload a selfie with your ID");
+      toast.error("Please upload a selfie with your ID");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate all required data
+    if (
+      !verificationData.sellerType ||
+      !verificationData.sellingCategory ||
+      !verificationData.formData ||
+      !verificationData.idImages?.frontImage ||
+      !verificationData.idImages?.backImage
+    ) {
+      toast.error("Missing required verification data");
       setIsSubmitting(false);
       return;
     }
@@ -47,13 +92,34 @@ export default function SellerSelfieImageVerification({ onSubmit, onSubmitAll }:
     // Submit image to parent component
     onSubmit(image);
 
-    // Submit all verification data
-    setTimeout(() => {
-      console.log("Selfie image:", image);
+    // Create FormData
+    const formData = new FormData();
+    formData.append("sellerType", verificationData.sellerType);
+    formData.append("sellingCategory", verificationData.sellingCategory);
+    formData.append("firstName", verificationData.formData.firstName);
+    formData.append("lastName", verificationData.formData.lastName);
+    formData.append("birthYear", verificationData.formData.dateOfBirth.year);
+    formData.append("birthMonth", verificationData.formData.dateOfBirth.month);
+    formData.append("birthDay", verificationData.formData.dateOfBirth.day);
+    formData.append("nationality", verificationData.formData.nationality);
+    formData.append("streetAddress", verificationData.formData.streetAddress);
+    formData.append("city", verificationData.formData.city);
+    formData.append("country", verificationData.formData.country);
+    formData.append("zipCode", verificationData.formData.zipCode);
+    formData.append("frontId", verificationData.idImages.frontImage);
+    formData.append("backId", verificationData.idImages.backImage);
+    formData.append("selfieWithId", image);
+
+    try {
+      await applyVerification(formData).unwrap();
+      toast.success("Verification submitted successfully!");
+      onSuccess();
+    } catch (error) {
+      console.error("Verification failed:", error);
+      toast.error("Failed to submit verification. Please try again.");
+    } finally {
       setIsSubmitting(false);
-      onSubmitAll(); // Move to review step
-      // Here you would typically handle the actual verification logic
-    }, 1000);
+    }
   };
 
   const handleImageClick = () => {
@@ -81,23 +147,23 @@ export default function SellerSelfieImageVerification({ onSubmit, onSubmitAll }:
           <div className="relative w-full max-w-xs">
             <div
               className={`border-2 border-dashed rounded-lg p-6 cursor-pointer transition-all flex items-center justify-center ${
-                image
+                preview
                   ? "border-green-500 bg-green-900/20"
                   : "border-gray-600 hover:border-gray-500"
               }`}
               onClick={handleImageClick}
             >
-              {image ? (
+              {preview ? (
                 <div className="relative w-full">
                   <img
-                    src={image}
+                    src={preview}
                     alt="Selfie with ID"
                     className="w-full h-64 object-cover rounded"
                   />
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleRemoveImage(setImage);
+                      handleRemoveImage();
                     }}
                     className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 transition-colors"
                   >
@@ -117,7 +183,7 @@ export default function SellerSelfieImageVerification({ onSubmit, onSubmitAll }:
               ref={inputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif"
-              onChange={(e) => handleImageUpload(e, setImage)}
+              onChange={handleImageUpload}
               className="hidden"
             />
           </div>
@@ -140,13 +206,20 @@ export default function SellerSelfieImageVerification({ onSubmit, onSubmitAll }:
         <button
           type="submit"
           disabled={isSubmitting || !image}
-          className={`w-full py-2.5 px-4 rounded-lg font-medium text-white transition-all duration-200 ${
+          className={`w-full py-2.5 px-4 rounded-lg font-medium text-white transition-all duration-200 flex items-center justify-center gap-2 ${
             isSubmitting || !image
               ? "bg-red-600 opacity-80 cursor-not-allowed"
               : "bg-red-600 hover:bg-red-700 active:bg-red-800"
           }`}
         >
-          {isSubmitting ? "Verifying..." : "Submit Verification"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Verification"
+          )}
         </button>
       </form>
     </div>

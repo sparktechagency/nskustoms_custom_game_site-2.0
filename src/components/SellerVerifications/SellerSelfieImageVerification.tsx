@@ -38,8 +38,22 @@ interface VerificationData {
 interface SellerSelfieImageVerificationProps {
   onSubmit: (image: File | null) => void;
   verificationData: VerificationData;
-  applyVerification: ReturnType<typeof import("@/src/redux/features/become-seller/becomeSellerApi").useApplyBecomeSellerMutation>[0];
+  applyVerification: ReturnType<
+    typeof import("@/src/redux/features/become-seller/becomeSellerApi").useApplyBecomeSellerMutation
+  >[0];
   onSuccess: () => void;
+}
+
+interface ValidationError {
+  path: string;
+  message: string;
+}
+
+interface ApiError {
+  status: number;
+  data: {
+    errors: ValidationError[];
+  };
 }
 
 export default function SellerSelfieImageVerification({
@@ -51,6 +65,7 @@ export default function SellerSelfieImageVerification({
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<ValidationError[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,12 +131,21 @@ export default function SellerSelfieImageVerification({
     formData.append("selfieWithId", image);
 
     try {
+      setErrors([]);
       await applyVerification(formData).unwrap();
       toast.success("Verification submitted successfully!");
       onSuccess();
     } catch (error) {
       console.error("Verification failed:", error);
-      toast.error("Failed to submit verification. Please try again.");
+      const apiError = error as ApiError;
+      if (apiError?.data?.errors && Array.isArray(apiError.data.errors)) {
+        setErrors(apiError.data.errors);
+        apiError.data.errors.forEach((err) => {
+          toast.error(err.message);
+        });
+      } else {
+        toast.error("Failed to submit verification. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -204,6 +228,23 @@ export default function SellerSelfieImageVerification({
             • Both your face and ID document must be clearly visible.
           </p>
         </div>
+
+        {/* Validation Errors */}
+        {errors.length > 0 && (
+          <div className="bg-red-500/20 border border-red-500 rounded-lg p-4">
+            <p className="text-red-400 text-sm font-medium mb-2">
+              Please fix the following errors:
+            </p>
+            <ul className="list-disc list-inside space-y-1">
+              {errors.map((error, index) => (
+                <li key={index} className="text-red-300 text-xs">
+                  <span className="font-medium capitalize">{error.path}:</span>{" "}
+                  {error.message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Submit Button */}

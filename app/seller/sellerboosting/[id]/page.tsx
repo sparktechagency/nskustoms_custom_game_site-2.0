@@ -3,8 +3,13 @@
 import { FaCircle } from "react-icons/fa";
 import profile from "@/src/Assets/seller/profile.png";
 import Image from "next/image";
+import { useParams } from "next/navigation";
+import { useGetBoostingPostByIdQuery } from "@/src/redux/features/boosting-post/boostingApi";
 
 const Page = () => {
+  const { id } = useParams<{ id: string }>();
+  const { data: boostingDetails } = useGetBoostingPostByIdQuery(id);
+  console.log(boostingDetails);
   const requestData = {
     createdDate: "Dec 8, 2025, 9:45AM",
     expiredDate: "Dec 15, 2025, 9:45AM",

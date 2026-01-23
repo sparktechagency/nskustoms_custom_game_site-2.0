@@ -3,7 +3,6 @@
 import { FaCircle } from "react-icons/fa";
 import profile from "@/src/Assets/seller/profile.png";
 import Image from "next/image";
-
 const Page = () => {
   const requestData = {
     createdDate: "Dec 8, 2025, 9:45AM",

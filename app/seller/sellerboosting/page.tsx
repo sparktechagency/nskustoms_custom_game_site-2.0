@@ -21,13 +21,6 @@ const Page = () => {
             League of Legends
           </p>
         </div>
-
-        {/* Right side - Button */}
-        <div className="flex space-x-2">
-          <button className="bg-[#AC2212] hover:bg-red-700 text-white px-5 py-2 rounded text-sm font-medium transition-colors duration-200">
-            Create a Request
-          </button>
-        </div>
       </div>
 
       <SellerBoosting />

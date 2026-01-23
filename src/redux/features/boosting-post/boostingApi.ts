@@ -66,6 +66,7 @@ const boostingPostApi = baseApi.injectEndpoints({
         url: `/boosting-posts/${id}`,
         method: "GET",
       }),
+      transformResponse: (res) => res.data,
     }),
 
     // Get all boosting posts for seller to browse

@@ -38,8 +38,9 @@ const conversationsApi = baseApi.injectEndpoints({
       query: (params?: ConversationParams) => ({
         url: "/conversations",
         method: "GET",
-        params: params || { page: 1, limit: 15 },
+        params: params || { page: 1, limit: 100 },
       }),
+      transformResponse: (res) => res.data,
     }),
 
     // Get all messages by conversation ID
@@ -49,6 +50,7 @@ const conversationsApi = baseApi.injectEndpoints({
         method: "GET",
         params: params,
       }),
+      transformResponse: (res) => res.data,
     }),
 
     // Send message by conversation ID
@@ -72,6 +74,7 @@ const conversationsApi = baseApi.injectEndpoints({
         url: `/conversations/${id}`,
         method: "GET",
       }),
+      transformResponse: (res) => res.data,
     }),
   }),
 });
@@ -82,7 +85,4 @@ export const {
   useGetMessagesByConversationIdQuery,
   useSendMessageMutation,
   useGetConversationByIdQuery,
-  useLazyGetMyConversationsQuery,
-  useLazyGetMessagesByConversationIdQuery,
-  useLazyGetConversationByIdQuery,
 } = conversationsApi;

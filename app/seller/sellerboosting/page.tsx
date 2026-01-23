@@ -27,12 +27,6 @@ const Page = () => {
           <button className="bg-[#AC2212] hover:bg-red-700 text-white px-5 py-2 rounded text-sm font-medium transition-colors duration-200">
             Create a Request
           </button>
-          <button
-            onClick={() => router.push("seller-verifications")}
-            className="bg-[#282836] cursor-pointer text-white px-5 py-2 rounded text-sm font-medium transition-colors duration-200"
-          >
-            Become a Seller
-          </button>
         </div>
       </div>
 

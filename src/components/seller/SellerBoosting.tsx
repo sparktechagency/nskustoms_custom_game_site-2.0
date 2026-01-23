@@ -171,7 +171,7 @@ const SellerBoosting = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link
-                          href={`/seller/boosting/${post._id}`}
+                          href={`/seller/sellerboosting/${post._id}`}
                           className="text-sm text-blue-400 hover:text-blue-300 font-medium"
                         >
                           View Details

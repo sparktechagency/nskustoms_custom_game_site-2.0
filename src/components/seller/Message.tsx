@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
 import { FaUser } from "react-icons/fa";
 import { Loader2, Send, MessageCircle } from "lucide-react";
 import {
@@ -10,89 +11,42 @@ import {
   useSendMessageMutation,
 } from "@/src/redux/features/conversations/conversationsApi";
 import { useAppSelector } from "@/src/redux/hooks";
-
-type ConversationType = "boosting" | "support";
-
-interface Participant {
-  _id: string;
-  name: string;
-  image: string;
-}
-
-interface Conversation {
-  _id: string;
-  participants: Participant[];
-  type: string;
-  referenceId: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastMessage?: string;
-}
-
-interface ConversationsResponse {
-  conversations: Conversation[];
-  total: number;
-  pages: number;
-}
-
-interface Message {
-  _id: string;
-  conversationId: string;
-  author: {
-    _id: string;
-    name: string;
-    image: string;
-  };
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MessagesResponse {
-  messages: Message[];
-  total: number;
-  pages: number;
-}
+import {
+  Conversation,
+  ConversationsResponse,
+  ConversationType,
+  MessagesResponse,
+} from "@/src/types/page.types";
+import { formatMessageTime, formatRelativeTime } from "@/src/utils/pageHealper";
 
 const tabs: { id: ConversationType; label: string }[] = [
   { id: "boosting", label: "Boosting" },
   { id: "support", label: "Support" },
 ];
 
-const formatRelativeTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return "Just now";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 604800)
-    return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  return date.toLocaleDateString();
-};
-
-const formatMessageTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
-
 const Message: React.FC = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedConversationId = searchParams.get("conversation");
+
   const [activeTab, setActiveTab] = useState<ConversationType>("boosting");
-  const [selectedConversationId, setSelectedConversationId] = useState<
-    string | null
-  >(null);
   const [messageInput, setMessageInput] = useState("");
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentUser = useAppSelector((state) => state.auth.user);
+
+  const handleSelectConversation = (conversationId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("conversation", conversationId);
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleClearConversation = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("conversation");
+    router.push(`?${params.toString()}`);
+  };
 
   const { data: conversationsData, isLoading: isLoadingConversations } =
     useGetMyConversationsQuery({
@@ -142,7 +96,7 @@ const Message: React.FC = () => {
 
   const handleTabChange = (tab: ConversationType) => {
     setActiveTab(tab);
-    setSelectedConversationId(null);
+    handleClearConversation();
   };
 
   const handleSendMessage = async () => {
@@ -215,7 +169,7 @@ const Message: React.FC = () => {
                 return (
                   <div
                     key={conv._id}
-                    onClick={() => setSelectedConversationId(conv._id)}
+                    onClick={() => handleSelectConversation(conv._id)}
                     className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-800/50 transition-colors border-b border-gray-700/50 ${
                       selectedConversationId === conv._id
                         ? "bg-gray-800/50"
@@ -306,26 +260,28 @@ const Message: React.FC = () => {
                 ) : messages.length > 0 ? (
                   <>
                     {[...messages].reverse().map((msg) => {
-                      const isCurrentUser =
-                        msg.author._id === currentUser?._id;
+                      const isCurrentUser = msg.author._id === currentUser?._id;
                       return (
                         <div
                           key={msg._id}
                           className={`flex items-start gap-3 ${isCurrentUser ? "flex-row-reverse" : ""}`}
                         >
-                          <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                            {msg.author.image ? (
-                              <Image
-                                src={msg.author.image}
-                                alt={msg.author.name}
-                                width={32}
-                                height={32}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <FaUser className="text-white text-xs" />
-                            )}
-                          </div>
+                          {/* Only show profile image for other user's messages */}
+                          {!isCurrentUser && (
+                            <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                              {msg.author.image ? (
+                                <Image
+                                  src={msg.author.image}
+                                  alt={msg.author.name}
+                                  width={32}
+                                  height={32}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <FaUser className="text-white text-xs" />
+                              )}
+                            </div>
+                          )}
                           <div
                             className={`max-w-xs md:max-w-md ${isCurrentUser ? "text-right" : ""}`}
                           >

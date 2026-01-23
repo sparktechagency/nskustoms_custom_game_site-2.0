@@ -9,16 +9,6 @@
 //   status: string;
 // }
 
-export interface Message {
-  id: number;
-  sender: string;
-  message: string;
-  timestamp: string;
-  isSeller: boolean;
-  isSystem?: boolean;
-  isLink?: boolean;
-}
-
 /** ===================SellerBoosting.tsx file types */
 
 export interface User {
@@ -26,17 +16,6 @@ export interface User {
   name: string;
   email: string;
   image: string;
-}
-
-export interface Conversation {
-  _id: string;
-  participants: User[];
-  type: string;
-  referenceId: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastMessage?: string;
 }
 
 export interface BoostingPost {
@@ -118,6 +97,52 @@ export interface Offer {
 
 export interface OffersResponse {
   offers: Offer[];
+  total: number;
+  pages: number;
+}
+
+/** ======================Conversations API  ============== */
+export type ConversationType = "boosting" | "support";
+
+export interface Participant {
+  _id: string;
+  name: string;
+  image: string;
+}
+
+export interface Conversation {
+  _id: string;
+  participants: Participant[];
+  type: string;
+  referenceId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastMessage?: string;
+}
+
+export interface ConversationsResponse {
+  conversations: Conversation[];
+  total: number;
+  pages: number;
+}
+
+export interface Message {
+  _id: string;
+  conversationId: string;
+  author: {
+    _id: string;
+    name: string;
+    image: string;
+  };
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MessagesResponse {
+  messages: Message[];
   total: number;
   pages: number;
 }

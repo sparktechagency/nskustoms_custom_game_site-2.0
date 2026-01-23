@@ -1,13 +1,13 @@
 // Types
-export interface Offer {
-  id: number;
-  seller: string;
-  rating: number;
-  reviews: number;
-  deliveryTime: string;
-  price: number;
-  status: string;
-}
+// export interface Offer {
+//   id: number;
+//   seller: string;
+//   rating: number;
+//   reviews: number;
+//   deliveryTime: string;
+//   price: number;
+//   status: string;
+// }
 
 export interface Message {
   id: number;
@@ -100,3 +100,24 @@ export type TabType =
   | "offer_accepted"
   | "offer_submitted"
   | "offer_lost";
+
+/** =====================Offer page for buyers */
+export type OfferStatus = "pending" | "accepted" | "declined";
+
+export interface Offer {
+  _id: string;
+  userId: string;
+  boostingPostId: BoostingPost;
+  deliverTime: string;
+  price: number;
+  message: string;
+  status: OfferStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OffersResponse {
+  offers: Offer[];
+  total: number;
+  pages: number;
+}

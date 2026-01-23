@@ -18,3 +18,73 @@ export interface Message {
   isSystem?: boolean;
   isLink?: boolean;
 }
+
+/** ===================SellerBoosting.tsx file types */
+
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  image: string;
+}
+
+export interface BoostingPost {
+  _id: string;
+  userId: User;
+  boostingType:
+    | "rank_boost"
+    | "placement_matches"
+    | "net_wins"
+    | "custom_request";
+  currentRank?: {
+    currentRank: string;
+    queue: string;
+    currentLp: string;
+  };
+  desiredRank?: {
+    desiredRank: string;
+    region: string;
+  };
+  placementMatches?: {
+    previousRank: string;
+    region: string;
+    queue: string;
+    numberOfGames: number;
+  };
+  netWins?: {
+    currentRank: string;
+    region: string;
+    queue: string;
+    numberOfWins: number;
+  };
+  customRequest?: {
+    gameType: string;
+    requestDescription: string;
+  };
+  customizeOrder?: {
+    solo?: {
+      stream: boolean;
+      soloQueue: boolean;
+      offlineMode: boolean;
+    };
+    duo: boolean;
+  };
+  isActive: boolean;
+  isCompleted: boolean;
+  isCancelled: boolean;
+  additionInfo?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BrowseBoostingResponse {
+  posts: BoostingPost[];
+  total: number;
+  pages: number;
+}
+
+export type TabType =
+  | "waiting_for_offer"
+  | "offer_accepted"
+  | "offer_submitted"
+  | "offer_lost";

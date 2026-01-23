@@ -37,9 +37,10 @@ const Page = () => {
     try {
       await createOffers(data).unwrap();
       setIsModalOpen(false);
-    } catch (error: CustomError) {
+    } catch (error) {
+      const customError = error as CustomError;
       console.error("Failed to create offer:", error);
-      toast.error(error?.data?.message);
+      toast.error(customError?.data?.message || "Failed to create offer");
       throw error;
     }
   };

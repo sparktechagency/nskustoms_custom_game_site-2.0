@@ -16,6 +16,8 @@ import {
 import { useCreateOfferSellerMutation } from "@/src/redux/features/offers/offersApi";
 import CreateOfferModel from "@/src/components/seller/CreateofferModel";
 import { useCreateConversationMutation } from "@/src/redux/features/conversations/conversationsApi";
+import { toast } from "sonner";
+import { CustomError } from "@/src/types/helper.types";
 
 const Page = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,13 +37,28 @@ const Page = () => {
     try {
       await createOffers(data).unwrap();
       setIsModalOpen(false);
-    } catch (error) {
+    } catch (error: CustomError) {
       console.error("Failed to create offer:", error);
+      toast.error(error?.data?.message);
       throw error;
     }
   };
 
   const details = boostingDetails as BoostingPost | undefined;
+
+  const handleCreateConversation = async () => {
+    if (!details) return;
+    try {
+      const converSationReqBody = {
+        receiverId: details.userId._id,
+        type: "boosting",
+        referenceId: id,
+      };
+      await createConversations(converSationReqBody).unwrap();
+    } catch (error) {
+      console.error("Failed to create conversation:", error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -367,8 +384,19 @@ const Page = () => {
             <div className="text-center py-8">
               <MessageCircle className="w-12 h-12 text-gray-600 mx-auto mb-3" />
               <p className="text-gray-400 mb-4">No conversations yet</p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors duration-200">
-                Talk with the Buyer
+              <button
+                onClick={handleCreateConversation}
+                disabled={isCreateConversations}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 mx-auto"
+              >
+                {isCreateConversations ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Talk with the Buyer"
+                )}
               </button>
             </div>
           )}

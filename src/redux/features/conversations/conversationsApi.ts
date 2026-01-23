@@ -11,9 +11,9 @@ interface MessageParams {
 }
 
 interface CreateConversationBody {
-  participantId: string;
-  orderId?: string;
-  [key: string]: unknown;
+  receiverId: string;
+  type: string;
+  referenceId: string;
 }
 
 interface SendMessageBody {
@@ -53,7 +53,13 @@ const conversationsApi = baseApi.injectEndpoints({
 
     // Send message by conversation ID
     sendMessage: builder.mutation({
-      query: ({ id, messageBody }: { id: string; messageBody: SendMessageBody }) => ({
+      query: ({
+        id,
+        messageBody,
+      }: {
+        id: string;
+        messageBody: SendMessageBody;
+      }) => ({
         url: `/conversations/${id}/messages`,
         method: "POST",
         body: messageBody,

@@ -1,8 +1,8 @@
 "use client";
 
 import { FaHome } from "react-icons/fa";
-import SellerBoosting from "@/src/components/seller/SellerBoosting";
 import { useRouter } from "next/navigation";
+import BuyerBoosting from "@/src/components/Buyer/BuyerBoosting";
 const Page = () => {
   const router = useRouter();
   return (
@@ -36,7 +36,7 @@ const Page = () => {
         </div>
       </div>
 
-      <SellerBoosting />
+      <BuyerBoosting />
     </div>
   );
 };

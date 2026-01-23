@@ -28,6 +28,17 @@ export interface User {
   image: string;
 }
 
+export interface Conversation {
+  _id: string;
+  participants: User[];
+  type: string;
+  referenceId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastMessage?: string;
+}
+
 export interface BoostingPost {
   _id: string;
   userId: User;
@@ -75,6 +86,7 @@ export interface BoostingPost {
   additionInfo?: string;
   createdAt: string;
   updatedAt: string;
+  conversations?: Conversation[];
 }
 
 export interface BrowseBoostingResponse {

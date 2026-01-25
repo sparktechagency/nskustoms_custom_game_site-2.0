@@ -69,6 +69,13 @@ const ordersApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    // payments verifications by session id
+    getVerifyPayments: builder.query({
+      query: (sessionId: string) => ({
+        url: `/orders/payment/verify/${sessionId}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -79,4 +86,7 @@ export const {
   useGetOrderByIdQuery,
   useLazyGetMyOrdersAsBuyerQuery,
   useLazyGetOrderByIdQuery,
+
+  // verify payments
+  useGetVerifyPaymentsQuery,
 } = ordersApi;

@@ -62,10 +62,10 @@ const AccountSettings = () => {
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: CustomError) {
-      // console.error("Failed to change password:", error);
+    } catch (error) {
+      const err = error as CustomError;
       toast.error(
-        error?.data?.message ||
+        err?.data?.message ||
           "Failed to change password. Please check your current password.",
       );
     }

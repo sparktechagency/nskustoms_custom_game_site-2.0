@@ -33,157 +33,20 @@ import {
 } from "lucide-react";
 import { FaCircle } from "react-icons/fa";
 import { toast } from "sonner";
-
-type SortOption = "newest" | "price_low" | "price_high" | "rating";
-
-interface OfferUser {
-  _id: string;
-  name: string;
-  email: string;
-  image: string;
-}
-
-interface BoostingOffer {
-  _id: string;
-  userId: OfferUser;
-  boostingPostId: string;
-  deliverTime: string;
-  price: number;
-  message: string;
-  status: "pending" | "accepted" | "declined";
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Participant {
-  _id: string;
-  name: string;
-  email: string;
-  image: string;
-}
-
-interface Conversation {
-  _id: string;
-  participants: Participant[];
-  type: string;
-  referenceId: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastMessage?: string;
-}
-
-interface BoostingDetails {
-  _id: string;
-  userId: OfferUser;
-  boostingType: string;
-  currentRank?: {
-    currentRank: string;
-    queue: string;
-    currentLp: string;
-  };
-  desiredRank?: {
-    desiredRank: string;
-    region: string;
-  };
-  netWins?: {
-    currentRank: string;
-    region: string;
-    queue: string;
-    numberOfWins: number;
-  };
-  placementMatches?: {
-    previousRank: string;
-    region: string;
-    queue: string;
-    numberOfGames: number;
-  };
-  customRequest?: {
-    gameType: string;
-    requestDescription: string;
-  };
-  customizeOrder: {
-    solo: {
-      stream: boolean;
-      soloQueue: boolean;
-      offlineMode: boolean;
-    };
-    duo: boolean;
-  };
-  isActive: boolean;
-  isCompleted: boolean;
-  isCancelled: boolean;
-  additionInfo?: string;
-  createdAt: string;
-  updatedAt: string;
-  conversations?: Conversation[];
-}
-
-interface MessageData {
-  _id: string;
-  conversationId: string;
-  author: {
-    _id: string;
-    name: string;
-    image: string;
-  };
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MessagesResponse {
-  messages: MessageData[];
-  total: number;
-  pages: number;
-}
-
-const sortOptions: { id: SortOption; label: string }[] = [
-  { id: "newest", label: "Newest First" },
-  { id: "price_low", label: "Price: Low to High" },
-  { id: "price_high", label: "Price: High to Low" },
-  { id: "rating", label: "By Rating" },
-];
-
-const formatBoostingType = (type: string): string => {
-  const typeMap: Record<string, string> = {
-    rank_boost: "Rank Boost",
-    placement_matches: "Placement Matches",
-    net_wins: "Net Wins",
-    custom_request: "Custom Request",
-  };
-  return typeMap[type] || type;
-};
-
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
-
-const formatMessageTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
-
-const getCompletionMethod = (
-  customizeOrder: BoostingDetails["customizeOrder"],
-): string => {
-  if (customizeOrder?.duo) return "Duo";
-  if (customizeOrder?.solo) return "Solo";
-  return "-";
-};
+import {
+  BoostingOffer,
+  BoostingPost,
+  Conversation,
+  MessagesResponse,
+  SortOptionBoostingPost,
+} from "../types/page.types";
+import {
+  formatBoostingType,
+  formatDate,
+  formatMessageTime,
+  getCompletionMethod,
+  sortOptions,
+} from "../utils/pageHealper";
 
 export default function BoostingRequestPage() {
   const router = useRouter();
@@ -191,7 +54,7 @@ export default function BoostingRequestPage() {
   const boostingId = searchParams.get("boostingId");
   const selectedConversationId = searchParams.get("conversation");
 
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [sortBy, setSortBy] = useState<SortOptionBoostingPost>("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [messageInput, setMessageInput] = useState("");
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -227,7 +90,7 @@ export default function BoostingRequestPage() {
   const [respondToOffer, { isLoading: isRespondingToOffer }] =
     useRespondToOfferMutation();
 
-  const details = boostingDetails as BoostingDetails | undefined;
+  const details = boostingDetails as BoostingPost | undefined;
   const offers = (offersData as BoostingOffer[]) || [];
   const messages = (messagesData as MessagesResponse)?.messages || [];
 
@@ -956,24 +819,6 @@ export default function BoostingRequestPage() {
                     </p>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Status Card */}
-            <div className="bg-[#282836] rounded-lg border border-gray-700 p-4">
-              <div className="flex items-center gap-2">
-                <FaCircle
-                  className={`text-xs ${
-                    details.isActive ? "text-green-500" : "text-gray-500"
-                  }`}
-                />
-                <span className="text-gray-200 font-medium">
-                  {details.isActive
-                    ? "Active Request"
-                    : details.isCompleted
-                      ? "Completed"
-                      : "Inactive Request"}
-                </span>
               </div>
             </div>
           </div>

@@ -1,4 +1,8 @@
-import { BoostingPost, OfferStatus } from "../types/page.types";
+import {
+  BoostingPost,
+  OfferStatus,
+  SortOptionBoostingPost,
+} from "../types/page.types";
 
 /** ===============================Boosting page as a seller============================== */
 
@@ -92,3 +96,12 @@ export const formatMessageTime = (dateString: string): string => {
     hour12: true,
   });
 };
+
+/**==========================short option for the Boosting request=============== */
+
+export const sortOptions: { id: SortOptionBoostingPost; label: string }[] = [
+  { id: "newest", label: "Newest First" },
+  { id: "price_low", label: "Price: Low to High" },
+  { id: "price_high", label: "Price: High to Low" },
+  { id: "rating", label: "By Rating" },
+];

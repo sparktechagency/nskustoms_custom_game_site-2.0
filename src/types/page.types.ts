@@ -146,3 +146,30 @@ export interface MessagesResponse {
   total: number;
   pages: number;
 }
+
+/** ============================Boosting Request Page ==================== */
+
+export type SortOptionBoostingPost =
+  | "newest"
+  | "price_low"
+  | "price_high"
+  | "rating";
+
+export interface OfferUser {
+  _id: string;
+  name: string;
+  email: string;
+  image: string;
+}
+
+export interface BoostingOffer {
+  _id: string;
+  userId: OfferUser;
+  boostingPostId: string;
+  deliverTime: string;
+  price: number;
+  message: string;
+  status: "pending" | "accepted" | "declined";
+  createdAt: string;
+  updatedAt: string;
+}

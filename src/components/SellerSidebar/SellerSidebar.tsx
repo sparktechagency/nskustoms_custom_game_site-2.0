@@ -12,7 +12,6 @@ import {
   FaStar,
   FaCog,
 } from "react-icons/fa";
-import profile from "@/src/Assets/seller/profile.png";
 import Image from "next/image";
 import { CgMenuBoxed } from "react-icons/cg";
 import { useSelector } from "react-redux";
@@ -21,7 +20,6 @@ import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 // Profile component for reuse
 const ProfileSection = () => {
   const user = useSelector(selectCurrentUser);
-  console.log(user?.image);
   return (
     <div className="flex items-center gap-1 p-2 bg-gradient-to-br from-slate-800 to-[#282836] rounded-lg border border-slate-700">
       {/* Avatar/Logo */}

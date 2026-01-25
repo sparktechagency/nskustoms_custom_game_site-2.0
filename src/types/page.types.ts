@@ -8,6 +8,17 @@
 //   price: number;
 //   status: string;
 // }
+/**====================== Custom Error =========== */
+
+export interface ErrorData {
+  code: number;
+  status: string;
+  message: string;
+}
+export interface CustomError {
+  status: number;
+  data: ErrorData;
+}
 
 /** ===================SellerBoosting.tsx file types */
 

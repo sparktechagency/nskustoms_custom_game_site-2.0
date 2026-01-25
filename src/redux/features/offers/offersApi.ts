@@ -21,8 +21,7 @@ interface UpdateOfferBody {
 
 interface RespondToOfferBody {
   offerId: string;
-  action: "accept" | "reject";
-  [key: string]: unknown;
+  status: "accepted" | "declined";
 }
 
 const offersApi = baseApi.injectEndpoints({
@@ -72,8 +71,9 @@ const offersApi = baseApi.injectEndpoints({
       }) => ({
         url: `/offers/post/${postId}`,
         method: "GET",
-        params: params || { page: 1, limit: 10 },
+        params: params || { page: 1, limit: 1000 },
       }),
+      transformResponse: (res) => res?.data?.offers,
     }),
 
     // Get single offer by ID

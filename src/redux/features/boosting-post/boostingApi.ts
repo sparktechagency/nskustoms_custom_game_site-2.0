@@ -54,10 +54,11 @@ const boostingPostApi = baseApi.injectEndpoints({
     // Get my boosting posts (as buyer)
     getMyBoostingPosts: builder.query({
       query: (params?: BoostingPostParams) => ({
-        url: "/boosting-posts/my-post",
+        url: "/boosting-posts/my-posts",
         method: "GET",
         params: params,
       }),
+      transformResponse: (res) => res?.data,
     }),
 
     // Get single boosting post by ID

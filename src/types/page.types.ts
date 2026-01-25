@@ -65,6 +65,7 @@ export interface BoostingPost {
   additionInfo?: string;
   createdAt: string;
   updatedAt: string;
+  offersCount?: number;
   conversations?: Conversation[];
 }
 
@@ -172,4 +173,18 @@ export interface BoostingOffer {
   status: "pending" | "accepted" | "declined";
   createdAt: string;
   updatedAt: string;
+}
+
+/**=====================Buyer Boosting page =========================== */
+
+export type TabTypeBuyerBoosting =
+  | "all"
+  | "in_progress"
+  | "completed"
+  | "cancelled";
+
+export interface BoostingResponse {
+  posts: BoostingPost[];
+  total: number;
+  pages: number;
 }

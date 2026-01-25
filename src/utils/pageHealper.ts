@@ -105,3 +105,5 @@ export const sortOptions: { id: SortOptionBoostingPost; label: string }[] = [
   { id: "price_high", label: "Price: High to Low" },
   { id: "rating", label: "By Rating" },
 ];
+
+/** ==========================Buyer Boosting page  */

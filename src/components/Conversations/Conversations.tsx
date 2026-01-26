@@ -1,6 +1,23 @@
 import React, { useState } from "react";
-import { Message, Offer } from "@/src/types/page.types";
 import ChatSection from "../BoostingRequestPage/ChatSection";
+
+interface LegacyMessage {
+  id: number;
+  message: string;
+  timestamp: string;
+  isSeller?: boolean;
+  isSystem?: boolean;
+  isLink?: boolean;
+  sender?: string;
+}
+
+interface LegacyOffer {
+  id: number;
+  seller: string;
+  rating?: number;
+  reviews?: number;
+  price: number;
+}
 
 interface Conversation {
   id: number;
@@ -13,12 +30,12 @@ interface Conversation {
 }
 
 interface ConversationsProps {
-  offers: Offer[];
-  messages: Message[];
+  offers: LegacyOffer[];
+  messages: LegacyMessage[];
   newMessage: string;
   onMessageChange: (message: string) => void;
   onSendMessage: () => void;
-  selectedOffer: Offer | null;
+  selectedOffer: LegacyOffer | null;
 }
 
 function Conversations({

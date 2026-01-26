@@ -1,11 +1,9 @@
-import Feedback from "@/src/components/seller/Feedback";
+import FeedbackClient from "./FeedbackClient";
+
+export const dynamic = "force-dynamic";
 
 const Page = () => {
- return (
- <div>
-   <Feedback />
- </div>
- );
+  return <FeedbackClient />;
 };
 
 export default Page;

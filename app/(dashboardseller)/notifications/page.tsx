@@ -1,13 +1,9 @@
-'use client';
+import NotificationsClient from "./NotificationsClient";
 
-import Notifications from '@/src/components/seller/Notifications';
+export const dynamic = "force-dynamic";
 
 const Page = () => {
-  return (
-    <div>
-      <Notifications />
-    </div>
-  );
+  return <NotificationsClient />;
 };
 
 export default Page;

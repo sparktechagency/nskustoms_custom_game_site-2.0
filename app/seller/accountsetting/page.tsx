@@ -1,11 +1,9 @@
-import AccountSettings from "@/src/components/seller/AccountSettings";
+import AccountSettingsClient from "./AccountSettingsClient";
+
+export const dynamic = "force-dynamic";
 
 const Page = () => {
- return (
- <div>
-   <AccountSettings />
- </div>
- );
+  return <AccountSettingsClient />;
 };
 
 export default Page;

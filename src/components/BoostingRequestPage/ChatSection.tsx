@@ -1,15 +1,31 @@
 "use client";
 
-import { Message, Offer } from "@/src/types/page.types";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
+interface LegacyMessage {
+  id: number;
+  message: string;
+  timestamp: string;
+  isSeller?: boolean;
+  isSystem?: boolean;
+  isLink?: boolean;
+  sender?: string;
+}
+
+interface SelectedOffer {
+  seller?: string;
+  rating?: number;
+  reviews?: number;
+  price: number;
+}
+
 interface ChatSectionProps {
-  messages: Message[];
+  messages: LegacyMessage[];
   newMessage: string;
   onMessageChange: (value: string) => void;
   onSendMessage: () => void;
-  selectedOffer: Offer | null;
+  selectedOffer: SelectedOffer | null;
 }
 
 export default function ChatSection({
@@ -39,17 +55,17 @@ export default function ChatSection({
         {selectedOffer && (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-xs">{selectedOffer.seller.charAt(0)}</span>
+              <span className="text-xs">{selectedOffer.seller?.charAt(0) || "?"}</span>
             </div>
             <div>
-              <div className="font-semibold">{selectedOffer.seller}</div>
+              <div className="font-semibold">{selectedOffer.seller || "Seller"}</div>
               <div className="flex items-center space-x-1">
                 <span className="text-xs text-green-400">
-                  {selectedOffer.rating}%
+                  {selectedOffer.rating || 0}%
                 </span>
                 <span className="text-xs text-gray-400">•</span>
                 <span className="text-xs text-gray-400">
-                  {selectedOffer.reviews} reviews
+                  {selectedOffer.reviews || 0} reviews
                 </span>
               </div>
             </div>

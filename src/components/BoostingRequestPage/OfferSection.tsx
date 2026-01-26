@@ -1,13 +1,22 @@
 "use client";
 
-import { Offer } from "@/src/types/page.types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+interface LegacyOffer {
+  id: number;
+  seller: string;
+  rating: number;
+  reviews: number;
+  deliveryTime: string;
+  price: number;
+  status?: string;
+}
+
 interface OfferSectionProps {
-  offers: Offer[];
-  selectedOffer: Offer | null;
-  onSelectOffer: (offer: Offer) => void;
+  offers: LegacyOffer[];
+  selectedOffer: LegacyOffer | null;
+  onSelectOffer: (offer: LegacyOffer) => void;
 }
 
 export default function OfferSection({

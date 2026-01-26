@@ -1,16 +1,20 @@
-import Message from "@/src/components/seller/Message";
-import { IoIosSend } from "react-icons/io";
+import { Suspense } from "react";
+import MessageClient from "./MessageClient";
+
+export const dynamic = "force-dynamic";
 
 const Page = () => {
- return (
- <div>
-  <div className="flex items-center">
-    <IoIosSend size={26} className="text-[#AC2212]"/>
-    <h1 className="text-white font-semibold">Message</h1>
-  </div>
-  <Message />
- </div>
- );
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="text-gray-400">Loading messages...</div>
+        </div>
+      }
+    >
+      <MessageClient />
+    </Suspense>
+  );
 };
 
 export default Page;

@@ -5,7 +5,7 @@ import { FaCircle } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useGetBoostingPostByIdQuery } from "@/src/redux/features/boosting-post/boostingApi";
+import { useGetBoostingPostByIdForSellerQuery } from "@/src/redux/features/boosting-post/boostingApi";
 import { Loader2, MessageCircle } from "lucide-react";
 import { BoostingPost } from "@/src/types/page.types";
 import {
@@ -18,10 +18,15 @@ import CreateOfferModel from "@/src/components/seller/CreateofferModel";
 import { useCreateConversationMutation } from "@/src/redux/features/conversations/conversationsApi";
 import { toast } from "sonner";
 import { CustomError } from "@/src/types/helper.types";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 
 const SellerBoostingDetailsClient = () => {
+  const currentUser = useSelector(selectCurrentUser);
+  console.log(currentUser);
   const { id } = useParams<{ id: string }>();
-  const { data: boostingDetails, isLoading } = useGetBoostingPostByIdQuery(id);
+  const { data: boostingDetails, isLoading } =
+    useGetBoostingPostByIdForSellerQuery(id);
   const [createOffers, { isLoading: isCreatingOffer }] =
     useCreateOfferSellerMutation();
   const [createConversations, { isLoading: isCreateConversations }] =
@@ -45,6 +50,8 @@ const SellerBoostingDetailsClient = () => {
   };
 
   const details = boostingDetails as BoostingPost | undefined;
+
+  console.log(details);
 
   const handleCreateConversation = async () => {
     if (!details) return;

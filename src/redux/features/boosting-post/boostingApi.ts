@@ -69,6 +69,14 @@ const boostingPostApi = baseApi.injectEndpoints({
       }),
       transformResponse: (res) => res.data,
     }),
+    // Get single boosting post by ID for seller
+    getBoostingPostByIdForSeller: builder.query({
+      query: (id: string) => ({
+        url: `/boosting-posts/${id}/seller`,
+        method: "GET",
+      }),
+      transformResponse: (res) => res.data,
+    }),
 
     // Get all boosting posts for seller to browse
     getBoostingPostsForSeller: builder.query({
@@ -93,4 +101,5 @@ export const {
   useLazyGetMyBoostingPostsQuery,
   useLazyGetBoostingPostByIdQuery,
   useLazyGetBoostingPostsForSellerQuery,
+  useGetBoostingPostByIdForSellerQuery,
 } = boostingPostApi;

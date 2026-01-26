@@ -9,6 +9,11 @@ import {
   BrowseBoostingResponse,
   TabType,
 } from "@/src/types/page.types";
+import {
+  formatBoostingType,
+  formatDate,
+  getBoostingDetails,
+} from "@/src/utils/pageHealper";
 
 const tabs: { id: TabType; label: string }[] = [
   { id: "waiting_for_offer", label: "Waiting for Offer" },
@@ -16,49 +21,6 @@ const tabs: { id: TabType; label: string }[] = [
   { id: "offer_accepted", label: "Offer Accepted" },
   { id: "offer_lost", label: "Offer Lost" },
 ];
-
-// Format boosting type for display
-const formatBoostingType = (type: string): string => {
-  const typeMap: Record<string, string> = {
-    rank_boost: "Rank Boost",
-    placement_matches: "Placement Matches",
-    net_wins: "Net Wins",
-    custom_request: "Custom Request",
-  };
-  return typeMap[type] || type;
-};
-
-// Get boosting details based on type
-const getBoostingDetails = (post: BoostingPost): string => {
-  switch (post.boostingType) {
-    case "rank_boost":
-      return `${post.currentRank?.currentRank} → ${post.desiredRank?.desiredRank} (${post.desiredRank?.region})`;
-    case "placement_matches":
-      return `${post.placementMatches?.previousRank} - ${post.placementMatches?.numberOfGames} games (${post.placementMatches?.region})`;
-    case "net_wins":
-      return `${post.netWins?.currentRank} - ${post.netWins?.numberOfWins} wins (${post.netWins?.region})`;
-    case "custom_request":
-      return (
-        post.customRequest?.requestDescription?.slice(0, 50) + "..." ||
-        "Custom Request"
-      );
-    default:
-      return "-";
-  }
-};
-
-// Format date
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
 
 const SellerBoosting = () => {
   const [activeTab, setActiveTab] = useState<TabType>("waiting_for_offer");
@@ -73,7 +35,6 @@ const SellerBoosting = () => {
 
   const boostingData = browseBoosting as BrowseBoostingResponse | undefined;
   const posts = boostingData?.posts || [];
-
   return (
     <div className="">
       <div className="w-full">
@@ -134,26 +95,28 @@ const SellerBoosting = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
-                            {post.userId.image ? (
+                            {post?.userId?.image ? (
                               <Image
                                 src={post.userId.image}
-                                alt={post.userId.name}
+                                alt={post.userId?.name || "Buyer"}
                                 width={32}
                                 height={32}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
                               <span className="text-xs font-bold text-white">
-                                {post.userId.name.charAt(0).toUpperCase()}
+                                {post?.userId?.name?.charAt(0)?.toUpperCase() ||
+                                  "B"}
                               </span>
                             )}
                           </div>
                           <div>
                             <span className="text-sm text-white block">
-                              {post.userId.name}
+                              {post?.userId?.name || "Buyer"}
                             </span>
                             <span className="text-xs text-gray-500">
-                              {post.userId.email}
+                              {post?.userId?.email ||
+                                "View details for more info"}
                             </span>
                           </div>
                         </div>

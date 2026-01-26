@@ -3,10 +3,19 @@
 import { useState } from "react";
 import { FaCircle } from "react-icons/fa";
 import Image from "next/image";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useGetBoostingPostByIdForSellerQuery } from "@/src/redux/features/boosting-post/boostingApi";
-import { Loader2, MessageCircle } from "lucide-react";
+import {
+  Loader2,
+  MessageCircle,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  XCircle,
+  User,
+  Key,
+  CreditCard,
+} from "lucide-react";
 import { BoostingPost } from "@/src/types/page.types";
 import {
   formatBoostingType,
@@ -22,8 +31,8 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 
 const SellerBoostingDetailsClient = () => {
+  const router = useRouter();
   const currentUser = useSelector(selectCurrentUser);
-  console.log(currentUser);
   const { id } = useParams<{ id: string }>();
   const { data: boostingDetails, isLoading } =
     useGetBoostingPostByIdForSellerQuery(id);
@@ -32,6 +41,7 @@ const SellerBoostingDetailsClient = () => {
   const [createConversations, { isLoading: isCreateConversations }] =
     useCreateConversationMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleCreateOffer = async (data: {
     boostingPostId: string;
@@ -49,9 +59,40 @@ const SellerBoostingDetailsClient = () => {
     }
   };
 
-  const details = boostingDetails as BoostingPost | undefined;
+  // Extended type to include offer, order, and conversation
+  interface SellerBoostingDetails extends BoostingPost {
+    offer?: {
+      _id: string;
+      deliverTime: string;
+      price: number;
+      message: string;
+      status: "pending" | "accepted" | "declined";
+      createdAt: string;
+    };
+    order?: {
+      _id: string;
+      gameUsername: string;
+      gamePassword: string;
+      orderPrice: number;
+      platformCharge: number;
+      total: number;
+      status: string;
+      createdAt: string;
+    };
+    conversation?: {
+      _id: string;
+      participants: string[];
+      type: string;
+      referenceId: string;
+      isActive: boolean;
+      lastMessage?: string;
+      participant: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  }
 
-  console.log(details);
+  const details = boostingDetails as SellerBoostingDetails | undefined;
 
   const handleCreateConversation = async () => {
     if (!details) return;
@@ -330,67 +371,270 @@ const SellerBoostingDetailsClient = () => {
           </div>
         </div>
 
-        {/* Status Section */}
-        <div className="bg-[#282836] rounded-lg p-6 md:flex justify-between items-center shadow-xl border border-gray-700">
-          <div className="flex items-center gap-2">
-            <FaCircle
-              className={`text-xs ${details.isActive ? "text-green-500" : "text-gray-500"}`}
-            />
-            <span className="text-gray-200 font-medium">
-              {details.isActive ? "Active Request" : "Inactive Request"}
-            </span>
+        {/* Offer & Order Section - Two Column Layout */}
+        {(details.offer || details.order) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Offer Information */}
+            {details.offer && (
+              <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-gray-200 font-medium flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-400" />
+                    Your Offer
+                  </h3>
+                  <span
+                    className={`px-3 py-1 text-xs rounded-full font-medium ${
+                      details.offer.status === "accepted"
+                        ? "bg-green-500/20 text-green-400"
+                        : details.offer.status === "pending"
+                          ? "bg-yellow-500/20 text-yellow-400"
+                          : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {details.offer.status === "accepted" && (
+                      <CheckCircle className="w-3 h-3 inline mr-1" />
+                    )}
+                    {details.offer.status === "declined" && (
+                      <XCircle className="w-3 h-3 inline mr-1" />
+                    )}
+                    {details.offer.status.charAt(0).toUpperCase() +
+                      details.offer.status.slice(1)}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                    <span className="text-gray-400 text-sm flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      Price
+                    </span>
+                    <span className="text-green-400 text-lg font-bold">
+                      ${details.offer.price}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                    <span className="text-gray-400 text-sm flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Delivery Time
+                    </span>
+                    <span className="text-gray-200 text-sm font-medium">
+                      {details.offer.deliverTime}
+                    </span>
+                  </div>
+
+                  <div className="py-2">
+                    <span className="text-gray-400 text-sm block mb-2">
+                      Message
+                    </span>
+                    <p className="text-gray-300 text-sm bg-gray-800/50 rounded-lg p-3">
+                      {details.offer.message}
+                    </p>
+                  </div>
+
+                  <div className="text-xs text-gray-500 pt-2">
+                    Submitted: {formatDate(details.offer.createdAt)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Order & Game Credentials - Only if order is paid */}
+            {details.order && details.order.status === "paid" && (
+              <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-gray-200 font-medium flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-blue-400" />
+                    Order Details
+                  </h3>
+                  <span className="px-3 py-1 text-xs rounded-full font-medium bg-green-500/20 text-green-400">
+                    <CheckCircle className="w-3 h-3 inline mr-1" />
+                    Paid
+                  </span>
+                </div>
+
+                {/* Game Credentials */}
+                <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-4 mb-4 border border-gray-600">
+                  <h4 className="text-gray-300 text-sm font-medium mb-3 flex items-center gap-2">
+                    <Key className="w-4 h-4 text-yellow-400" />
+                    Game Credentials
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-gray-500 text-xs block mb-1">
+                        Username
+                      </label>
+                      <div className="flex items-center gap-2 bg-gray-800 rounded px-3 py-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-200 text-sm font-mono">
+                          {details.order.gameUsername}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-gray-500 text-xs block mb-1">
+                        Password
+                      </label>
+                      <div className="flex items-center gap-2 bg-gray-800 rounded px-3 py-2">
+                        <Key className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-200 text-sm font-mono flex-1">
+                          {showPassword
+                            ? details.order.gamePassword
+                            : "••••••••"}
+                        </span>
+                        <button
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-gray-400 hover:text-gray-200 text-xs"
+                        >
+                          {showPassword ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Summary */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                    <span className="text-gray-400 text-sm">Order Price</span>
+                    <span className="text-gray-200 text-sm">
+                      ${details.order.orderPrice}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                    <span className="text-gray-400 text-sm">
+                      Platform Charge
+                    </span>
+                    <span className="text-gray-200 text-sm">
+                      ${details.order.platformCharge}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-300 font-medium">Total</span>
+                    <span className="text-green-400 font-bold text-lg">
+                      ${details.order.total}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-gray-500 pt-3 border-t border-gray-700 mt-3">
+                  Paid on: {formatDate(details.order.createdAt)}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Status Section - Conditional Display */}
+        <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <FaCircle
+                className={`text-xs ${
+                  details.isCancelled
+                    ? "text-red-500"
+                    : details.isCompleted
+                      ? "text-blue-500"
+                      : details.isActive
+                        ? "text-green-500"
+                        : "text-gray-500"
+                }`}
+              />
+              <span className="text-gray-200 font-medium">
+                {details.isCancelled
+                  ? "Request Cancelled"
+                  : details.isCompleted
+                    ? "Request Completed"
+                    : details.isActive
+                      ? "Active Request"
+                      : "Inactive Request"}
+              </span>
+            </div>
+
+            {/* Status badges */}
+            <div className="flex flex-wrap gap-2">
+              {details.offer && (
+                <span
+                  className={`px-2 py-1 text-xs rounded ${
+                    details.offer.status === "accepted"
+                      ? "bg-green-500/20 text-green-400"
+                      : details.offer.status === "pending"
+                        ? "bg-yellow-500/20 text-yellow-400"
+                        : "bg-red-500/20 text-red-400"
+                  }`}
+                >
+                  Offer {details.offer.status}
+                </span>
+              )}
+              {details.order && (
+                <span
+                  className={`px-2 py-1 text-xs rounded ${
+                    details.order.status === "paid"
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-yellow-500/20 text-yellow-400"
+                  }`}
+                >
+                  Order {details.order.status}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Conversation Section */}
         <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
-          <h3 className="text-gray-200 font-medium mb-4">Conversations</h3>
+          <h3 className="text-gray-200 font-medium mb-4 flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            Conversation with Buyer
+          </h3>
 
-          {details.conversations && details.conversations.length > 0 ? (
-            <div className="space-y-3">
-              {details.conversations.map((conversation) => (
-                <Link
-                  key={conversation._id}
-                  href={`/seller/messages/${conversation._id}`}
-                  className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
-                      {conversation.participants[0]?.image ? (
-                        <Image
-                          src={conversation.participants[0].image}
-                          alt={conversation.participants[0].name}
-                          width={40}
-                          height={40}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-white text-sm font-bold">
-                          {conversation.participants[0]?.name
-                            ?.charAt(0)
-                            .toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-gray-200 text-sm font-medium">
-                        {conversation.participants[0]?.name}
-                      </p>
-                      {conversation.lastMessage && (
-                        <p className="text-gray-500 text-xs truncate max-w-xs">
-                          {conversation.lastMessage}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <MessageCircle className="w-5 h-5 text-gray-400" />
-                </Link>
-              ))}
+          {details.conversation ? (
+            <div
+              onClick={() =>
+                router.push(`/seller/message?conversation=${details.conversation?._id}`)
+              }
+              className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+                  {details.userId?.image ? (
+                    <Image
+                      src={details.userId.image}
+                      alt={details.userId.name}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-sm font-bold">
+                      {details.userId?.name?.charAt(0)?.toUpperCase() || "B"}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-gray-200 text-sm font-medium">
+                    {details.userId?.name || "Buyer"}
+                  </p>
+                  {details.conversation.lastMessage && (
+                    <p className="text-gray-500 text-xs truncate max-w-xs">
+                      {details.conversation.lastMessage}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {details.conversation.isActive && (
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                )}
+                <MessageCircle className="w-5 h-5 text-gray-400" />
+              </div>
             </div>
           ) : (
             <div className="text-center py-8">
               <MessageCircle className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400 mb-4">No conversations yet</p>
+              <p className="text-gray-400 mb-4">No conversation yet</p>
               <button
                 onClick={handleCreateConversation}
                 disabled={isCreateConversations}
@@ -409,18 +653,23 @@ const SellerBoostingDetailsClient = () => {
           )}
         </div>
 
-        {/* Create Offer Section */}
-        <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
-          <div className="text-center py-8">
-            <p className="text-gray-400 mb-4">Create your offer here.</p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded transition-colors duration-200"
-            >
-              Create an offer
-            </button>
+        {/* Create Offer Section - Only show if no offer exists */}
+        {!details.offer && (
+          <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
+            <div className="text-center py-8">
+              <DollarSign className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-400 mb-4">
+                Submit your offer for this boosting request
+              </p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded transition-colors duration-200"
+              >
+                Create an Offer
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Create Offer Modal */}

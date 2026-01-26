@@ -27,12 +27,9 @@ import CreateOfferModel from "@/src/components/seller/CreateofferModel";
 import { useCreateConversationMutation } from "@/src/redux/features/conversations/conversationsApi";
 import { toast } from "sonner";
 import { CustomError } from "@/src/types/helper.types";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 
 const SellerBoostingDetailsClient = () => {
   const router = useRouter();
-  const currentUser = useSelector(selectCurrentUser);
   const { id } = useParams<{ id: string }>();
   const { data: boostingDetails, isLoading } =
     useGetBoostingPostByIdForSellerQuery(id);
@@ -593,7 +590,9 @@ const SellerBoostingDetailsClient = () => {
           {details.conversation ? (
             <div
               onClick={() =>
-                router.push(`/seller/message?conversation=${details.conversation?._id}`)
+                router.push(
+                  `/seller/message?conversation=${details.conversation?._id}`,
+                )
               }
               className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
             >

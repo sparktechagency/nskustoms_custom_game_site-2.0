@@ -59,11 +59,14 @@ export default function Login() {
             isEmailVerified: user.isEmailVerified,
           },
           token: accessToken,
-        })
+        }),
       );
 
-      console.log("Login successful:", response);
-      router.push("/offers");
+      if (user.role === "seller") {
+        router.push("/sellerboosting");
+      } else {
+        router.push("/boosting");
+      }
     } catch (err: unknown) {
       const error = err as { data?: { message?: string }; message?: string };
       const errorMessage =

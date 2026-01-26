@@ -59,7 +59,7 @@ const SellerSidebar = () => {
     { label: "Messages", path: "/seller/message", icon: FaEnvelope },
     { label: "Notifications", path: "/seller/notifications", icon: FaBell },
     { label: "Feedback", path: "/seller/feedback", icon: FaStar },
-    { label: "Settings", path: "/accountsetting", icon: FaCog },
+    { label: "Settings", path: "/seller/accountsetting", icon: FaCog },
   ];
 
   // AntD menu format

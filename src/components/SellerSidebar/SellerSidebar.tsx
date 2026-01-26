@@ -11,11 +11,61 @@ import {
   FaBell,
   FaStar,
   FaCog,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import Image from "next/image";
 import { CgMenuBoxed } from "react-icons/cg";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { logout, selectCurrentUser } from "@/src/redux/features/auth/authSlice";
+
+// Logout Confirmation Modal
+const LogoutModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[#282836] rounded-lg p-6 max-w-sm w-full border border-gray-700 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-500/20">
+          <FaSignOutAlt className="w-6 h-6 text-red-500" />
+        </div>
+        <h3 className="text-xl font-bold text-white text-center mb-2">
+          Logout
+        </h3>
+        <p className="text-gray-400 text-center mb-6">
+          Are you sure you want to logout from your account?
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Profile component for reuse
 const ProfileSection = () => {
@@ -49,6 +99,15 @@ const ProfileSection = () => {
 const SellerSidebar = () => {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("auth-auraboost");
+    setShowLogoutModal(false);
+    // TODO: Add actual logout logic here (clear auth, redirect, etc.)
+  };
 
   // Normalize pathname for comparison (remove trailing slash)
   const normalizedPathname = pathname?.replace(/\/$/, "");
@@ -91,26 +150,41 @@ const SellerSidebar = () => {
           body: { padding: 0, backgroundColor: "#0f172a" },
         }}
       >
-        <div className="p-1 ">
-          <ProfileSection />
+        <div className="flex flex-col h-full">
+          <div className="p-1">
+            <ProfileSection />
+          </div>
+          <Menu
+            mode="inline"
+            className="bg-[#282836] border-0 flex-1"
+            selectedKeys={[normalizedPathname]}
+            items={antdItems}
+            onClick={() => setDrawerOpen(false)}
+            style={{
+              backgroundColor: "#282836",
+              color: "#fff",
+            }}
+            styles={{
+              item: {
+                color: "#94a3b8", // slate-400 for inactive items
+              },
+            }}
+            theme="dark"
+          />
+          {/* Logout Button - Mobile */}
+          <div className="p-3 border-t border-gray-700">
+            <button
+              onClick={() => {
+                setDrawerOpen(false);
+                setShowLogoutModal(true);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+            >
+              <FaSignOutAlt className="w-4 h-4" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
         </div>
-        <Menu
-          mode="inline"
-          className="bg-[#282836] border-0"
-          selectedKeys={[normalizedPathname]}
-          items={antdItems}
-          onClick={() => setDrawerOpen(false)}
-          style={{
-            backgroundColor: "#282836",
-            color: "#fff",
-          }}
-          styles={{
-            item: {
-              color: "#94a3b8", // slate-400 for inactive items
-            },
-          }}
-          theme="dark"
-        />
       </Drawer>
 
       {/* 🖥 Tablet + Desktop Sidebar */}
@@ -134,7 +208,24 @@ const SellerSidebar = () => {
             },
           }}
         />
+        {/* Logout Button - Desktop */}
+        <div className="mt-auto pt-4 border-t border-gray-700">
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+          >
+            <FaSignOutAlt className="w-4 h-4" />
+            <span className="font-medium">Logout</span>
+          </button>
+        </div>
       </aside>
+
+      {/* Logout Confirmation Modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+      />
 
       {/* Custom CSS for active state */}
       <style jsx global>{`

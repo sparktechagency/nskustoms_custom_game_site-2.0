@@ -3,6 +3,7 @@ import "./globals.css";
 import ReduxProvider from "@/src/Provider/ReduxProvider";
 import "aos/dist/aos.css";
 import { Toaster } from "sonner";
+import { GoogleTranslateScript } from "@/src/components/GoogleTranslateScript";
 
 export const metadata: Metadata = {
   title: {
@@ -92,6 +93,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased`}>
+        <GoogleTranslateScript />
         <Toaster position="top-right" />
         <ReduxProvider>{children}</ReduxProvider>
       </body>

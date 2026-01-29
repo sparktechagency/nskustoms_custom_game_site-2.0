@@ -247,7 +247,7 @@ a:hover {
 }
 
 .on-page-link:hover {
-  color: #AC2212; /* hover:text-[#AC2212] */
+  color: #ac2212; /* hover:text-[#AC2212] */
 }
 
 .on-page-link.active {
@@ -376,4 +376,60 @@ a:hover {
   .sidebar-item span {
     display: none; /* hidden */
   }
+}
+
+/* for Google Translate   */
+
+/* Hide the Google Translate banner */
+
+.antialiased {
+  position: inherit !important;
+}
+
+/* Hide the Google Translate toolbar */
+.goog-te-gadget {
+  display: none !important;
+}
+/* Hide the Google Translate banner */
+.goog-te-banner-frame {
+  display: none !important;
+}
+/* Remove pop-up preview */
+.goog-te-balloon-frame {
+  display: none !important;
+}
+
+/* Hide the floating dropdown */
+.goog-te-menu-frame {
+  display: none !important;
+}
+
+/* Hide Google Translate Top Bar */
+.skiptranslate {
+  display: none !important;
+}
+
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf.VIpgJd-ZVi9od-aZ2wEe-wOHMyf-ti6hGc {
+  display: none !important;
+}
+
+.VIpgJd-ZVi9od-aZ2wEe {
+  display: none !important;
+}
+
+/* ::selection {
+  background: #e8eefe !important;
+  color: white !important;
+} */
+
+/* finish there  */
+
+/*
+ * The 'notranslate' class is automatically recognized by Google Translate.
+ * No CSS needed - just add class="notranslate" to elements that should not be translated.
+ * This selector ensures proper attribute-based exclusion as well.
+ */
+.notranslate,
+[translate="no"] {
+  /* These elements should not be translated by Google Translate */
 }

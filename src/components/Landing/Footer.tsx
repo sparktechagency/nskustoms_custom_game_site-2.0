@@ -10,11 +10,56 @@ import googlepay from "@/src/Assets/Footer/googlepay.png";
 import mastercard from "@/src/Assets/Footer/mastercard.png";
 import visa from "@/src/Assets/Footer/visa.png";
 import Link from "next/link";
+import { changeGoogleTranslateLanguage } from "@/src/components/GoogleTranslateScript";
+
+const languages = [
+  { label: "English", value: "en" },
+  { label: "French", value: "fr" },
+  { label: "Portuguese", value: "pt" },
+  { label: "Spanish", value: "es" },
+];
+
+const currencies = [
+  { label: "USD", value: "USD", symbol: "$" },
+  { label: "EUR", value: "EUR", symbol: "€" },
+  { label: "GBP", value: "GBP", symbol: "£" },
+  { label: "CAD", value: "CAD", symbol: "$" },
+];
 
 export default function Footer() {
-  const [language, setLanguage] = useState("English");
-  const [currency, setCurrency] = useState("USD");
+  const [selectedLanguage, setSelectedLanguage] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentLanguage") || "en";
+    }
+    return "en";
+  });
+  const [currency, setCurrency] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentCurrency") || "USD";
+    }
+    return "USD";
+  });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const switchLanguage = (lang: string) => {
+    setSelectedLanguage(lang);
+    localStorage.setItem("currentLanguage", lang);
+    changeGoogleTranslateLanguage(lang);
+  };
+
+  const switchCurrency = (curr: string) => {
+    setCurrency(curr);
+    localStorage.setItem("currentCurrency", curr);
+    setIsDropdownOpen(false);
+  };
+
+  const getCurrentLanguageLabel = () => {
+    return languages.find((l) => l.value === selectedLanguage)?.label || "English";
+  };
+
+  const getCurrentCurrencySymbol = () => {
+    return currencies.find((c) => c.value === currency)?.symbol || "$";
+  };
 
   const paymentMethods = [
     { name: "Visa", icon: visa },
@@ -149,18 +194,11 @@ export default function Footer() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v6M19 10v6"
+                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
                   />
                 </svg>
                 <span>
-                  {language} | {currency} -{" "}
-                  {currency === "CAD"
-                    ? "$"
-                    : currency === "EUR"
-                    ? "€"
-                    : currency === "GBP"
-                    ? "£"
-                    : "$"}
+                  {getCurrentLanguageLabel()} | {currency} - {getCurrentCurrencySymbol()}
                 </span>
                 <svg
                   className={`w-4 h-4 ml-1 transition-transform ${
@@ -181,112 +219,42 @@ export default function Footer() {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 bottom-11 mt-2 w-48 bg-gray-800 rounded-md shadow-lg z-10">
+                <div className="absolute right-0 bottom-11 mt-2 w-48 bg-gray-800 rounded-md shadow-lg z-10 max-h-80 overflow-y-auto">
                   <div className="py-1">
                     <div className="px-4 py-2 text-sm text-gray-300 border-b border-gray-700">
                       Language
                     </div>
-                    <button
-                      onClick={() => {
-                        setLanguage("English");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        language === "English"
-                          ? "bg-gray-700"
-                          : "hover:bg-gray-700"
-                      }`}
-                    >
-                      English
-                    </button>
-                    <button
-                      onClick={() => {
-                        setLanguage("Spanish");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        language === "Spanish"
-                          ? "bg-gray-700"
-                          : "hover:bg-gray-700"
-                      }`}
-                    >
-                      Spanish
-                    </button>
-                    <button
-                      onClick={() => {
-                        setLanguage("French");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        language === "French"
-                          ? "bg-gray-700"
-                          : "hover:bg-gray-700"
-                      }`}
-                    >
-                      French
-                    </button>
-                    <button
-                      onClick={() => {
-                        setLanguage("Portuguese ");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        language === "Portuguese "
-                          ? "bg-gray-700"
-                          : "hover:bg-gray-700"
-                      }`}
-                    >
-                      Portuguese
-                    </button>
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.value}
+                        onClick={() => switchLanguage(lang.value)}
+                        className={`block w-full text-left px-4 py-2 text-sm ${
+                          selectedLanguage === lang.value
+                            ? "bg-gray-700"
+                            : "hover:bg-gray-700"
+                        }`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
                   </div>
                   <div className="py-1">
                     <div className="px-4 py-2 text-sm text-gray-300 border-b border-gray-700">
                       Currency
                     </div>
-                    <button
-                      onClick={() => {
-                        setCurrency("USD");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        currency === "USD" ? "bg-gray-700" : "hover:bg-gray-700"
-                      }`}
-                    >
-                      USD - $
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCurrency("EUR");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        currency === "EUR" ? "bg-gray-700" : "hover:bg-gray-700"
-                      }`}
-                    >
-                      EUR - €
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCurrency("GBP");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        currency === "GBP" ? "bg-gray-700" : "hover:bg-gray-700"
-                      }`}
-                    >
-                      GBP - £
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCurrency("CAD");
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        currency === "CAD" ? "bg-gray-700" : "hover:bg-gray-700"
-                      }`}
-                    >
-                      CAD - $
-                    </button>
+                    {currencies.map((curr) => (
+                      <button
+                        key={curr.value}
+                        onClick={() => switchCurrency(curr.value)}
+                        className={`block w-full text-left px-4 py-2 text-sm ${
+                          currency === curr.value
+                            ? "bg-gray-700"
+                            : "hover:bg-gray-700"
+                        }`}
+                      >
+                        {curr.label} - {curr.symbol}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}

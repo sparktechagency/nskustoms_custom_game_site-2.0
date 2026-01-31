@@ -9,7 +9,7 @@ import Image from "next/image";
 import { CgMenuBoxed } from "react-icons/cg";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
-import { FaCircleDollarToSlot } from "react-icons/fa6";
+// import { FaCircleDollarToSlot } from "react-icons/fa6";
 
 // Profile component for reuse
 const ProfileSection = () => {
@@ -52,7 +52,7 @@ const BuyerSidebar = () => {
     { label: "Messages", path: "/message", icon: FaEnvelope },
     { label: "Notifications", path: "/notifications", icon: FaBell },
     { label: "Feedback", path: "/feedback", icon: FaStar },
-    { label: "Refund Policy", path: "/refundpolicy", icon:FaCircleDollarToSlot},
+    // { label: "Refund Policy", path: "/refundpolicy", icon:FaCircleDollarToSlot},
     { label: "Settings", path: "/accountsetting", icon: FaCog },
   ];
 

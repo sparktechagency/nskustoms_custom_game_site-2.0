@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import React, { useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 import support from '@/src/Assets/seller/support.png'
 import Image from 'next/image';
+import { useSetRefundsMutation } from '@/src/redux/features/become-seller/becomeSellerApi';
+import { useSearchParams } from 'next/navigation';
 
 interface FormData {
   orderId: string;
@@ -12,8 +15,12 @@ interface FormData {
 }
 
 const Page = () => {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId');
+  console.log(orderId);
+
   const [formData, setFormData] = useState<FormData>({
-    orderId: '',
+    orderId: orderId ? orderId : '',
     email: '',
     reason: ''
   });
@@ -34,15 +41,98 @@ const Page = () => {
       if (validTypes.includes(file.type)) {
         setSelectedFile(file);
       } else {
-        alert('Please upload a valid file format (JPEG, PNG, MP4, MOV)');
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid File',
+          text: 'Please upload a valid file format (JPEG, PNG, MP4, MOV)',
+          confirmButtonColor: '#dc2626',
+          background: '#1f1f1f',
+          color: '#fff'
+        });
       }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [setRefunds] = useSetRefundsMutation();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Form submitted:', formData, selectedFile);
-    // Handle form submission logic here
+    
+    // Create FormData object
+    const formDataToSend = new FormData();
+    
+    // Append form fields
+    formDataToSend.append('orderId', formData.orderId);
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('reasonForRefund', formData.reason);
+    
+    // Append file if selected
+    if (selectedFile) {
+      formDataToSend.append('images', selectedFile);
+    }
+    
+    try {
+    
+      // Call your mutation with FormData
+      const res = await setRefunds(formDataToSend).unwrap();
+      console.log('Response:', res);
+      
+      // Check if response code is 200
+      if (res.code === 200) {
+        // Reset form after successful submission
+        setFormData({
+          orderId: '',
+          email: '',
+          reason: ''
+        });
+        setSelectedFile(null);
+        
+        // Reset file input
+        const fileInput = document.getElementById('fileUpload') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = '';
+        }
+        
+        // Show success message - dynamic from response
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: res.message || 'Refund request submitted successfully!',
+          confirmButtonColor: '#dc2626',
+          background: '#1f1f1f',
+          color: '#fff'
+        });
+      } 
+      
+    } catch (error: any) {
+      console.error('Error submitting refund:', error);
+      
+      let errorMessage = 'Failed to submit refund request. Please try again.';
+      
+      // Handle validation errors from backend (status 400)
+      if (error?.status === 400 && error?.data?.errors && Array.isArray(error.data.errors)) {
+        // Get all error messages from the errors array
+        errorMessage = error.data.errors.map((err: any) => err.message).join('\n');
+      } 
+      // Handle general error message from backend
+      else if (error?.data?.message) {
+        errorMessage = error.data.message;
+      }
+      // Handle error message at top level
+      else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      // Show error message
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission Failed',
+        text: errorMessage,
+        confirmButtonColor: '#dc2626',
+        background: '#1f1f1f',
+        color: '#fff'
+      });
+    }
   };
 
   return (
@@ -77,6 +167,8 @@ const Page = () => {
                 onChange={handleInputChange}
                 className="w-full bg-gray-800 border-2 border-blue-500 rounded px-4 py-3 text-white focus:outline-none focus:border-blue-400 transition-colors"
                 placeholder="Enter order ID"
+                required
+                disabled
               />
             </div>
 
@@ -92,6 +184,7 @@ const Page = () => {
                 onChange={handleInputChange}
                 className="w-full bg-gray-800 border-2 border-gray-700 rounded px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
                 placeholder="Enter your email"
+                required
               />
             </div>
           </div>
@@ -108,6 +201,8 @@ const Page = () => {
               onChange={handleInputChange}
               className="w-full bg-gray-800 border-2 border-gray-700 rounded px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors resize-none"
               placeholder="Explain your reason for refund"
+              rows={4}
+              required
             />
           </div>
 
@@ -154,4 +249,4 @@ const Page = () => {
   );
 }
 
-export default Page  
+export default Page;

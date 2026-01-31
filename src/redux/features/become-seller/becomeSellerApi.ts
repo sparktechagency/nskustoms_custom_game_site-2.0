@@ -40,6 +40,13 @@ const becomeSellerPostApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+    setRefunds: builder.mutation({
+      query: (data) => ({
+        url: "/refunds",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -49,5 +56,6 @@ export const {
   useGetMySellerApplicationQuery,
   useGetTransactionsQuery,
   useGetTransactionsStatsQuery,
-  useSetTransactionsMutation
+  useSetTransactionsMutation,
+  useSetRefundsMutation,
 } = becomeSellerPostApi;

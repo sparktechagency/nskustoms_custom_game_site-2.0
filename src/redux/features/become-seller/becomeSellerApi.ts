@@ -21,6 +21,25 @@ const becomeSellerPostApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    getTransactions: builder.query({
+      query: () => ({
+        url: "/transactions/my-transactions",
+        method: "GET",
+      }),
+    }),
+    getTransactionsStats: builder.query({
+      query: () => ({
+        url: "/transactions/stats",
+        method: "GET",
+      }),
+    }),
+    setTransactions: builder.mutation({
+      query: (data) => ({
+        url: "transactions",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -28,4 +47,7 @@ export const {
   useApplyBecomeSellerMutation,
   useDeleteMySellerApplicationMutation,
   useGetMySellerApplicationQuery,
+  useGetTransactionsQuery,
+  useGetTransactionsStatsQuery,
+  useSetTransactionsMutation
 } = becomeSellerPostApi;

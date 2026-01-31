@@ -63,7 +63,7 @@ export default function Login() {
       );
 
       if (user.role === "seller") {
-        router.push("/sellerboosting");
+        router.push("/seller/sellerboosting");
       } else {
         router.push("/boosting");
       }

@@ -14,6 +14,7 @@ import {
   formatDate,
   getBoostingDetails,
 } from "@/src/utils/pageHealper";
+import { FaCircleDollarToSlot } from "react-icons/fa6";
 
 const tabs: { id: TabType; label: string }[] = [
   { id: "waiting_for_offer", label: "Waiting for Offer" },

@@ -245,6 +245,20 @@ class SocketService {
 
   // ============ Conversation Methods ============
 
+  public createConversation(
+    payload: { receiverId: string; type?: string; referenceId?: string },
+    callback?: (response: SocketResponse) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.CONVERSATION_CREATE, payload, callback);
+  }
+
+  public getConversationList(
+    query?: { page?: number; limit?: number; type?: string },
+    callback?: (response: SocketResponse) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.CONVERSATION_LIST, query || {}, callback);
+  }
+
   public joinConversation(
     payload: JoinConversationPayload,
     callback?: (response: SocketResponse) => void,

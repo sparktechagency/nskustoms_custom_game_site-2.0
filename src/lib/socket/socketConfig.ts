@@ -49,6 +49,9 @@ export const SOCKET_CONFIG = {
     CONVERSATION_USER_TYPING: "conversation:userTyping",
     CONVERSATION_USER_STOP_TYPING: "conversation:userStoppedTyping",
     CONVERSATION_READ: "conversation:read",
+    CONVERSATION_NEW: "conversation:new",
+    CONVERSATION_CREATED: "conversation:created",
+    CONVERSATION_UPDATED: "conversation:updated",
   },
 
   // Emit names - Client to Server
@@ -57,6 +60,8 @@ export const SOCKET_CONFIG = {
     USER_ONLINE: "user-online",
 
     // Conversations
+    CONVERSATION_CREATE: "conversation:create",
+    CONVERSATION_LIST: "conversation:list",
     CONVERSATION_JOIN: "conversation:join",
     CONVERSATION_LEAVE: "conversation:leave",
     CONVERSATION_SEND_MESSAGE: "conversation:sendMessage",

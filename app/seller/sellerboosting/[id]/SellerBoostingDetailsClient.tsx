@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { FaCircle } from "react-icons/fa";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -16,7 +16,7 @@ import {
   Key,
   CreditCard,
 } from "lucide-react";
-import { BoostingPost } from "@/src/types/page.types";
+import { BoostingPost, Conversation } from "@/src/types/page.types";
 import {
   formatBoostingType,
   formatDate,
@@ -24,21 +24,29 @@ import {
 } from "@/src/utils/pageHealper";
 import { useCreateOfferSellerMutation } from "@/src/redux/features/offers/offersApi";
 import CreateOfferModel from "@/src/components/seller/CreateofferModel";
-import { useCreateConversationMutation } from "@/src/redux/features/conversations/conversationsApi";
 import { toast } from "sonner";
 import { CustomError } from "@/src/types/helper.types";
+import { useSocket, useSocketEvent } from "@/src/hooks/useSocket";
+import { SOCKET_CONFIG } from "@/src/lib/socket/socketConfig";
+import socketService from "@/src/lib/socket/socketService";
 
 const SellerBoostingDetailsClient = () => {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const { data: boostingDetails, isLoading } =
-    useGetBoostingPostByIdForSellerQuery(id);
+  const {
+    data: boostingDetails,
+    isLoading,
+    refetch,
+  } = useGetBoostingPostByIdForSellerQuery(id);
   const [createOffers, { isLoading: isCreatingOffer }] =
     useCreateOfferSellerMutation();
-  const [createConversations, { isLoading: isCreateConversations }] =
-    useCreateConversationMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [realtimeConversation, setRealtimeConversation] =
+    useState<Conversation | null>(null);
+
+  const { isConnected } = useSocket();
 
   const handleCreateOffer = async (data: {
     boostingPostId: string;
@@ -91,19 +99,99 @@ const SellerBoostingDetailsClient = () => {
 
   const details = boostingDetails as SellerBoostingDetails | undefined;
 
+  // Listen for new conversations (when conversation is created)
+  useSocketEvent<{ conversation: Conversation; message?: string }>(
+    SOCKET_CONFIG.events.CONVERSATION_NEW,
+    useCallback(
+      (data) => {
+        if (data.conversation && data.conversation.referenceId === id) {
+          setRealtimeConversation(data.conversation);
+          toast.success("Conversation started!");
+        }
+      },
+      [id],
+    ),
+    [id],
+  );
+
+  // Listen for conversation created response
+  useSocketEvent<{ conversation: Conversation }>(
+    SOCKET_CONFIG.events.CONVERSATION_CREATED,
+    useCallback(
+      (data) => {
+        if (data.conversation && data.conversation.referenceId === id) {
+          setRealtimeConversation(data.conversation);
+        }
+      },
+      [id],
+    ),
+    [id],
+  );
+
+  // Listen for conversation updates
+  useSocketEvent<{ conversation: Conversation }>(
+    SOCKET_CONFIG.events.CONVERSATION_UPDATED,
+    useCallback(
+      (data) => {
+        if (data.conversation && data.conversation.referenceId === id) {
+          setRealtimeConversation(data.conversation);
+        }
+      },
+      [id],
+    ),
+    [id],
+  );
+
   const handleCreateConversation = async () => {
-    if (!details) return;
+    if (!details || !isConnected) {
+      toast.error("Not connected to server");
+      return;
+    }
+
+    setIsCreatingConversation(true);
+
     try {
-      const converSationReqBody = {
-        receiverId: details.userId._id,
-        type: "boosting",
-        referenceId: id,
-      };
-      await createConversations(converSationReqBody).unwrap();
+      socketService.createConversation(
+        {
+          receiverId: details.userId._id,
+          type: "boosting",
+          referenceId: id,
+        },
+        (response) => {
+          setIsCreatingConversation(false);
+
+          if (response.success && response.data) {
+            const conversation = response.data as Conversation;
+            setRealtimeConversation(conversation);
+            toast.success("Conversation created successfully!");
+            // Navigate to the conversation
+            router.push(`/seller/message?conversation=${conversation._id}`);
+          } else {
+            // Check if it's "already exists" - still navigate
+            if (response.message?.includes("Existing conversation")) {
+              const conversation = response.data as Conversation;
+              setRealtimeConversation(conversation);
+              router.push(`/seller/message?conversation=${conversation._id}`);
+            } else {
+              toast.error(response.error || "Failed to create conversation");
+            }
+          }
+        },
+      );
+
+      // Fallback timeout
+      setTimeout(() => {
+        setIsCreatingConversation(false);
+      }, 10000);
     } catch (error) {
       console.error("Failed to create conversation:", error);
+      toast.error("Failed to create conversation");
+      setIsCreatingConversation(false);
     }
   };
+
+  // Get the current conversation (from API or realtime)
+  const currentConversation = realtimeConversation || details?.conversation;
 
   if (isLoading) {
     return (
@@ -582,16 +670,24 @@ const SellerBoostingDetailsClient = () => {
 
         {/* Conversation Section */}
         <div className="bg-[#282836] rounded-lg p-6 shadow-xl border border-gray-700">
-          <h3 className="text-gray-200 font-medium mb-4 flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            Conversation with Buyer
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-200 font-medium flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Conversation with Buyer
+            </h3>
+            {isConnected && (
+              <span className="flex items-center gap-1 text-xs text-green-400">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                Live
+              </span>
+            )}
+          </div>
 
-          {details.conversation ? (
+          {currentConversation ? (
             <div
               onClick={() =>
                 router.push(
-                  `/seller/message?conversation=${details.conversation?._id}`,
+                  `/seller/message?conversation=${currentConversation._id}`,
                 )
               }
               className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
@@ -616,15 +712,15 @@ const SellerBoostingDetailsClient = () => {
                   <p className="text-gray-200 text-sm font-medium">
                     {details.userId?.name || "Buyer"}
                   </p>
-                  {details.conversation.lastMessage && (
+                  {currentConversation.lastMessage && (
                     <p className="text-gray-500 text-xs truncate max-w-xs">
-                      {details.conversation.lastMessage}
+                      {currentConversation.lastMessage}
                     </p>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {details.conversation.isActive && (
+                {currentConversation.isActive && (
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                 )}
                 <MessageCircle className="w-5 h-5 text-gray-400" />
@@ -636,18 +732,26 @@ const SellerBoostingDetailsClient = () => {
               <p className="text-gray-400 mb-4">No conversation yet</p>
               <button
                 onClick={handleCreateConversation}
-                disabled={isCreateConversations}
+                disabled={isCreatingConversation || !isConnected}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 mx-auto"
               >
-                {isCreateConversations ? (
+                {isCreatingConversation ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Creating...
                   </>
                 ) : (
-                  "Talk with the Buyer"
+                  <>
+                    <MessageCircle className="w-4 h-4" />
+                    Talk with the Buyer
+                  </>
                 )}
               </button>
+              {!isConnected && (
+                <p className="text-yellow-500 text-xs mt-2">
+                  Connecting to server...
+                </p>
+              )}
             </div>
           )}
         </div>

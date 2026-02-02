@@ -66,6 +66,24 @@ export interface TypingPayload {
   conversationId: string;
 }
 
+export interface CreateConversationPayload {
+  receiverId: string;
+  type?: "boosting" | "support";
+  referenceId?: string;
+}
+
+export interface ConversationListQuery {
+  page?: number;
+  limit?: number;
+  type?: "boosting" | "support";
+}
+
+export interface ConversationListResponse {
+  conversations: unknown[];
+  total: number;
+  pages: number;
+}
+
 export interface CreateBoostingPostPayload {
   game: string;
   currentRank: string;
@@ -79,6 +97,7 @@ export interface SocketResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
+  message?: string;
 }
 
 export interface MessagesResponse {

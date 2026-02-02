@@ -202,6 +202,8 @@ const Message: React.FC = () => {
   const [messageInput, setMessageInput] = useState("");
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [realtimeMessages, setRealtimeMessages] = useState<MessageType[]>([]);
+  const [realtimeConversations, setRealtimeConversations] = useState<Conversation[]>([]);
+  const [updatedConversationIds, setUpdatedConversationIds] = useState<Set<string>>(new Set());
   const [isTyping, setIsTyping] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [typingConversations, setTypingConversations] = useState<Set<string>>(new Set());
@@ -223,12 +225,15 @@ const Message: React.FC = () => {
     router.push(`?${params.toString()}`);
   };
 
-  const { data: conversationsData, isLoading: isLoadingConversations } =
-    useGetMyConversationsQuery({
-      page: 1,
-      limit: 100,
-      type: activeTab,
-    });
+  const {
+    data: conversationsData,
+    isLoading: isLoadingConversations,
+    refetch: refetchConversations,
+  } = useGetMyConversationsQuery({
+    page: 1,
+    limit: 100,
+    type: activeTab,
+  });
 
   const { data: messagesData, isLoading: isLoadingMessages } =
     useGetMessagesByConversationIdQuery(
@@ -239,9 +244,34 @@ const Message: React.FC = () => {
       { skip: !selectedConversationId },
     );
 
-  const conversations =
+  const apiConversations =
     (conversationsData as ConversationsResponse)?.conversations || [];
   const messages = (messagesData as MessagesResponse)?.messages || [];
+
+  // Combine API conversations with realtime conversations
+  const conversations = React.useMemo(() => {
+    // Filter realtime conversations by active tab
+    const filteredRealtimeConvs = realtimeConversations.filter(
+      (conv) => conv.type === activeTab
+    );
+
+    // Merge: realtime first (newer), then API conversations (excluding duplicates)
+    const allConvs = [...filteredRealtimeConvs];
+    apiConversations.forEach((apiConv) => {
+      if (!allConvs.some((c) => c._id === apiConv._id)) {
+        allConvs.push(apiConv);
+      }
+    });
+
+    // Sort by updatedAt (most recent first) and prioritize updated ones
+    return allConvs.sort((a, b) => {
+      const aUpdated = updatedConversationIds.has(a._id);
+      const bUpdated = updatedConversationIds.has(b._id);
+      if (aUpdated && !bUpdated) return -1;
+      if (!aUpdated && bUpdated) return 1;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+  }, [apiConversations, realtimeConversations, activeTab, updatedConversationIds]);
 
   const selectedConversation = conversations.find(
     (c) => c._id === selectedConversationId,
@@ -298,18 +328,95 @@ const Message: React.FC = () => {
     };
   }, [selectedConversationId, isConnected]);
 
+  // Listen for new conversations (when someone starts a conversation with us)
+  useSocketEvent<{ conversation: Conversation; message: string }>(
+    SOCKET_CONFIG.events.CONVERSATION_NEW,
+    useCallback(
+      (data) => {
+        if (data.conversation) {
+          // Add to realtime conversations
+          setRealtimeConversations((prev) => {
+            // Check if conversation already exists
+            if (prev.some((c) => c._id === data.conversation._id)) {
+              return prev;
+            }
+            return [data.conversation, ...prev];
+          });
+          // Refetch to get updated list from server
+          refetchConversations();
+        }
+      },
+      [refetchConversations],
+    ),
+    [refetchConversations],
+  );
+
   // Listen for new messages
   useSocketEvent<{ conversationId: string; message: MessageType }>(
     SOCKET_CONFIG.events.CONVERSATION_MESSAGE,
     useCallback(
       (data) => {
+        // Add message to realtime messages if in selected conversation
         if (data.conversationId === selectedConversationId) {
           setRealtimeMessages((prev) => [...prev, data.message]);
         }
+
+        // Update conversation in the list (move to top, update lastMessage)
+        setUpdatedConversationIds((prev) => new Set(prev).add(data.conversationId));
+
+        // Update the conversation's lastMessage in realtime conversations
+        setRealtimeConversations((prev) => {
+          const existingIndex = prev.findIndex((c) => c._id === data.conversationId);
+          if (existingIndex >= 0) {
+            const updated = [...prev];
+            updated[existingIndex] = {
+              ...updated[existingIndex],
+              lastMessage: data.message.message,
+              updatedAt: data.message.createdAt || new Date().toISOString(),
+            };
+            return updated;
+          }
+          return prev;
+        });
+
+        // Clear the updated flag after a short delay
+        setTimeout(() => {
+          setUpdatedConversationIds((prev) => {
+            const next = new Set(prev);
+            next.delete(data.conversationId);
+            return next;
+          });
+        }, 3000);
       },
       [selectedConversationId],
     ),
     [selectedConversationId],
+  );
+
+  // Listen for conversation updates (e.g., lastMessage update from server)
+  useSocketEvent<{ conversation: Conversation }>(
+    SOCKET_CONFIG.events.CONVERSATION_UPDATED,
+    useCallback(
+      (data) => {
+        if (data.conversation) {
+          // Update in realtime conversations
+          setRealtimeConversations((prev) => {
+            const existingIndex = prev.findIndex(
+              (c) => c._id === data.conversation._id
+            );
+            if (existingIndex >= 0) {
+              const updated = [...prev];
+              updated[existingIndex] = data.conversation;
+              return updated;
+            }
+            // If not found, add it
+            return [data.conversation, ...prev];
+          });
+        }
+      },
+      [],
+    ),
+    [],
   );
 
   // Listen for typing indicators (track across all conversations)
@@ -379,6 +486,9 @@ const Message: React.FC = () => {
   const handleTabChange = (tab: ConversationType) => {
     setActiveTab(tab);
     handleClearConversation();
+    // Clear realtime state when switching tabs
+    setRealtimeConversations([]);
+    setUpdatedConversationIds(new Set());
   };
 
   const handleSendMessage = async () => {

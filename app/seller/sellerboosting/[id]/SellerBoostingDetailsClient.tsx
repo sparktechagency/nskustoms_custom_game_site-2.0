@@ -22,10 +22,8 @@ import {
   formatDate,
   getCompletionMethod,
 } from "@/src/utils/pageHealper";
-import { useCreateOfferSellerMutation } from "@/src/redux/features/offers/offersApi";
 import CreateOfferModel from "@/src/components/seller/CreateofferModel";
 import { toast } from "sonner";
-import { CustomError } from "@/src/types/helper.types";
 import { useSocket, useSocketEvent } from "@/src/hooks/useSocket";
 import { SOCKET_CONFIG } from "@/src/lib/socket/socketConfig";
 import socketService from "@/src/lib/socket/socketService";
@@ -38,31 +36,70 @@ const SellerBoostingDetailsClient = () => {
     isLoading,
     refetch,
   } = useGetBoostingPostByIdForSellerQuery(id);
-  const [createOffers, { isLoading: isCreatingOffer }] =
-    useCreateOfferSellerMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [isCreatingOffer, setIsCreatingOffer] = useState(false);
   const [realtimeConversation, setRealtimeConversation] =
     useState<Conversation | null>(null);
 
   const { isConnected } = useSocket();
 
-  const handleCreateOffer = async (data: {
-    boostingPostId: string;
-    deliverTime: string;
-    price: number;
-    message: string;
-  }) => {
-    try {
-      await createOffers(data).unwrap();
-      setIsModalOpen(false);
-    } catch (error) {
-      const customError = error as CustomError;
-      toast.error(customError?.data?.message || "Failed to create offer");
-      throw error;
-    }
-  };
+  // Handle create offer via socket
+  const handleCreateOffer = useCallback(
+    (data: {
+      boostingPostId: string;
+      deliverTime: string;
+      price: number;
+      message: string;
+    }) => {
+      if (!isConnected) {
+        toast.error("Not connected to server");
+        return Promise.reject(new Error("Not connected"));
+      }
+
+      setIsCreatingOffer(true);
+
+      return new Promise<void>((resolve, reject) => {
+        socketService.createOffer<{ _id: string }>(
+          {
+            boostingPostId: data.boostingPostId,
+            price: data.price,
+            message: data.message,
+            deliverTime: data.deliverTime,
+          },
+          (response) => {
+            setIsCreatingOffer(false);
+
+            if (response.success) {
+              toast.success("Offer created successfully!");
+              setIsModalOpen(false);
+              refetch(); // Refresh the data
+              resolve();
+            } else {
+              const errorMessage =
+                response.error || response.message || "Failed to create offer";
+              toast.error(errorMessage);
+              reject(new Error(errorMessage));
+            }
+          },
+        );
+
+        // Fallback timeout
+        setTimeout(() => {
+          setIsCreatingOffer((prev) => {
+            if (prev) {
+              toast.error("Request timed out");
+              reject(new Error("Timeout"));
+              return false;
+            }
+            return prev;
+          });
+        }, 15000);
+      });
+    },
+    [isConnected, refetch],
+  );
 
   // Extended type to include offer, order, and conversation
   interface SellerBoostingDetails extends BoostingPost {

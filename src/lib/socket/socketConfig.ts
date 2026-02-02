@@ -81,6 +81,7 @@ export const SOCKET_CONFIG = {
     // Offers
     OFFER_CREATE: "offer:create",
     OFFER_UPDATE_STATUS: "offer:updateStatus",
+    OFFER_GET_BY_ID: "offer:getById",
   },
 } as const;
 

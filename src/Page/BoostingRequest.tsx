@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Header from "@/src/components/Landing/Header";
@@ -8,18 +8,10 @@ import Footer from "@/src/components/Landing/Footer";
 import CancelBoostingRequestModal from "@/src/components/BoostingRequestPage/CancelBoostingRequestModal";
 import EmptyBoostingRequest from "@/src/components/BoostingRequestPage/EmptyBoostingRequest";
 import {
-  useCreateConversationMutation,
-  useGetMessagesByConversationIdQuery,
-  useSendMessageMutation,
-} from "../redux/features/conversations/conversationsApi";
-import {
   useGetBoostingPostByIdQuery,
   useMakeBoostingAsCancelledMutation,
 } from "../redux/features/boosting-post/boostingApi";
-import {
-  useGetOffersForPostQuery,
-  useRespondToOfferMutation,
-} from "../redux/features/offers/offersApi";
+import { useRespondToOfferMutation } from "../redux/features/offers/offersApi";
 import { useAppSelector } from "../redux/hooks";
 import {
   Loader2,
@@ -37,7 +29,6 @@ import {
   BoostingOffer,
   BoostingPost,
   Conversation,
-  MessagesResponse,
   SortOptionBoostingPost,
 } from "../types/page.types";
 import {
@@ -47,6 +38,17 @@ import {
   getCompletionMethod,
   sortOptions,
 } from "../utils/pageHealper";
+import { useSocket, useSocketEvent } from "../hooks/useSocket";
+import socketService from "../lib/socket/socketService";
+import { SOCKET_CONFIG } from "../lib/socket/socketConfig";
+import type { SocketMessage } from "../redux/features/socket/socket.types";
+
+interface Message {
+  _id: string;
+  message: string;
+  author: { _id: string; name: string; image?: string };
+  createdAt: string;
+}
 
 export default function BoostingRequestPage() {
   const router = useRouter();
@@ -59,40 +61,145 @@ export default function BoostingRequestPage() {
   const [messageInput, setMessageInput] = useState("");
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Socket-based state
+  const [offers, setOffers] = useState<BoostingOffer[]>([]);
+  const [isLoadingOffers, setIsLoadingOffers] = useState(true);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
   const currentUser = useAppSelector((state) => state.auth.user);
+  const { isConnected } = useSocket();
 
-  // API Queries
-  const { data: boostingDetails, isLoading: isLoadingDetails } =
-    useGetBoostingPostByIdQuery(boostingId!, { skip: !boostingId });
-
-  const { data: offersData, isLoading: isLoadingOffers } =
-    useGetOffersForPostQuery({ postId: boostingId! }, { skip: !boostingId });
-
+  // API Queries (keeping for boosting details)
   const {
-    data: messagesData,
-    isLoading: isLoadingMessages,
-    refetch: refetchMessages,
-  } = useGetMessagesByConversationIdQuery(
-    {
-      id: selectedConversationId || "",
-      params: { page: 1, limit: 50 },
-    },
-    { skip: !selectedConversationId },
-  );
+    data: boostingDetails,
+    isLoading: isLoadingDetails,
+    refetch: refetchDetails,
+  } = useGetBoostingPostByIdQuery(boostingId!, { skip: !boostingId });
 
   // Mutations
-  const [createConversation, { isLoading: isCreatingConversation }] =
-    useCreateConversationMutation();
   const [cancelBoosting, { isLoading: isCancelling }] =
     useMakeBoostingAsCancelledMutation();
-  const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [respondToOffer, { isLoading: isRespondingToOffer }] =
     useRespondToOfferMutation();
 
   const details = boostingDetails as BoostingPost | undefined;
-  const offers = (offersData as BoostingOffer[]) || [];
-  const messages = (messagesData as MessagesResponse)?.messages || [];
+
+  // Fetch offers via socket
+  const fetchOffers = useCallback(() => {
+    if (!boostingId || !isConnected) return;
+
+    setIsLoadingOffers(true);
+    socketService.getBoostingPostOffers<{ offers: BoostingOffer[] }>(
+      boostingId,
+      (response) => {
+        console.log(response, "offers response");
+
+        setIsLoadingOffers(false);
+        if (response.success && response.data?.offers) {
+          setOffers(response.data.offers);
+        }
+      },
+    );
+
+    // Fallback timeout
+    setTimeout(() => {
+      setIsLoadingOffers((prev) => (prev ? false : prev));
+    }, 10000);
+  }, [boostingId, isConnected]);
+
+  // Fetch messages via socket
+  const fetchMessages = useCallback(() => {
+    if (!selectedConversationId || !isConnected) return;
+
+    setIsLoadingMessages(true);
+    socketService.getMessages(
+      selectedConversationId,
+      { page: 1, limit: 50 },
+      (response) => {
+        setIsLoadingMessages(false);
+        if (response.success && response.data?.messages) {
+          setMessages(response.data.messages as unknown as Message[]);
+        }
+      },
+    );
+  }, [selectedConversationId, isConnected]);
+
+  // Initial fetch for offers
+  useEffect(() => {
+    if (isConnected && boostingId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: fetch on connection
+      fetchOffers();
+    }
+  }, [isConnected, boostingId, fetchOffers]);
+
+  // Fetch messages when conversation changes
+  useEffect(() => {
+    if (isConnected && selectedConversationId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: fetch on selection
+      fetchMessages();
+      // Join conversation room
+      socketService.joinConversation({
+        conversationId: selectedConversationId,
+      });
+    }
+
+    return () => {
+      if (selectedConversationId) {
+        socketService.leaveConversation(selectedConversationId);
+      }
+    };
+  }, [isConnected, selectedConversationId, fetchMessages]);
+
+  // Listen for new offers in real-time
+  useSocketEvent<{ offer: BoostingOffer; message?: string }>(
+    SOCKET_CONFIG.events.OFFER_NEW,
+    useCallback((data) => {
+      console.log(data, "new offer data");
+      if (data.offer) {
+        setOffers((prev) => {
+          const exists = prev.some((o) => o._id === data.offer._id);
+          if (exists) return prev;
+          return [data.offer, ...prev];
+        });
+        toast.info("New offer received!");
+      }
+    }, []),
+    [boostingId],
+  );
+
+  // Listen for new messages in real-time
+  useSocketEvent<SocketMessage>(
+    SOCKET_CONFIG.events.CONVERSATION_MESSAGE,
+    useCallback(
+      (data) => {
+        console.log(data, "new conversation message data");
+        if (data.conversationId === selectedConversationId) {
+          const newMessage: Message = {
+            _id: data._id,
+            message: data.content,
+            author: {
+              _id: data.senderId,
+              name: data.senderName,
+            },
+            createdAt: data.createdAt,
+          };
+
+          setMessages((prev) => {
+            const exists = prev.some((m) => m._id === newMessage._id);
+            if (exists) return prev;
+            return [...prev, newMessage];
+          });
+        }
+      },
+      [selectedConversationId],
+    ),
+    [selectedConversationId],
+  );
 
   // Sort offers
   const sortedOffers = [...offers].sort((a, b) => {
@@ -115,60 +222,91 @@ export default function BoostingRequestPage() {
     }
   });
 
-  // Find existing conversation with a seller
-  const findExistingConversation = (sellerId: string) => {
-    return details?.conversations?.find((conv) =>
-      conv.participants.some((p) => p._id === sellerId),
-    );
-  };
-
-  // Handle chat with seller
-  const handleChatWithSeller = async (sellerId: string) => {
-    const existingConversation = findExistingConversation(sellerId);
-
-    if (existingConversation) {
-      // Select existing conversation
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("conversation", existingConversation._id);
-      router.push(`?${params.toString()}`);
-    } else {
-      // Create new conversation
-      try {
-        const result = await createConversation({
-          receiverId: sellerId,
-          type: "boosting",
-          referenceId: boostingId!,
-        }).unwrap();
-        // Navigate to the new conversation
+  // Handle chat with seller via socket
+  const handleChatWithSeller = useCallback(
+    (sellerId: string) => {
+      // Find existing conversation with a seller
+      const existingConversation = details?.conversations?.find((conv) =>
+        conv.participants.some((p) => p._id === sellerId),
+      );
+      if (existingConversation) {
+        // Select existing conversation
         const params = new URLSearchParams(searchParams.toString());
-        params.set("conversation", result.data._id);
+        params.set("conversation", existingConversation._id);
         router.push(`?${params.toString()}`);
-        toast.success("Conversation started!");
-      } catch (error) {
-        console.error("Failed to create conversation:", error);
-        toast.error("Failed to start conversation");
+      } else {
+        if (!isConnected) {
+          toast.error("Not connected to server");
+          return;
+        }
+
+        setIsCreatingConversation(true);
+
+        // Create new conversation via socket
+        socketService.createConversation(
+          {
+            receiverId: sellerId,
+            type: "boosting",
+            referenceId: boostingId!,
+          },
+          (response) => {
+            setIsCreatingConversation(false);
+
+            if (response.success && response.data) {
+              const conversation = response.data as Conversation;
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("conversation", conversation._id);
+              router.push(`?${params.toString()}`);
+              toast.success("Conversation started!");
+              refetchDetails(); // Refresh to get updated conversations
+            } else if (response.message?.includes("Existing conversation")) {
+              const conversation = response.data as Conversation;
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("conversation", conversation._id);
+              router.push(`?${params.toString()}`);
+            } else {
+              toast.error(response.error || "Failed to start conversation");
+            }
+          },
+        );
+
+        // Fallback timeout
+        setTimeout(() => {
+          setIsCreatingConversation(false);
+        }, 10000);
       }
-    }
-  };
+    },
+    [details, searchParams, router, boostingId, isConnected, refetchDetails],
+  );
 
-  // Handle send message
-  const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedConversationId) return;
+  // Handle send message via socket
+  const handleSendMessage = useCallback(() => {
+    if (!messageInput.trim() || !selectedConversationId || !isConnected) return;
 
-    try {
-      await sendMessage({
-        id: selectedConversationId,
-        messageBody: {
-          message: messageInput.trim(),
-        },
-      }).unwrap();
-      setMessageInput("");
-      refetchMessages();
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      toast.error("Failed to send message");
-    }
-  };
+    setIsSending(true);
+
+    socketService.sendMessage(
+      {
+        conversationId: selectedConversationId,
+        message: messageInput.trim(),
+      },
+      (response) => {
+        setIsSending(false);
+
+        if (response.success) {
+          setMessageInput("");
+          // Message will be added via the socket listener
+        } else {
+          toast.error(response.error || "Failed to send message");
+        }
+      },
+    );
+
+    // Fallback timeout
+    setTimeout(() => {
+      setIsSending(false);
+    }, 10000);
+  }, [messageInput, selectedConversationId, isConnected]);
 
   // Handle cancel request
   const handleConfirmCancel = async () => {
@@ -208,14 +346,19 @@ export default function BoostingRequestPage() {
     }
   };
 
-  // Scroll to bottom of messages
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Scroll to bottom of messages within container
+  const scrollToBottom = useCallback((smooth = true) => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: smooth ? "smooth" : "auto",
+      });
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   // Handle key press for sending message
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -441,9 +584,17 @@ export default function BoostingRequestPage() {
             {/* Offers Section */}
             <div className="bg-[#282836] rounded-lg border border-gray-700">
               <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-                <h2 className="text-lg font-semibold">
-                  Offers ({offers.length})
-                </h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold">
+                    Offers ({offers.length})
+                  </h2>
+                  {isConnected && (
+                    <span className="flex items-center gap-1 text-xs text-green-400">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      Live
+                    </span>
+                  )}
+                </div>
                 {/* Sort Dropdown */}
                 <div className="relative">
                   <button
@@ -585,8 +736,14 @@ export default function BoostingRequestPage() {
 
             {/* Conversations Section */}
             <div className="bg-[#282836] rounded-lg border border-gray-700">
-              <div className="p-4 border-b border-gray-700">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Conversations</h2>
+                {isConnected && (
+                  <span className="flex items-center gap-1 text-xs text-green-400">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    Live
+                  </span>
+                )}
               </div>
 
               <div className="flex h-[400px]">
@@ -674,7 +831,10 @@ export default function BoostingRequestPage() {
                       </div>
 
                       {/* Messages */}
-                      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                      <div
+                        ref={messagesContainerRef}
+                        className="flex-1 overflow-y-auto p-4 space-y-3"
+                      >
                         {isLoadingMessages ? (
                           <div className="flex items-center justify-center h-full">
                             <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />

@@ -304,7 +304,10 @@ class SocketService {
 
   public stopTyping(payload: TypingPayload): void {
     // Backend expects just the conversationId string
-    this.emit(SOCKET_CONFIG.emits.CONVERSATION_STOP_TYPING, payload.conversationId);
+    this.emit(
+      SOCKET_CONFIG.emits.CONVERSATION_STOP_TYPING,
+      payload.conversationId,
+    );
   }
 
   // ============ Boosting Post Methods ============
@@ -346,14 +349,19 @@ class SocketService {
     postId: string,
     callback?: (response: SocketResponse<T>) => void,
   ): void {
-    this.emit(SOCKET_CONFIG.emits.BOOSTING_POST_GET_OFFERS, postId, callback);
+    this.emit(SOCKET_CONFIG.emits.OFFER_GET_BY_ID, postId, callback);
   }
 
   // ============ Offer Methods ============
 
-  public createOffer(
-    payload: { postId: string; message: string; price: number },
-    callback?: (response: SocketResponse) => void,
+  public createOffer<T = unknown>(
+    payload: {
+      boostingPostId: string;
+      message: string;
+      price: number;
+      deliverTime?: string;
+    },
+    callback?: (response: SocketResponse<T>) => void,
   ): void {
     this.emit(SOCKET_CONFIG.emits.OFFER_CREATE, payload, callback);
   }
@@ -368,6 +376,13 @@ class SocketService {
       { offerId, status },
       callback,
     );
+  }
+
+  public getOfferById<T = unknown>(
+    offerId: string,
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.OFFER_GET_BY_ID, offerId, callback);
   }
 }
 

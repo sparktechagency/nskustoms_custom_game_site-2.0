@@ -45,13 +45,6 @@ import { useSocket, useIsUserOnline, useSocketEvent } from "../hooks/useSocket";
 import socketService from "../lib/socket/socketService";
 import { SOCKET_CONFIG } from "../lib/socket/socketConfig";
 
-interface Message {
-  _id: string;
-  message: string;
-  author: { _id: string; name: string; image?: string };
-  createdAt: string;
-}
-
 // Online status indicator component
 const OnlineIndicator: React.FC<{ userId: string | undefined }> = ({
   userId,
@@ -239,7 +232,6 @@ export default function BoostingRequestPage() {
   const [updatedConversationIds, setUpdatedConversationIds] = useState<
     Set<string>
   >(new Set());
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -339,10 +331,11 @@ export default function BoostingRequestPage() {
   }, [isConnected, boostingId, fetchOffers]);
 
   // Clear realtime messages and typing state when conversation changes
+  // This intentional setState on dependency change to reset UI state when switching conversations
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRealtimeMessages([]);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setIsTyping(false);
   }, [selectedConversationId]);
 
@@ -351,14 +344,7 @@ export default function BoostingRequestPage() {
     if (!selectedConversationId || !isConnected) return;
 
     // Join the conversation room
-    socketService.joinConversation(
-      { conversationId: selectedConversationId },
-      (response) => {
-        if (response.success) {
-          console.log("[Socket] Joined conversation:", selectedConversationId);
-        }
-      },
-    );
+    socketService.joinConversation({ conversationId: selectedConversationId });
 
     // Mark as read
     socketService.markAsRead(selectedConversationId);

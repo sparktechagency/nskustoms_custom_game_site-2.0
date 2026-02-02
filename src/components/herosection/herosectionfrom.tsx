@@ -201,7 +201,6 @@ const Herosectionfrom: React.FC = () => {
         setIsLoading(false);
 
         if (response.success && response.data?._id) {
-          console.log("[Socket] Boosting post created:", response.data);
           router.push(`/boosting-request?boostingId=${response.data._id}`);
         } else {
           const errorMessage =

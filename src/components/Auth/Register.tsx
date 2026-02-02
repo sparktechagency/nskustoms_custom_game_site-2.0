@@ -56,14 +56,13 @@ export default function Register() {
     }
 
     try {
-      const response = await register({
+      await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         dateOfBirth: formatDateForApi(formData.dateOfBirth),
       }).unwrap();
 
-      console.log("Registration successful:", response);
       // Redirect to OTP verification page with email
       router.push(`/opt-verifications?email=${encodeURIComponent(formData.email)}`);
     } catch (err: unknown) {
@@ -77,13 +76,11 @@ export default function Register() {
   };
 
   const handleGoogleSignIn = () => {
-    console.log("Sign in with Google");
-    // Handle Google sign-in logic
+    // TODO: Handle Google sign-in logic
   };
 
   const handleAppleSignIn = () => {
-    console.log("Continue with Apple");
-    // Handle Apple sign-in logic
+    // TODO: Handle Apple sign-in logic
   };
 
   return (

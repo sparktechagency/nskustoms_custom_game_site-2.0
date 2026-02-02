@@ -19,6 +19,12 @@ export default function OrderReviewModal({
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    setRating(0);
+    setReview("");
+    onClose();
+  };
+
   const handleStarClick = (starValue: number) => {
     setRating(starValue);
   };
@@ -34,7 +40,14 @@ export default function OrderReviewModal({
 
   return (
     <div className="fixed inset-0 bg-[#000000B2] bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md relative">
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          aria-label="Close modal"
+        >
+          ✕
+        </button>
         <div className="mb-6">
           <h2 className="text-white text-xl font-bold mb-1">
             How{`'`}s your order?

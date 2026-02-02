@@ -59,7 +59,6 @@ class SocketService {
   // Connect to socket server
   public connect(token: string): void {
     if (this.socket?.connected) {
-      console.log("[Socket] Already connected");
       return;
     }
 
@@ -68,8 +67,6 @@ class SocketService {
 
     const socketUrl = getSocketUrl();
     store.dispatch(connectionInitiated());
-
-    console.log("[Socket] Connecting to:", socketUrl);
 
     // Clean token (remove quotes if present)
     const cleanToken = token.replace(/['"]+/g, "");
@@ -109,7 +106,6 @@ class SocketService {
 
     // Connection events
     this.socket.on(events.CONNECT, () => {
-      console.log("[Socket] Connected:", this.socket?.id);
       store.dispatch(connectionEstablished());
 
       // Emit user online event
@@ -121,7 +117,6 @@ class SocketService {
     });
 
     this.socket.on(events.DISCONNECT, (reason) => {
-      console.log("[Socket] Disconnected:", reason);
       store.dispatch(connectionLost());
 
       // Auto-reconnect for certain disconnect reasons
@@ -131,17 +126,14 @@ class SocketService {
     });
 
     this.socket.on(events.CONNECT_ERROR, (error) => {
-      console.error("[Socket] Connection error:", error.message);
       store.dispatch(connectionError(error.message));
     });
 
-    this.socket.on(events.RECONNECT_ATTEMPT, (attemptNumber) => {
-      console.log("[Socket] Reconnecting attempt:", attemptNumber);
+    this.socket.on(events.RECONNECT_ATTEMPT, () => {
       store.dispatch(connectionInitiated());
     });
 
     this.socket.on(events.RECONNECT_FAILED, () => {
-      console.error("[Socket] Reconnection failed");
       store.dispatch(connectionError("Reconnection failed"));
     });
 
@@ -231,7 +223,6 @@ class SocketService {
     callback?: (response: SocketResponse<T>) => void,
   ): void {
     if (!this.socket?.connected) {
-      console.warn("[Socket] Cannot emit - not connected");
       callback?.({ success: false, error: "Not connected" });
       return;
     }

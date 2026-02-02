@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { CheckCircle, X, Image, Loader2 } from "lucide-react";
+import { CheckCircle, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SellerTypes, SellerCategories } from "./SellerVerifications";
 
@@ -184,6 +184,7 @@ export default function SellerSelfieImageVerification({
             >
               {preview ? (
                 <div className="relative w-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Using img for data URL preview */}
                   <img
                     src={preview}
                     alt="Selfie with ID"
@@ -201,7 +202,7 @@ export default function SellerSelfieImageVerification({
                 </div>
               ) : (
                 <div className="text-center">
-                  <Image className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                  <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
                   <p className="text-sm text-gray-400">
                     Click to upload selfie with ID
                   </p>

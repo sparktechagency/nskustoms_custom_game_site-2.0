@@ -78,13 +78,11 @@ export default function Login() {
   };
 
   const handleGoogleSignIn = () => {
-    console.log("Sign in with Google");
-    // Handle Google sign-in logic
+    // TODO: Handle Google sign-in logic
   };
 
   const handleAppleSignIn = () => {
-    console.log("Continue with Apple");
-    // Handle Apple sign-in logic
+    // TODO: Handle Apple sign-in logic
   };
 
   return (

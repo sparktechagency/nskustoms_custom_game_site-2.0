@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { CheckCircle, X, Image } from "lucide-react";
+import { CheckCircle, X, Image as ImageIcon } from "lucide-react";
 
 interface SellerIDImageVerificationsProps {
   onSubmit: (frontImage: File | null, backImage: File | null) => void;
@@ -98,6 +98,7 @@ export default function SellerIDImageVerifications({
             >
               {frontPreview ? (
                 <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Using img for data URL preview */}
                   <img
                     src={frontPreview}
                     alt="Front ID"
@@ -115,7 +116,7 @@ export default function SellerIDImageVerifications({
                 </div>
               ) : (
                 <div className="text-center">
-                  <Image className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
                   <p className="text-xs text-gray-400">Front ID</p>
                 </div>
               )}
@@ -141,6 +142,7 @@ export default function SellerIDImageVerifications({
             >
               {backPreview ? (
                 <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Using img for data URL preview */}
                   <img
                     src={backPreview}
                     alt="Back ID"
@@ -158,7 +160,7 @@ export default function SellerIDImageVerifications({
                 </div>
               ) : (
                 <div className="text-center">
-                  <Image className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
                   <p className="text-xs text-gray-400">Back ID</p>
                 </div>
               )}

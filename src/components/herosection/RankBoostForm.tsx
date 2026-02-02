@@ -2,8 +2,6 @@ import React from "react";
 import Image from "next/image";
 import Ironiv from "@/src/Assets/Landing/Ironiv.png";
 import CurrentRankBg from "@/src/Assets/Landing/currnet_rank_bg.png";
-
-import raja from "@/src/Assets/Landing/raja.png";
 import raja1 from "@/src/Assets/Landing/raja1.png";
 import { RankType, QueueType, RegionType } from "@/src/types/components.types";
 import { rankData, ranks, regions } from "@/src/lib/ranks";

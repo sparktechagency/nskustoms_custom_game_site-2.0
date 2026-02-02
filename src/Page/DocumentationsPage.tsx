@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { documentationData } from "@/src/data/documentation";
 import SidebarDocs from "../components/documentations/SidebarDocs";
 import DocsSearchBar from "../components/documentations/DocsSearchBar";
@@ -18,14 +18,8 @@ const getInitialPage = () => {
 };
 
 export default function DocumentationPage() {
-  const [activePage, setActivePage] = useState(getInitialPage);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activePage] = useState(getInitialPage);
   const [activeSection, setActiveSection] = useState("");
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    console.log("Searching for:", query);
-  };
 
   const handleSectionClick = (id: string) => {
     setActiveSection(id);
@@ -76,7 +70,7 @@ export default function DocumentationPage() {
         <div className="content-header">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Help Center</h1>
-            <DocsSearchBar onSearch={handleSearch} />
+            <DocsSearchBar onSearch={() => {}} />
           </div>
         </div>
 

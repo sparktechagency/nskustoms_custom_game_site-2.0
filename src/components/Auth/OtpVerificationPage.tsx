@@ -103,12 +103,11 @@ export default function OtpVerification() {
     }
 
     try {
-      const response = await verifyEmail({
+      await verifyEmail({
         email: email,
         code: otpCode,
       }).unwrap();
 
-      console.log("OTP verified successfully:", response);
       router.push("/login");
     } catch (err: unknown) {
       const error = err as { data?: { message?: string }; message?: string };

@@ -6,8 +6,7 @@ import Image from "next/image";
 import { useGetSellerRatingStatsQuery } from "@/src/redux/features/ratings/ratingsApi";
 const Feedback = () => {
   const [activeTab, setActiveTab] = useState("all");
-  const { data: sellerRatingsStats } = useGetSellerRatingStatsQuery({});
-  console.log(sellerRatingsStats);
+  useGetSellerRatingStatsQuery({});
 
   const stats = [
     {

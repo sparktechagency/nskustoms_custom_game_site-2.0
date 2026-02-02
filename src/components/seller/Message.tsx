@@ -200,7 +200,6 @@ const Message: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<ConversationType>("boosting");
   const [messageInput, setMessageInput] = useState("");
-  const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [realtimeMessages, setRealtimeMessages] = useState<MessageType[]>([]);
   const [realtimeConversations, setRealtimeConversations] = useState<
     Conversation[]
@@ -311,11 +310,11 @@ const Message: React.FC = () => {
   };
 
   // Clear realtime messages and typing state when conversation changes
-  // This is intentional - resetting state when switching conversations
+  // This intentional setState on dependency change to reset UI state when switching conversations
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRealtimeMessages([]);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setIsTyping(false);
   }, [selectedConversationId]);
 
@@ -324,14 +323,7 @@ const Message: React.FC = () => {
     if (!selectedConversationId || !isConnected) return;
 
     // Join the conversation room
-    socketService.joinConversation(
-      { conversationId: selectedConversationId },
-      (response) => {
-        if (response.success) {
-          console.log("[Socket] Joined conversation:", selectedConversationId);
-        }
-      },
-    );
+    socketService.joinConversation({ conversationId: selectedConversationId });
 
     // Mark as read
     socketService.markAsRead(selectedConversationId);
@@ -588,12 +580,6 @@ const Message: React.FC = () => {
     };
   }, []);
 
-  const handleCopyCode = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
-
   return (
     <section className="">
       {/* Navigation Tabs */}
@@ -820,13 +806,6 @@ const Message: React.FC = () => {
             </div>
           )}
         </div>
-
-        {/* Copy notification */}
-        {copiedCode && (
-          <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
-            Code copied to clipboard!
-          </div>
-        )}
       </div>
     </section>
   );

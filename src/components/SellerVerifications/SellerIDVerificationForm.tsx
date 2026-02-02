@@ -69,10 +69,8 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
 
     // Simulate API call
     setTimeout(() => {
-      console.log("Form submitted:", formData);
       setIsSubmitting(false);
-      onNext(); // Move to next step
-      // Here you would typically handle the actual verification logic
+      onNext();
     }, 1000);
   };
 

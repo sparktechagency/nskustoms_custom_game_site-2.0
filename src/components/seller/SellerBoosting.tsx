@@ -44,12 +44,10 @@ const SellerBoosting = () => {
   const fetchBoostingPosts = useCallback(
     (page = 1, limit = 10) => {
       if (!isSocketConnected) {
-        console.log("[SellerBoosting] Socket not connected, waiting...");
         return;
       }
 
       setIsLoading(true);
-      console.log("[SellerBoosting] Fetching posts for tab:", activeTab);
 
       socketService.browseBoostingPosts<BrowseBoostingSocketResponse>(
         { page, limit, type: activeTab },
@@ -57,7 +55,6 @@ const SellerBoosting = () => {
           setIsLoading(false);
 
           if (response.success && response.data) {
-            console.log("[SellerBoosting] Posts received:", response.data);
             setPosts(response.data.posts || []);
             setPagination({
               total: response.data.total || 0,
@@ -76,13 +73,7 @@ const SellerBoosting = () => {
 
       // Fallback timeout
       setTimeout(() => {
-        setIsLoading((prev) => {
-          if (prev) {
-            console.warn("[SellerBoosting] Request timed out");
-            return false;
-          }
-          return prev;
-        });
+        setIsLoading((prev) => (prev ? false : prev));
       }, 10000);
     },
     [isSocketConnected, activeTab],
@@ -102,8 +93,6 @@ const SellerBoosting = () => {
     if (!isSocketConnected || activeTab !== "waiting_for_offer") return;
 
     const handleNewBoostingPost = (newPost: { post: BoostingPost }) => {
-      console.log("[SellerBoosting] New boosting post received:", newPost);
-
       // Add new post to the top of the list
       setPosts((prevPosts) => {
         // Check if post already exists
@@ -136,16 +125,12 @@ const SellerBoosting = () => {
     if (!isSocketConnected) return;
 
     const handlePostUpdated = (updatedPost: BoostingPost) => {
-      console.log("[SellerBoosting] Boosting post updated:", updatedPost);
-
       setPosts((prevPosts) =>
         prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
       );
     };
 
     const handlePostDeleted = (data: { postId: string }) => {
-      console.log("[SellerBoosting] Boosting post deleted:", data.postId);
-
       setPosts((prevPosts) => prevPosts.filter((p) => p._id !== data.postId));
       setPagination((prev) => ({
         ...prev,

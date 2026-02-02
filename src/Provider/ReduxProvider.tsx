@@ -1,10 +1,25 @@
-"use client"; // Ensures this component is only used on the client side
+"use client";
 
-import { store } from "@/src/redux/store/store";
+import { store, persistor } from "@/src/redux/store/store";
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { SocketProvider } from "./SocketProvider";
+
+// Loading component for PersistGate
+const PersistLoader = () => (
+  <div className="flex h-screen w-full items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+  </div>
+);
 
 const ReduxProvider = ({ children }: { children: React.ReactNode }) => {
-  return <Provider store={store}>{children}</Provider>;
+  return (
+    <Provider store={store}>
+      <PersistGate loading={<PersistLoader />} persistor={persistor}>
+        <SocketProvider>{children}</SocketProvider>
+      </PersistGate>
+    </Provider>
+  );
 };
 
 export default ReduxProvider;

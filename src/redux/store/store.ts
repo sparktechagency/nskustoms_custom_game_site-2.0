@@ -10,6 +10,7 @@ import {
   persistStore,
 } from "redux-persist";
 import authReducer from "@/src/redux/features/auth/authSlice";
+import socketReducer from "@/src/redux/features/socket/socketSlice";
 import storage from "redux-persist/lib/storage";
 import { baseApi } from "@/src/redux/baseApi/baseApi";
 
@@ -23,13 +24,14 @@ export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
     auth: persistedAuthReducer,
+    socket: socketReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(baseApi.middleware), // Make sure to concatenate the baseApi.middleware properly
+    }).concat(baseApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

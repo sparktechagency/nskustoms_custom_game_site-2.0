@@ -82,6 +82,13 @@ export const SOCKET_CONFIG = {
     OFFER_CREATE: "offer:create",
     OFFER_UPDATE_STATUS: "offer:updateStatus",
     OFFER_GET_BY_ID: "offer:getById",
+
+    // Notifications
+    NOTIFICATION_LIST: "notification:list",
+    NOTIFICATION_GET_BY_ID: "notification:getById",
+    NOTIFICATION_UNREAD_COUNT: "notification:unreadCount",
+    NOTIFICATION_MARK_READ: "notification:markRead",
+    NOTIFICATION_DELETE: "notification:delete",
   },
 } as const;
 

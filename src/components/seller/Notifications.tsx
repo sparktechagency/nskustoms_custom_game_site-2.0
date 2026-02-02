@@ -1,12 +1,13 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import {
-  useDeleteNotificationMutation,
-  useGetMyNotificationsQuery,
-  useMarkNotificationsAsReadMutation,
-} from "@/src/redux/features/notifications/notificationsApi";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, X, Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { selectIsConnected } from "@/src/redux/features/socket/socketSlice";
+import socketService from "@/src/lib/socket/socketService";
+import { SOCKET_CONFIG } from "@/src/lib/socket/socketConfig";
+import { toast } from "sonner";
 
 interface Notification {
   _id: string;
@@ -53,42 +54,116 @@ const formatType = (type: string): string => {
 };
 
 const Notifications = () => {
-  const {
-    data: userNotifications,
-    isLoading,
-    refetch,
-  } = useGetMyNotificationsQuery({});
-  const [deleteNotification, { isLoading: isDeleting }] =
-    useDeleteNotificationMutation();
-  const [markAsRead] = useMarkNotificationsAsReadMutation();
+  const isConnected = useSelector(selectIsConnected);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const notificationsData = userNotifications as
-    | NotificationsResponse
-    | undefined;
-  const notifications = notificationsData?.notifications || [];
-  const unreadCount = notificationsData?.unreadCount || 0;
+  // Fetch notifications via socket
+  const fetchNotifications = useCallback(() => {
+    if (!isConnected) return;
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteNotification(id).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to delete notification:", error);
+    socketService.getNotificationList<NotificationsResponse>(
+      { page: 1, limit: 50 },
+      (response) => {
+        setIsLoading(false);
+        if (response.success && response.data) {
+          setNotifications(response.data.notifications || []);
+          setUnreadCount(response.data.unreadCount || 0);
+        }
+      },
+    );
+  }, [isConnected]);
+
+  // Initial fetch when connected
+  useEffect(() => {
+    if (isConnected) {
+      fetchNotifications();
     }
-  };
+  }, [isConnected, fetchNotifications]);
 
-  const handleMarkAsRead = async (notification: Notification) => {
-    if (notification.isRead) return;
+  // Listen for real-time notification updates
+  useEffect(() => {
+    if (!isConnected) return;
 
-    try {
-      await markAsRead({
-        notificationIds: [notification._id],
-      }).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
-  };
+    // Handler for new notifications
+    const handleNewNotification = (data: {
+      type: string;
+      notification?: Notification;
+    }) => {
+      if (data.notification) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setNotifications((prev) => {
+          const exists = prev.some((n) => n._id === data.notification!._id);
+          if (exists) return prev;
+          return [data.notification!, ...prev];
+        });
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setUnreadCount((prev) => prev + 1);
+      }
+    };
+
+    // Subscribe to notification events
+    const unsubOffer = socketService.on(
+      SOCKET_CONFIG.events.NOTIFICATION_OFFER,
+      handleNewNotification as (...args: unknown[]) => void,
+    );
+    const unsubMessage = socketService.on(
+      SOCKET_CONFIG.events.NOTIFICATION_MESSAGE,
+      handleNewNotification as (...args: unknown[]) => void,
+    );
+    const unsubOrder = socketService.on(
+      SOCKET_CONFIG.events.NOTIFICATION_ORDER,
+      handleNewNotification as (...args: unknown[]) => void,
+    );
+
+    return () => {
+      unsubOffer();
+      unsubMessage();
+      unsubOrder();
+    };
+  }, [isConnected]);
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      if (!isConnected) return;
+
+      setIsDeleting(id);
+      socketService.deleteNotification(id, (response) => {
+        setIsDeleting(null);
+        if (response.success) {
+          setNotifications((prev) => prev.filter((n) => n._id !== id));
+          // Update unread count if the deleted notification was unread
+          const deletedNotification = notifications.find((n) => n._id === id);
+          if (deletedNotification && !deletedNotification.isRead) {
+            setUnreadCount((prev) => Math.max(0, prev - 1));
+          }
+        } else {
+          toast.error("Failed to delete notification");
+        }
+      });
+    },
+    [isConnected, notifications],
+  );
+
+  const handleMarkAsRead = useCallback(
+    (notification: Notification) => {
+      if (notification.isRead || !isConnected) return;
+
+      socketService.markNotificationAsRead([notification._id], (response) => {
+        if (response.success) {
+          setNotifications((prev) =>
+            prev.map((n) =>
+              n._id === notification._id ? { ...n, isRead: true } : n,
+            ),
+          );
+          setUnreadCount((prev) => Math.max(0, prev - 1));
+        }
+      });
+    },
+    [isConnected],
+  );
 
   return (
     <div>
@@ -166,10 +241,14 @@ const Notifications = () => {
                         e.stopPropagation();
                         handleDelete(notification._id);
                       }}
-                      disabled={isDeleting}
+                      disabled={isDeleting === notification._id}
                       className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
                     >
-                      <X className="w-4 h-4" />
+                      {isDeleting === notification._id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <X className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>

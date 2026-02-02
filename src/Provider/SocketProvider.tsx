@@ -20,10 +20,25 @@ import {
   selectUnreadMessages,
 } from "@/src/redux/features/socket/socketSlice";
 import socketService from "@/src/lib/socket/socketService";
+import { SOCKET_CONFIG } from "@/src/lib/socket/socketConfig";
+import { toast } from "sonner";
 import type {
   SocketResponse,
   SendMessagePayload,
 } from "@/src/redux/features/socket/socket.types";
+
+// Notification data type from socket
+interface NotificationData {
+  type: string;
+  title?: string;
+  message?: string;
+  notification?: {
+    _id: string;
+    title: string;
+    message: string;
+    type: string;
+  };
+}
 
 // Context type
 interface SocketContextType {
@@ -80,6 +95,52 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socketService.disconnect();
     }
   }, [user]);
+
+  // Listen for notification events and show toast
+  useEffect(() => {
+    if (!isConnected) return;
+
+    // Handler for offer notifications
+    const handleOfferNotification = (data: NotificationData) => {
+      const title = data.notification?.title || data.title || "New Offer";
+      const message = data.notification?.message || data.message || "You have a new offer!";
+      toast.info(message, { description: title });
+    };
+
+    // Handler for message notifications
+    const handleMessageNotification = (data: NotificationData) => {
+      const title = data.notification?.title || data.title || "New Message";
+      const message = data.notification?.message || data.message || "You have a new message!";
+      toast.info(message, { description: title });
+    };
+
+    // Handler for order notifications
+    const handleOrderNotification = (data: NotificationData) => {
+      const title = data.notification?.title || data.title || "Order Update";
+      const message = data.notification?.message || data.message || "Your order has been updated!";
+      toast.info(message, { description: title });
+    };
+
+    // Subscribe to notification events
+    const unsubOffer = socketService.on(
+      SOCKET_CONFIG.events.NOTIFICATION_OFFER,
+      handleOfferNotification as (...args: unknown[]) => void,
+    );
+    const unsubMessage = socketService.on(
+      SOCKET_CONFIG.events.NOTIFICATION_MESSAGE,
+      handleMessageNotification as (...args: unknown[]) => void,
+    );
+    const unsubOrder = socketService.on(
+      SOCKET_CONFIG.events.NOTIFICATION_ORDER,
+      handleOrderNotification as (...args: unknown[]) => void,
+    );
+
+    return () => {
+      unsubOffer();
+      unsubMessage();
+      unsubOrder();
+    };
+  }, [isConnected]);
 
   // Manual connect
   const connect = useCallback(() => {

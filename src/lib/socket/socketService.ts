@@ -375,6 +375,42 @@ class SocketService {
   ): void {
     this.emit(SOCKET_CONFIG.emits.OFFER_GET_BY_ID, offerId, callback);
   }
+
+  // ============ Notification Methods ============
+
+  public getNotificationList<T = unknown>(
+    query?: { page?: number; limit?: number },
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.NOTIFICATION_LIST, query || {}, callback);
+  }
+
+  public getNotificationById<T = unknown>(
+    notificationId: string,
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.NOTIFICATION_GET_BY_ID, notificationId, callback);
+  }
+
+  public getUnreadNotificationCount<T = unknown>(
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.NOTIFICATION_UNREAD_COUNT, {}, callback);
+  }
+
+  public markNotificationAsRead<T = unknown>(
+    notificationIds: string[],
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.NOTIFICATION_MARK_READ, { notificationIds }, callback);
+  }
+
+  public deleteNotification<T = unknown>(
+    notificationId: string,
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.NOTIFICATION_DELETE, notificationId, callback);
+  }
 }
 
 // Export singleton instance

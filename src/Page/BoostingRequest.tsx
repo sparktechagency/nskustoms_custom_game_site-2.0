@@ -368,7 +368,7 @@ export default function BoostingRequestPage() {
     };
   }, [selectedConversationId, isConnected]);
 
-  // Listen for new offers in real-time
+  // Listen for new offers in real-time (offer:new event)
   useSocketEvent<{ offer: BoostingOffer; message?: string }>(
     SOCKET_CONFIG.events.OFFER_NEW,
     useCallback((data) => {
@@ -381,6 +381,37 @@ export default function BoostingRequestPage() {
         toast.info("New offer received!");
       }
     }, []),
+    [boostingId],
+  );
+
+  // Listen for offer notifications (notification:offer event - sent directly to post owner)
+  useSocketEvent<{
+    type: string;
+    offer: BoostingOffer;
+    message?: string;
+  }>(
+    SOCKET_CONFIG.events.NOTIFICATION_OFFER,
+    useCallback(
+      (data) => {
+        if (!data.offer || data.type !== "new_offer") return;
+
+        // Check if this offer is for the current boosting post
+        // boostingPostId can be string or object with _id
+        const postId = data.offer.boostingPostId as unknown;
+        const offerPostId =
+          typeof postId === "string" ? postId : (postId as { _id?: string })?._id;
+
+        if (offerPostId === boostingId) {
+          setOffers((prev) => {
+            const exists = prev.some((o) => o._id === data.offer._id);
+            if (exists) return prev;
+            return [data.offer, ...prev];
+          });
+          toast.info(data.message || "New offer received!");
+        }
+      },
+      [boostingId],
+    ),
     [boostingId],
   );
 

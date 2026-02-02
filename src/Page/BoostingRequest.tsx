@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Header from "@/src/components/Landing/Header";
@@ -12,6 +12,7 @@ import {
   useMakeBoostingAsCancelledMutation,
 } from "../redux/features/boosting-post/boostingApi";
 import { useRespondToOfferMutation } from "../redux/features/offers/offersApi";
+import { useGetMessagesByConversationIdQuery } from "../redux/features/conversations/conversationsApi";
 import { useAppSelector } from "../redux/hooks";
 import {
   Loader2,
@@ -23,25 +24,26 @@ import {
   CheckCircle,
   User,
 } from "lucide-react";
-import { FaCircle } from "react-icons/fa";
+import { FaCircle, FaUser } from "react-icons/fa";
 import { toast } from "sonner";
 import {
   BoostingOffer,
   BoostingPost,
   Conversation,
   SortOptionBoostingPost,
+  Message as MessageType,
 } from "../types/page.types";
 import {
   formatBoostingType,
   formatDate,
   formatMessageTime,
+  formatRelativeTime,
   getCompletionMethod,
   sortOptions,
 } from "../utils/pageHealper";
-import { useSocket, useSocketEvent } from "../hooks/useSocket";
+import { useSocket, useIsUserOnline, useSocketEvent } from "../hooks/useSocket";
 import socketService from "../lib/socket/socketService";
 import { SOCKET_CONFIG } from "../lib/socket/socketConfig";
-import type { SocketMessage } from "../redux/features/socket/socket.types";
 
 interface Message {
   _id: string;
@@ -49,6 +51,168 @@ interface Message {
   author: { _id: string; name: string; image?: string };
   createdAt: string;
 }
+
+// Online status indicator component
+const OnlineIndicator: React.FC<{ userId: string | undefined }> = ({
+  userId,
+}) => {
+  const isOnline = useIsUserOnline(userId);
+  return (
+    <span
+      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#282836] ${
+        isOnline ? "bg-green-500" : "bg-gray-500"
+      }`}
+    />
+  );
+};
+
+// Typing indicator component
+const TypingIndicator: React.FC = () => (
+  <div className="flex items-center gap-1 text-gray-400 text-sm">
+    <span className="flex gap-1">
+      <span
+        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+        style={{ animationDelay: "0ms" }}
+      />
+      <span
+        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+        style={{ animationDelay: "150ms" }}
+      />
+      <span
+        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+        style={{ animationDelay: "300ms" }}
+      />
+    </span>
+    <span className="ml-2">typing...</span>
+  </div>
+);
+
+// Chat header status component
+const ChatHeaderStatus: React.FC<{
+  isActive: boolean;
+  isTyping: boolean;
+  userId: string | undefined;
+}> = ({ isActive, isTyping, userId }) => {
+  const isOnline = useIsUserOnline(userId);
+
+  if (isTyping) {
+    return (
+      <span className="text-xs text-green-400 flex items-center gap-1">
+        <span className="flex gap-0.5">
+          <span
+            className="w-1 h-1 bg-green-400 rounded-full animate-bounce"
+            style={{ animationDelay: "0ms" }}
+          />
+          <span
+            className="w-1 h-1 bg-green-400 rounded-full animate-bounce"
+            style={{ animationDelay: "100ms" }}
+          />
+          <span
+            className="w-1 h-1 bg-green-400 rounded-full animate-bounce"
+            style={{ animationDelay: "200ms" }}
+          />
+        </span>
+        typing...
+      </span>
+    );
+  }
+
+  if (!isActive) {
+    return <span className="text-xs text-gray-500">Inactive</span>;
+  }
+
+  return (
+    <span
+      className={`text-xs ${isOnline ? "text-green-400" : "text-gray-500"}`}
+    >
+      {isOnline ? "Online" : "Offline"}
+    </span>
+  );
+};
+
+// Conversation list item with online/typing status
+const ConversationListItem: React.FC<{
+  otherUserId: string | undefined;
+  otherUserName: string;
+  otherUserImage: string | null;
+  lastMessage: string | undefined;
+  updatedAt: string;
+  isSelected: boolean;
+  isTyping: boolean;
+  onClick: () => void;
+}> = ({
+  otherUserId,
+  otherUserName,
+  otherUserImage,
+  lastMessage,
+  updatedAt,
+  isSelected,
+  isTyping,
+  onClick,
+}) => {
+  const isOnline = useIsUserOnline(otherUserId);
+
+  return (
+    <div
+      onClick={onClick}
+      className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-800/50 transition-colors border-b border-gray-700/50 ${
+        isSelected ? "bg-gray-800/50" : ""
+      }`}
+    >
+      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
+        {otherUserImage ? (
+          <Image
+            src={otherUserImage}
+            alt={otherUserName}
+            width={40}
+            height={40}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <FaUser className="text-white text-sm" />
+        )}
+        <span
+          className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#282836] ${
+            isOnline ? "bg-green-500" : "bg-gray-500"
+          }`}
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start mb-1">
+          <span className="text-sm font-medium text-white truncate">
+            {otherUserName || "Unknown"}
+          </span>
+          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+            {formatRelativeTime(updatedAt)}
+          </span>
+        </div>
+        {isTyping ? (
+          <p className="text-xs text-green-400 flex items-center gap-1">
+            <span className="flex gap-0.5">
+              <span
+                className="w-1 h-1 bg-green-400 rounded-full animate-bounce"
+                style={{ animationDelay: "0ms" }}
+              />
+              <span
+                className="w-1 h-1 bg-green-400 rounded-full animate-bounce"
+                style={{ animationDelay: "100ms" }}
+              />
+              <span
+                className="w-1 h-1 bg-green-400 rounded-full animate-bounce"
+                style={{ animationDelay: "200ms" }}
+              />
+            </span>
+            typing...
+          </p>
+        ) : (
+          <p className="text-xs text-gray-400 truncate">
+            {lastMessage || "No messages yet"}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function BoostingRequestPage() {
   const router = useRouter();
@@ -62,14 +226,19 @@ export default function BoostingRequestPage() {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Socket-based state
   const [offers, setOffers] = useState<BoostingOffer[]>([]);
   const [isLoadingOffers, setIsLoadingOffers] = useState(true);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [realtimeMessages, setRealtimeMessages] = useState<MessageType[]>([]);
+  const [realtimeConversations, setRealtimeConversations] = useState<Conversation[]>([]);
+  const [updatedConversationIds, setUpdatedConversationIds] = useState<Set<string>>(new Set());
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingConversations, setTypingConversations] = useState<Set<string>>(new Set());
 
   const currentUser = useAppSelector((state) => state.auth.user);
   const { isConnected } = useSocket();
@@ -81,6 +250,16 @@ export default function BoostingRequestPage() {
     refetch: refetchDetails,
   } = useGetBoostingPostByIdQuery(boostingId!, { skip: !boostingId });
 
+  // Get messages from API
+  const { data: messagesData, isLoading: isLoadingMessagesApi } =
+    useGetMessagesByConversationIdQuery(
+      {
+        id: selectedConversationId || "",
+        params: { page: 1, limit: 50 },
+      },
+      { skip: !selectedConversationId },
+    );
+
   // Mutations
   const [cancelBoosting, { isLoading: isCancelling }] =
     useMakeBoostingAsCancelledMutation();
@@ -88,6 +267,39 @@ export default function BoostingRequestPage() {
     useRespondToOfferMutation();
 
   const details = boostingDetails as BoostingPost | undefined;
+  const apiMessages = (messagesData as { messages: MessageType[] })?.messages || [];
+
+  // Combine API conversations with realtime conversations
+  const conversations = React.useMemo(() => {
+    const apiConversations = details?.conversations || [];
+
+    // Merge: realtime first (newer), then API conversations (excluding duplicates)
+    const allConvs = [...realtimeConversations];
+    apiConversations.forEach((apiConv) => {
+      if (!allConvs.some((c) => c._id === apiConv._id)) {
+        allConvs.push(apiConv);
+      }
+    });
+
+    // Sort by updatedAt (most recent first) and prioritize updated ones
+    return allConvs.sort((a, b) => {
+      const aUpdated = updatedConversationIds.has(a._id);
+      const bUpdated = updatedConversationIds.has(b._id);
+      if (aUpdated && !bUpdated) return -1;
+      if (!aUpdated && bUpdated) return 1;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+  }, [details?.conversations, realtimeConversations, updatedConversationIds]);
+
+  // Combine API messages with realtime messages
+  const allMessages = React.useMemo(() => {
+    const reversed = [...apiMessages].reverse();
+    // Filter out duplicates from realtime messages
+    const uniqueRealtimeMessages = realtimeMessages.filter(
+      (rtMsg) => !reversed.some((apiMsg) => apiMsg._id === rtMsg._id),
+    );
+    return [...reversed, ...uniqueRealtimeMessages];
+  }, [apiMessages, realtimeMessages]);
 
   // Fetch offers via socket
   const fetchOffers = useCallback(() => {
@@ -97,8 +309,6 @@ export default function BoostingRequestPage() {
     socketService.getBoostingPostOffers<{ offers: BoostingOffer[] }>(
       boostingId,
       (response) => {
-        console.log(response, "offers response");
-
         setIsLoadingOffers(false);
         if (response.success && response.data?.offers) {
           setOffers(response.data.offers);
@@ -112,23 +322,6 @@ export default function BoostingRequestPage() {
     }, 10000);
   }, [boostingId, isConnected]);
 
-  // Fetch messages via socket
-  const fetchMessages = useCallback(() => {
-    if (!selectedConversationId || !isConnected) return;
-
-    setIsLoadingMessages(true);
-    socketService.getMessages(
-      selectedConversationId,
-      { page: 1, limit: 50 },
-      (response) => {
-        setIsLoadingMessages(false);
-        if (response.success && response.data?.messages) {
-          setMessages(response.data.messages as unknown as Message[]);
-        }
-      },
-    );
-  }, [selectedConversationId, isConnected]);
-
   // Initial fetch for offers
   useEffect(() => {
     if (isConnected && boostingId) {
@@ -137,29 +330,40 @@ export default function BoostingRequestPage() {
     }
   }, [isConnected, boostingId, fetchOffers]);
 
-  // Fetch messages when conversation changes
+  // Clear realtime messages and typing state when conversation changes
   useEffect(() => {
-    if (isConnected && selectedConversationId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: fetch on selection
-      fetchMessages();
-      // Join conversation room
-      socketService.joinConversation({
-        conversationId: selectedConversationId,
-      });
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRealtimeMessages([]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsTyping(false);
+  }, [selectedConversationId]);
+
+  // Join/leave conversation room
+  useEffect(() => {
+    if (!selectedConversationId || !isConnected) return;
+
+    // Join the conversation room
+    socketService.joinConversation(
+      { conversationId: selectedConversationId },
+      (response) => {
+        if (response.success) {
+          console.log("[Socket] Joined conversation:", selectedConversationId);
+        }
+      },
+    );
+
+    // Mark as read
+    socketService.markAsRead(selectedConversationId);
 
     return () => {
-      if (selectedConversationId) {
-        socketService.leaveConversation(selectedConversationId);
-      }
+      socketService.leaveConversation(selectedConversationId);
     };
-  }, [isConnected, selectedConversationId, fetchMessages]);
+  }, [selectedConversationId, isConnected]);
 
   // Listen for new offers in real-time
   useSocketEvent<{ offer: BoostingOffer; message?: string }>(
     SOCKET_CONFIG.events.OFFER_NEW,
     useCallback((data) => {
-      console.log(data, "new offer data");
       if (data.offer) {
         setOffers((prev) => {
           const exists = prev.some((o) => o._id === data.offer._id);
@@ -172,29 +376,119 @@ export default function BoostingRequestPage() {
     [boostingId],
   );
 
+  // Listen for new conversations
+  useSocketEvent<{ conversation: Conversation; message: string }>(
+    SOCKET_CONFIG.events.CONVERSATION_NEW,
+    useCallback(
+      (data) => {
+        if (data.conversation) {
+          setRealtimeConversations((prev) => {
+            if (prev.some((c) => c._id === data.conversation._id)) {
+              return prev;
+            }
+            return [data.conversation, ...prev];
+          });
+          refetchDetails();
+        }
+      },
+      [refetchDetails],
+    ),
+    [refetchDetails],
+  );
+
   // Listen for new messages in real-time
-  useSocketEvent<SocketMessage>(
+  useSocketEvent<{ conversationId: string; message: MessageType }>(
     SOCKET_CONFIG.events.CONVERSATION_MESSAGE,
     useCallback(
       (data) => {
-        console.log(data, "new conversation message data");
+        // Add message to realtime messages if in selected conversation
         if (data.conversationId === selectedConversationId) {
-          const newMessage: Message = {
-            _id: data._id,
-            message: data.content,
-            author: {
-              _id: data.senderId,
-              name: data.senderName,
-            },
-            createdAt: data.createdAt,
-          };
-
-          setMessages((prev) => {
-            const exists = prev.some((m) => m._id === newMessage._id);
-            if (exists) return prev;
-            return [...prev, newMessage];
-          });
+          setRealtimeMessages((prev) => [...prev, data.message]);
         }
+
+        // Update conversation in the list
+        setUpdatedConversationIds((prev) => new Set(prev).add(data.conversationId));
+
+        // Update the conversation's lastMessage
+        setRealtimeConversations((prev) => {
+          const existingIndex = prev.findIndex((c) => c._id === data.conversationId);
+          if (existingIndex >= 0) {
+            const updated = [...prev];
+            updated[existingIndex] = {
+              ...updated[existingIndex],
+              lastMessage: data.message.message,
+              updatedAt: data.message.createdAt || new Date().toISOString(),
+            };
+            return updated;
+          }
+          return prev;
+        });
+
+        // Clear the updated flag after a short delay
+        setTimeout(() => {
+          setUpdatedConversationIds((prev) => {
+            const next = new Set(prev);
+            next.delete(data.conversationId);
+            return next;
+          });
+        }, 3000);
+      },
+      [selectedConversationId],
+    ),
+    [selectedConversationId],
+  );
+
+  // Listen for conversation updates
+  useSocketEvent<{ conversation: Conversation }>(
+    SOCKET_CONFIG.events.CONVERSATION_UPDATED,
+    useCallback((data) => {
+      if (data.conversation) {
+        setRealtimeConversations((prev) => {
+          const existingIndex = prev.findIndex(
+            (c) => c._id === data.conversation._id
+          );
+          if (existingIndex >= 0) {
+            const updated = [...prev];
+            updated[existingIndex] = data.conversation;
+            return updated;
+          }
+          return [data.conversation, ...prev];
+        });
+      }
+    }, []),
+    [],
+  );
+
+  // Listen for typing indicators
+  useSocketEvent<{ conversationId: string; userId: string; userName: string }>(
+    SOCKET_CONFIG.events.CONVERSATION_USER_TYPING,
+    useCallback(
+      (data) => {
+        if (data.userId !== currentUser?._id) {
+          if (data.conversationId === selectedConversationId) {
+            setIsTyping(true);
+          }
+          setTypingConversations((prev) => new Set(prev).add(data.conversationId));
+        }
+      },
+      [selectedConversationId, currentUser?._id],
+    ),
+    [selectedConversationId, currentUser?._id],
+  );
+
+  // Listen for stop typing
+  useSocketEvent<{ conversationId: string; userId: string }>(
+    SOCKET_CONFIG.events.CONVERSATION_USER_STOP_TYPING,
+    useCallback(
+      (data) => {
+        if (data.conversationId === selectedConversationId) {
+          setIsTyping(false);
+        }
+        setTypingConversations((prev) => {
+          const next = new Set(prev);
+          next.delete(data.conversationId);
+          return next;
+        });
       },
       [selectedConversationId],
     ),
@@ -281,32 +575,65 @@ export default function BoostingRequestPage() {
 
   // Handle send message via socket
   const handleSendMessage = useCallback(() => {
-    if (!messageInput.trim() || !selectedConversationId || !isConnected) return;
+    if (!messageInput.trim() || !selectedConversationId || isSending) return;
 
+    const messageText = messageInput.trim();
+    setMessageInput("");
     setIsSending(true);
+
+    // Stop typing indicator
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    socketService.stopTyping({ conversationId: selectedConversationId });
 
     socketService.sendMessage(
       {
         conversationId: selectedConversationId,
-        message: messageInput.trim(),
+        message: messageText,
       },
       (response) => {
         setIsSending(false);
-
-        if (response.success) {
-          setMessageInput("");
-          // Message will be added via the socket listener
-        } else {
+        if (!response.success) {
+          setMessageInput(messageText);
           toast.error(response.error || "Failed to send message");
         }
       },
     );
 
     // Fallback timeout
-    setTimeout(() => {
-      setIsSending(false);
-    }, 10000);
-  }, [messageInput, selectedConversationId, isConnected]);
+    setTimeout(() => setIsSending(false), 5000);
+  }, [messageInput, selectedConversationId, isSending]);
+
+  // Handle typing indicator
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageInput(e.target.value);
+
+    if (!selectedConversationId || !isConnected) return;
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Emit typing event
+    socketService.startTyping({ conversationId: selectedConversationId });
+
+    // Stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      socketService.stopTyping({ conversationId: selectedConversationId });
+    }, 2000);
+  };
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Handle cancel request
   const handleConfirmCancel = async () => {
@@ -349,16 +676,29 @@ export default function BoostingRequestPage() {
   // Scroll to bottom of messages within container
   const scrollToBottom = useCallback((smooth = true) => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTo({
-        top: messagesContainerRef.current.scrollHeight,
-        behavior: smooth ? "smooth" : "auto",
-      });
+      if (smooth) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      } else {
+        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      }
     }
   }, []);
 
+  // Scroll to bottom when new messages arrive or typing indicator shows
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    const timer = setTimeout(() => {
+      scrollToBottom(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [allMessages.length, isTyping, scrollToBottom]);
+
+  // Instant scroll on conversation change
+  useEffect(() => {
+    scrollToBottom(false);
+  }, [selectedConversationId, scrollToBottom]);
 
   // Handle key press for sending message
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -369,7 +709,7 @@ export default function BoostingRequestPage() {
   };
 
   // Get selected conversation details
-  const selectedConversation = details?.conversations?.find(
+  const selectedConversation = conversations.find(
     (c) => c._id === selectedConversationId,
   );
 
@@ -378,6 +718,12 @@ export default function BoostingRequestPage() {
       conversation.participants.find((p) => p._id !== currentUser?._id) ||
       conversation.participants[0]
     );
+  };
+
+  const handleSelectConversation = (conversationId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("conversation", conversationId);
+    router.push(`?${params.toString()}`);
   };
 
   // Render boosting details based on type
@@ -749,47 +1095,21 @@ export default function BoostingRequestPage() {
               <div className="flex h-[400px]">
                 {/* Conversation List */}
                 <div className="w-1/3 border-r border-gray-700 overflow-y-auto">
-                  {details.conversations && details.conversations.length > 0 ? (
-                    details.conversations.map((conv) => {
+                  {conversations.length > 0 ? (
+                    conversations.map((conv) => {
                       const otherUser = getOtherParticipant(conv);
                       return (
-                        <div
+                        <ConversationListItem
                           key={conv._id}
-                          onClick={() => {
-                            const params = new URLSearchParams(
-                              searchParams.toString(),
-                            );
-                            params.set("conversation", conv._id);
-                            router.push(`?${params.toString()}`);
-                          }}
-                          className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-800/50 transition-colors border-b border-gray-700/50 ${
-                            selectedConversationId === conv._id
-                              ? "bg-gray-800/50"
-                              : ""
-                          }`}
-                        >
-                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                            {otherUser?.image ? (
-                              <Image
-                                src={otherUser.image}
-                                alt={otherUser.name}
-                                width={40}
-                                height={40}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <User className="w-5 h-5 text-white" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">
-                              {otherUser?.name || "Unknown"}
-                            </p>
-                            <p className="text-xs text-gray-500 truncate">
-                              {conv.lastMessage || "No messages"}
-                            </p>
-                          </div>
-                        </div>
+                          otherUserId={otherUser?._id}
+                          otherUserName={otherUser?.name || "Unknown"}
+                          otherUserImage={otherUser?.image || null}
+                          lastMessage={conv.lastMessage}
+                          updatedAt={conv.updatedAt}
+                          isSelected={selectedConversationId === conv._id}
+                          isTyping={typingConversations.has(conv._id)}
+                          onClick={() => handleSelectConversation(conv._id)}
+                        />
                       );
                     })
                   ) : (
@@ -808,7 +1128,7 @@ export default function BoostingRequestPage() {
                     <>
                       {/* Chat Header */}
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-700">
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
                           {getOtherParticipant(selectedConversation)?.image ? (
                             <Image
                               src={
@@ -822,12 +1142,22 @@ export default function BoostingRequestPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <User className="w-4 h-4 text-white" />
+                            <FaUser className="text-white text-xs" />
                           )}
+                          <OnlineIndicator
+                            userId={getOtherParticipant(selectedConversation)?._id}
+                          />
                         </div>
-                        <span className="text-sm font-medium">
-                          {getOtherParticipant(selectedConversation)?.name}
-                        </span>
+                        <div>
+                          <span className="text-sm font-medium block">
+                            {getOtherParticipant(selectedConversation)?.name}
+                          </span>
+                          <ChatHeaderStatus
+                            isActive={selectedConversation.isActive}
+                            isTyping={isTyping}
+                            userId={getOtherParticipant(selectedConversation)?._id}
+                          />
+                        </div>
                       </div>
 
                       {/* Messages */}
@@ -835,41 +1165,72 @@ export default function BoostingRequestPage() {
                         ref={messagesContainerRef}
                         className="flex-1 overflow-y-auto p-4 space-y-3"
                       >
-                        {isLoadingMessages ? (
+                        {isLoadingMessagesApi ? (
                           <div className="flex items-center justify-center h-full">
                             <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
                           </div>
-                        ) : messages.length > 0 ? (
+                        ) : allMessages.length > 0 ? (
                           <>
-                            {[...messages].reverse().map((msg) => {
+                            {allMessages.map((msg) => {
                               const isCurrentUser =
                                 msg.author._id === currentUser?._id;
                               return (
                                 <div
                                   key={msg._id}
-                                  className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
+                                  className={`flex items-start gap-3 ${isCurrentUser ? "flex-row-reverse" : ""}`}
                                 >
+                                  {!isCurrentUser && (
+                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                      {msg.author.image ? (
+                                        <Image
+                                          src={msg.author.image}
+                                          alt={msg.author.name}
+                                          width={32}
+                                          height={32}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      ) : (
+                                        <FaUser className="text-white text-xs" />
+                                      )}
+                                    </div>
+                                  )}
                                   <div
-                                    className={`max-w-[70%] rounded-lg px-3 py-2 ${
-                                      isCurrentUser
-                                        ? "bg-red-600 text-white"
-                                        : "bg-gray-700 text-gray-200"
-                                    }`}
+                                    className={`max-w-[70%] ${isCurrentUser ? "text-right" : ""}`}
                                   >
-                                    <p className="text-sm">{msg.message}</p>
-                                    <span className="text-xs opacity-70 mt-1 block">
+                                    <div
+                                      className={`rounded-lg px-3 py-2 inline-block ${
+                                        isCurrentUser
+                                          ? "bg-red-600 text-white"
+                                          : "bg-gray-700 text-gray-200"
+                                      }`}
+                                    >
+                                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                                    </div>
+                                    <span className="text-xs text-gray-500 mt-1 block">
                                       {formatMessageTime(msg.createdAt)}
                                     </span>
                                   </div>
                                 </div>
                               );
                             })}
+                            {/* Typing indicator */}
+                            {isTyping && (
+                              <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                  <FaUser className="text-white text-xs" />
+                                </div>
+                                <div className="bg-gray-700 rounded-lg px-3 py-2">
+                                  <TypingIndicator />
+                                </div>
+                              </div>
+                            )}
                             <div ref={messagesEndRef} />
                           </>
                         ) : (
                           <div className="flex items-center justify-center h-full">
+                            <MessageCircle className="w-12 h-12 text-gray-600 mb-3" />
                             <p className="text-gray-500 text-sm">
-                              No messages yet
+                              No messages yet. Start the conversation!
                             </p>
                           </div>
                         )}
@@ -877,28 +1238,37 @@ export default function BoostingRequestPage() {
 
                       {/* Input */}
                       <div className="p-3 border-t border-gray-700">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            placeholder="Type a message..."
-                            value={messageInput}
-                            onChange={(e) => setMessageInput(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            disabled={isSending}
-                            className="flex-1 bg-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500"
-                          />
-                          <button
-                            onClick={handleSendMessage}
-                            disabled={isSending || !messageInput.trim()}
-                            className="p-2 bg-red-600 hover:bg-red-700 rounded transition-colors disabled:opacity-50"
-                          >
-                            {isSending ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Send className="w-4 h-4" />
-                            )}
-                          </button>
-                        </div>
+                        {selectedConversation.isActive ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              placeholder="Type a message..."
+                              value={messageInput}
+                              onChange={handleInputChange}
+                              onKeyPress={handleKeyPress}
+                              disabled={isSending}
+                              className="flex-1 bg-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                            />
+                            <button
+                              onClick={handleSendMessage}
+                              disabled={isSending || !messageInput.trim()}
+                              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                              {isSending ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Send className="w-4 h-4" />
+                              )}
+                              Send
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-center py-2">
+                            <p className="text-gray-500 text-sm">
+                              This conversation is no longer active
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </>
                   ) : (

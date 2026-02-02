@@ -37,6 +37,7 @@ export const SOCKET_CONFIG = {
 
     // Boosting Posts
     BOOSTING_POST_NEW: "boostingPost:new",
+    BOOSTING_POST_CREATED: "boostingPost:created",
     BOOSTING_POST_UPDATED: "boostingPost:updated",
     BOOSTING_POST_DELETED: "boostingPost:deleted",
 
@@ -72,6 +73,8 @@ export const SOCKET_CONFIG = {
 
     // Boosting Posts
     BOOSTING_POST_CREATE: "boostingPost:create",
+    BOOSTING_POST_BROWSE: "boostingPost:browse",
+    BOOSTING_POST_GET_OFFERS: "boostingPost:getOffers",
     BOOSTING_POST_UPDATE: "boostingPost:update",
     BOOSTING_POST_DELETE: "boostingPost:delete",
 

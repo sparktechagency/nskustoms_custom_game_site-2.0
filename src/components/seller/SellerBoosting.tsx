@@ -1,20 +1,25 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useGetBoostingPostsForSellerQuery } from "@/src/redux/features/boosting-post/boostingApi";
 import { Loader2 } from "lucide-react";
-import {
-  BoostingPost,
-  BrowseBoostingResponse,
-  TabType,
-} from "@/src/types/page.types";
+import { BoostingPost, TabType } from "@/src/types/page.types";
 import {
   formatBoostingType,
   formatDate,
   getBoostingDetails,
 } from "@/src/utils/pageHealper";
-import { FaCircleDollarToSlot } from "react-icons/fa6";
+import { useSelector } from "react-redux";
+import { selectIsConnected } from "@/src/redux/features/socket/socketSlice";
+import socketService from "@/src/lib/socket/socketService";
+import { SOCKET_CONFIG } from "@/src/lib/socket/socketConfig";
+
+interface BrowseBoostingSocketResponse {
+  posts: BoostingPost[];
+  total: number;
+  pages: number;
+  currentPage: number;
+}
 
 const tabs: { id: TabType; label: string }[] = [
   { id: "waiting_for_offer", label: "Waiting for Offer" },
@@ -25,17 +30,149 @@ const tabs: { id: TabType; label: string }[] = [
 
 const SellerBoosting = () => {
   const [activeTab, setActiveTab] = useState<TabType>("waiting_for_offer");
+  const [posts, setPosts] = useState<BoostingPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    pages: 1,
+    currentPage: 1,
+  });
+  const isSocketConnected = useSelector(selectIsConnected);
+  const hasInitialFetch = useRef(false);
 
-  const { data: browseBoosting, isLoading } = useGetBoostingPostsForSellerQuery(
-    {
-      page: 1,
-      limit: 10,
-      type: activeTab,
+  // Fetch boosting posts via socket
+  const fetchBoostingPosts = useCallback(
+    (page = 1, limit = 10) => {
+      if (!isSocketConnected) {
+        console.log("[SellerBoosting] Socket not connected, waiting...");
+        return;
+      }
+
+      setIsLoading(true);
+      console.log("[SellerBoosting] Fetching posts for tab:", activeTab);
+
+      socketService.browseBoostingPosts<BrowseBoostingSocketResponse>(
+        { page, limit, type: activeTab },
+        (response) => {
+          setIsLoading(false);
+
+          if (response.success && response.data) {
+            console.log("[SellerBoosting] Posts received:", response.data);
+            setPosts(response.data.posts || []);
+            setPagination({
+              total: response.data.total || 0,
+              pages: response.data.pages || 1,
+              currentPage: response.data.currentPage || 1,
+            });
+          } else {
+            console.error(
+              "[SellerBoosting] Failed to fetch posts:",
+              response.error,
+            );
+            setPosts([]);
+          }
+        },
+      );
+
+      // Fallback timeout
+      setTimeout(() => {
+        setIsLoading((prev) => {
+          if (prev) {
+            console.warn("[SellerBoosting] Request timed out");
+            return false;
+          }
+          return prev;
+        });
+      }, 10000);
     },
+    [isSocketConnected, activeTab],
   );
 
-  const boostingData = browseBoosting as BrowseBoostingResponse | undefined;
-  const posts = boostingData?.posts || [];
+  // Initial fetch and refetch on tab change
+  useEffect(() => {
+    if (isSocketConnected) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: fetch data on connection/tab change
+      fetchBoostingPosts();
+      hasInitialFetch.current = true;
+    }
+  }, [isSocketConnected, activeTab, fetchBoostingPosts]);
+
+  // Listen for real-time new boosting posts (only for waiting_for_offer tab)
+  useEffect(() => {
+    if (!isSocketConnected || activeTab !== "waiting_for_offer") return;
+
+    const handleNewBoostingPost = (newPost: { post: BoostingPost }) => {
+      console.log("[SellerBoosting] New boosting post received:", newPost);
+
+      // Add new post to the top of the list
+      setPosts((prevPosts) => {
+        // Check if post already exists
+        const exists = prevPosts.some((p) => p._id === newPost?.post._id);
+        if (exists) return prevPosts;
+
+        return [newPost.post, ...prevPosts];
+      });
+
+      // Update total count
+      setPagination((prev) => ({
+        ...prev,
+        total: prev.total + 1,
+      }));
+    };
+
+    // Subscribe to new boosting posts
+    const unsubscribe = socketService.on(
+      SOCKET_CONFIG.events.BOOSTING_POST_NEW,
+      handleNewBoostingPost as (...args: unknown[]) => void,
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isSocketConnected, activeTab]);
+
+  // Listen for boosting post updates
+  useEffect(() => {
+    if (!isSocketConnected) return;
+
+    const handlePostUpdated = (updatedPost: BoostingPost) => {
+      console.log("[SellerBoosting] Boosting post updated:", updatedPost);
+
+      setPosts((prevPosts) =>
+        prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
+      );
+    };
+
+    const handlePostDeleted = (data: { postId: string }) => {
+      console.log("[SellerBoosting] Boosting post deleted:", data.postId);
+
+      setPosts((prevPosts) => prevPosts.filter((p) => p._id !== data.postId));
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
+    };
+
+    const unsubscribeUpdated = socketService.on(
+      SOCKET_CONFIG.events.BOOSTING_POST_UPDATED,
+      handlePostUpdated as (...args: unknown[]) => void,
+    );
+    const unsubscribeDeleted = socketService.on(
+      SOCKET_CONFIG.events.BOOSTING_POST_DELETED,
+      handlePostDeleted as (...args: unknown[]) => void,
+    );
+
+    return () => {
+      unsubscribeUpdated();
+      unsubscribeDeleted();
+    };
+  }, [isSocketConnected]);
+
+  const boostingData = {
+    posts,
+    total: pagination.total,
+    pages: pagination.pages,
+  };
   return (
     <div className="">
       <div className="w-full">
@@ -58,10 +195,15 @@ const SellerBoosting = () => {
 
         {/* Table */}
         <div className="bg-[#282836] rounded-lg overflow-hidden border border-gray-700">
-          {isLoading ? (
+          {!isSocketConnected ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+              <p className="text-gray-400 mt-2">Connecting to server...</p>
+            </div>
+          ) : isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-              <p className="text-gray-400 mt-2">Loading...</p>
+              <p className="text-gray-400 mt-2">Loading boosting posts...</p>
             </div>
           ) : posts.length > 0 ? (
             <div className="overflow-x-auto">

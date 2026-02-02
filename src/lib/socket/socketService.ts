@@ -309,9 +309,9 @@ class SocketService {
 
   // ============ Boosting Post Methods ============
 
-  public createBoostingPost(
-    payload: CreateBoostingPostPayload,
-    callback?: (response: SocketResponse) => void,
+  public createBoostingPost<T = unknown>(
+    payload: Record<string, unknown>,
+    callback?: (response: SocketResponse<T>) => void,
   ): void {
     this.emit(SOCKET_CONFIG.emits.BOOSTING_POST_CREATE, payload, callback);
   }
@@ -333,6 +333,20 @@ class SocketService {
     callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(SOCKET_CONFIG.emits.BOOSTING_POST_DELETE, postId, callback);
+  }
+
+  public browseBoostingPosts<T = unknown>(
+    query?: { page?: number; limit?: number; type?: string },
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.BOOSTING_POST_BROWSE, query || {}, callback);
+  }
+
+  public getBoostingPostOffers<T = unknown>(
+    postId: string,
+    callback?: (response: SocketResponse<T>) => void,
+  ): void {
+    this.emit(SOCKET_CONFIG.emits.BOOSTING_POST_GET_OFFERS, postId, callback);
   }
 
   // ============ Offer Methods ============

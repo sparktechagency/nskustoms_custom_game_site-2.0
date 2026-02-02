@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   OrderType,
   QueueType,
@@ -17,9 +17,10 @@ import CustomRequestForm from "./CustomRequestForm";
 import AdditionalInfo from "./AdditionalInfo";
 import WhyTrustSection from "./WhyTrustSection";
 import OrderSummary from "./OrderSummary";
-import { useCreateBoostingPostMutation } from "@/src/redux/features/boosting-post/boostingApi";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
+import { selectIsConnected } from "@/src/redux/features/socket/socketSlice";
+import socketService from "@/src/lib/socket/socketService";
 
 // Helper function to convert queue type to API format
 const formatQueueForApi = (queue: QueueType): "solo/duo" | "5v5_flex" => {
@@ -53,6 +54,7 @@ const formatRegionForApi = (region: RegionType): string => {
 
 const Herosectionfrom: React.FC = () => {
   const currentUser = useSelector(selectCurrentUser);
+  const isSocketConnected = useSelector(selectIsConnected);
   const router = useRouter();
   const [orderType, setOrderType] = useState<OrderType>("rank-boost");
   const [desiredRank, setDesiredRank] = useState<RankType>("Challenger");
@@ -72,10 +74,9 @@ const Herosectionfrom: React.FC = () => {
   const [soloqueue, setSoloqueue] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [createBoostingPost, { isLoading }] = useCreateBoostingPostMutation();
-
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(() => {
     setError(null);
 
     // Check if user is logged in
@@ -84,121 +85,164 @@ const Herosectionfrom: React.FC = () => {
       return;
     }
 
-    try {
-      let requestBody: Record<string, unknown> = {};
-
-      switch (orderType) {
-        case "rank-boost":
-          requestBody = {
-            boostingType: "rank_boost",
-            currentRank: {
-              currentRank: currentLP,
-              queue: formatQueueForApi(queue),
-              currentLp: "0",
-            },
-            desiredRank: {
-              desiredRank: desiredRank,
-              region: formatRegionForApi(region),
-            },
-            customizeOrder: {
-              solo:
-                orderMode === "solo"
-                  ? {
-                      stream: stream,
-                      soloQueue: soloqueue,
-                      offlineMode: offlineMode,
-                    }
-                  : StaticsSoloNot,
-              duo: orderMode === "duo",
-            },
-            additionInfo: additionalInfo,
-          };
-          break;
-
-        case "placement-matches":
-          requestBody = {
-            boostingType: "placement_matches",
-            placementMatches: {
-              previousRank: previousSeasonRank,
-              region: formatRegionForApi(placementRegion),
-              queue: formatQueueForApi(placementQueue),
-              numberOfGames: numberOfGames,
-            },
-            customizeOrder: {
-              solo:
-                orderMode === "solo"
-                  ? {
-                      stream: stream,
-                      soloQueue: soloqueue,
-                      offlineMode: offlineMode,
-                    }
-                  : StaticsSoloNot,
-              duo: orderMode === "duo",
-            },
-            additionInfo: additionalInfo,
-          };
-          break;
-
-        case "net-wins":
-          requestBody = {
-            boostingType: "net_wins",
-            netWins: {
-              currentRank: previousSeasonRank,
-              region: formatRegionForApi(placementRegion),
-              queue: formatQueueForApi(placementQueue),
-              numberOfWins: numberOfGames,
-            },
-            customizeOrder: {
-              solo:
-                orderMode === "solo"
-                  ? {
-                      stream: stream,
-                      soloQueue: soloqueue,
-                      offlineMode: offlineMode,
-                    }
-                  : StaticsSoloNot,
-              duo: orderMode === "duo",
-            },
-            additionInfo: additionalInfo,
-          };
-          break;
-
-        case "custom-request":
-          requestBody = {
-            boostingType: "custom_request",
-            customRequest: {
-              gameType: "League of Legends",
-              requestDescription: customRequest,
-            },
-            customizeOrder: {
-              solo:
-                orderMode === "solo"
-                  ? {
-                      stream: stream,
-                      soloQueue: soloqueue,
-                      offlineMode: offlineMode,
-                    }
-                  : StaticsSoloNot,
-              duo: orderMode === "duo",
-            },
-            additionalInfo: additionalInfo,
-          };
-          break;
-      }
-
-      const response = await createBoostingPost(requestBody).unwrap();
-      // Redirect to offers or success page
-      console.log(response);
-      router.push(`/boosting-request?boostingId=${response?.data?._id}`);
-    } catch (err: unknown) {
-      const apiError = err as { data?: { message?: string }; message?: string };
-      const errorMessage =
-        apiError?.data?.message ||
-        apiError?.message ||
-        "Failed to create order. Please try again.";
-      setError(errorMessage);
+    // Check socket connection
+    if (!isSocketConnected) {
+      setError("Connection not established. Please wait and try again.");
+      return;
     }
-  };
+
+    setIsLoading(true);
+
+    let requestBody: Record<string, unknown> = {};
+
+    switch (orderType) {
+      case "rank-boost":
+        requestBody = {
+          boostingType: "rank_boost",
+          currentRank: {
+            currentRank: currentLP,
+            queue: formatQueueForApi(queue),
+            currentLp: "0",
+          },
+          desiredRank: {
+            desiredRank: desiredRank,
+            region: formatRegionForApi(region),
+          },
+          customizeOrder: {
+            solo:
+              orderMode === "solo"
+                ? {
+                    stream: stream,
+                    soloQueue: soloqueue,
+                    offlineMode: offlineMode,
+                  }
+                : StaticsSoloNot,
+            duo: orderMode === "duo",
+          },
+          additionInfo: additionalInfo,
+        };
+        break;
+
+      case "placement-matches":
+        requestBody = {
+          boostingType: "placement_matches",
+          placementMatches: {
+            previousRank: previousSeasonRank,
+            region: formatRegionForApi(placementRegion),
+            queue: formatQueueForApi(placementQueue),
+            numberOfGames: numberOfGames,
+          },
+          customizeOrder: {
+            solo:
+              orderMode === "solo"
+                ? {
+                    stream: stream,
+                    soloQueue: soloqueue,
+                    offlineMode: offlineMode,
+                  }
+                : StaticsSoloNot,
+            duo: orderMode === "duo",
+          },
+          additionInfo: additionalInfo,
+        };
+        break;
+
+      case "net-wins":
+        requestBody = {
+          boostingType: "net_wins",
+          netWins: {
+            currentRank: previousSeasonRank,
+            region: formatRegionForApi(placementRegion),
+            queue: formatQueueForApi(placementQueue),
+            numberOfWins: numberOfGames,
+          },
+          customizeOrder: {
+            solo:
+              orderMode === "solo"
+                ? {
+                    stream: stream,
+                    soloQueue: soloqueue,
+                    offlineMode: offlineMode,
+                  }
+                : StaticsSoloNot,
+            duo: orderMode === "duo",
+          },
+          additionInfo: additionalInfo,
+        };
+        break;
+
+      case "custom-request":
+        requestBody = {
+          boostingType: "custom_request",
+          customRequest: {
+            gameType: "League of Legends",
+            requestDescription: customRequest,
+          },
+          customizeOrder: {
+            solo:
+              orderMode === "solo"
+                ? {
+                    stream: stream,
+                    soloQueue: soloqueue,
+                    offlineMode: offlineMode,
+                  }
+                : StaticsSoloNot,
+            duo: orderMode === "duo",
+          },
+          additionalInfo: additionalInfo,
+        };
+        break;
+    }
+
+    // Use socket to create boosting post
+    socketService.createBoostingPost<{ _id: string }>(
+      requestBody,
+      (response) => {
+        setIsLoading(false);
+
+        if (response.success && response.data?._id) {
+          console.log("[Socket] Boosting post created:", response.data);
+          router.push(`/boosting-request?boostingId=${response.data._id}`);
+        } else {
+          const errorMessage =
+            response.error ||
+            response.message ||
+            "Failed to create order. Please try again.";
+          setError(errorMessage);
+        }
+      },
+    );
+
+    // Fallback timeout in case socket doesn't respond
+    setTimeout(() => {
+      setIsLoading((prev) => {
+        if (prev) {
+          setError("Request timed out. Please try again.");
+          return false;
+        }
+        return prev;
+      });
+    }, 15000);
+  }, [
+    currentUser,
+    isSocketConnected,
+    router,
+    orderType,
+    currentLP,
+    queue,
+    desiredRank,
+    region,
+    orderMode,
+    stream,
+    soloqueue,
+    offlineMode,
+    additionalInfo,
+    previousSeasonRank,
+    placementRegion,
+    placementQueue,
+    numberOfGames,
+    customRequest,
+  ]);
 
   return (
     <div className="py-2">

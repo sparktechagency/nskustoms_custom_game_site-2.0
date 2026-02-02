@@ -1,8 +1,10 @@
 // Socket Configuration
 
 // Connection options (mutable for socket.io compatibility)
+// Using polling first to send auth headers, then upgrade to websocket
 export const SOCKET_CONNECTION_OPTIONS = {
-  transports: ["websocket"] as string[],
+  transports: ["polling", "websocket"] as string[],
+  upgrade: true,
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
@@ -45,7 +47,7 @@ export const SOCKET_CONFIG = {
     // Conversations
     CONVERSATION_MESSAGE: "conversation:message",
     CONVERSATION_USER_TYPING: "conversation:userTyping",
-    CONVERSATION_USER_STOP_TYPING: "conversation:userStopTyping",
+    CONVERSATION_USER_STOP_TYPING: "conversation:userStoppedTyping",
     CONVERSATION_READ: "conversation:read",
   },
 

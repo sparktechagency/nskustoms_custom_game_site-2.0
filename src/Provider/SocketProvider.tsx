@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useCallback, createContext, useContext, useMemo } from "react";
+import {
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+  useMemo,
+} from "react";
 import { useAppSelector } from "@/src/redux/hooks";
-import { selectCurrentUser, selectToken } from "@/src/redux/features/auth/authSlice";
+import {
+  selectCurrentUser,
+  selectToken,
+} from "@/src/redux/features/auth/authSlice";
 import {
   selectIsConnected,
   selectIsConnecting,
@@ -11,7 +20,10 @@ import {
   selectUnreadMessages,
 } from "@/src/redux/features/socket/socketSlice";
 import socketService from "@/src/lib/socket/socketService";
-import type { SocketResponse, SendMessagePayload } from "@/src/redux/features/socket/socket.types";
+import type {
+  SocketResponse,
+  SendMessagePayload,
+} from "@/src/redux/features/socket/socket.types";
 
 // Context type
 interface SocketContextType {
@@ -22,9 +34,15 @@ interface SocketContextType {
   unreadMessages: number;
   connect: () => void;
   disconnect: () => void;
-  joinConversation: (conversationId: string, callback?: (response: SocketResponse) => void) => void;
+  joinConversation: (
+    conversationId: string,
+    callback?: (response: SocketResponse) => void,
+  ) => void;
   leaveConversation: (conversationId: string) => void;
-  sendMessage: (payload: SendMessagePayload, callback?: (response: SocketResponse) => void) => void;
+  sendMessage: (
+    payload: SendMessagePayload,
+    callback?: (response: SocketResponse) => void,
+  ) => void;
   startTyping: (conversationId: string) => void;
   stopTyping: (conversationId: string) => void;
   markAsRead: (conversationId: string) => void;
@@ -80,7 +98,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     (conversationId: string, callback?: (response: SocketResponse) => void) => {
       socketService.joinConversation({ conversationId }, callback);
     },
-    []
+    [],
   );
 
   // Leave conversation
@@ -90,10 +108,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Send message
   const sendMessage = useCallback(
-    (payload: SendMessagePayload, callback?: (response: SocketResponse) => void) => {
+    (
+      payload: SendMessagePayload,
+      callback?: (response: SocketResponse) => void,
+    ) => {
       socketService.sendMessage(payload, callback);
     },
-    []
+    [],
   );
 
   // Start typing
@@ -114,7 +135,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   // Check if user is online
   const isUserOnline = useCallback(
     (userId: string) => onlineUsers.includes(userId),
-    [onlineUsers]
+    [onlineUsers],
   );
 
   // Memoize context value
@@ -150,7 +171,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       stopTyping,
       markAsRead,
       isUserOnline,
-    ]
+    ],
   );
 
   return (

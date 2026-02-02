@@ -14,7 +14,11 @@ import {
   incrementUnreadMessages,
 } from "@/src/redux/features/socket/socketSlice";
 import { baseApi } from "@/src/redux/baseApi/baseApi";
-import { SOCKET_CONFIG, SOCKET_CONNECTION_OPTIONS, getSocketUrl } from "./socketConfig";
+import {
+  SOCKET_CONFIG,
+  SOCKET_CONNECTION_OPTIONS,
+  getSocketUrl,
+} from "./socketConfig";
 import type {
   SocketResponse,
   SendMessagePayload,
@@ -67,10 +71,13 @@ class SocketService {
 
     console.log("[Socket] Connecting to:", socketUrl);
 
+    // Clean token (remove quotes if present)
+    const cleanToken = token.replace(/['"]+/g, "");
+
     this.socket = io(socketUrl, {
       ...SOCKET_CONNECTION_OPTIONS,
-      auth: { token },
-      extraHeaders: { token },
+      auth: { token: cleanToken },
+      extraHeaders: { authorization: `Bearer ${cleanToken}` },
     });
 
     this.setupEventListeners();
@@ -171,14 +178,14 @@ class SocketService {
       events.CONVERSATION_USER_TYPING,
       (data: { conversationId: string; userId: string; userName: string }) => {
         store.dispatch(addTypingUser(data));
-      }
+      },
     );
 
     this.socket.on(
       events.CONVERSATION_USER_STOP_TYPING,
       (data: { conversationId: string; userId: string }) => {
         store.dispatch(removeTypingUser(data));
-      }
+      },
     );
   }
 
@@ -221,7 +228,7 @@ class SocketService {
   public emit<T = unknown>(
     event: string,
     data?: unknown,
-    callback?: (response: SocketResponse<T>) => void
+    callback?: (response: SocketResponse<T>) => void,
   ): void {
     if (!this.socket?.connected) {
       console.warn("[Socket] Cannot emit - not connected");
@@ -240,12 +247,12 @@ class SocketService {
 
   public joinConversation(
     payload: JoinConversationPayload,
-    callback?: (response: SocketResponse) => void
+    callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(
       SOCKET_CONFIG.emits.CONVERSATION_JOIN,
       payload.conversationId,
-      callback
+      callback,
     );
   }
 
@@ -255,7 +262,7 @@ class SocketService {
 
   public sendMessage(
     payload: SendMessagePayload,
-    callback?: (response: SocketResponse) => void
+    callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(SOCKET_CONFIG.emits.CONVERSATION_SEND_MESSAGE, payload, callback);
   }
@@ -263,12 +270,12 @@ class SocketService {
   public getMessages(
     conversationId: string,
     options?: { page?: number; limit?: number },
-    callback?: (response: SocketResponse<MessagesResponse>) => void
+    callback?: (response: SocketResponse<MessagesResponse>) => void,
   ): void {
     this.emit(
       SOCKET_CONFIG.emits.CONVERSATION_GET_MESSAGES,
       { conversationId, ...options },
-      callback
+      callback,
     );
   }
 
@@ -277,18 +284,20 @@ class SocketService {
   }
 
   public startTyping(payload: TypingPayload): void {
-    this.emit(SOCKET_CONFIG.emits.CONVERSATION_TYPING, payload);
+    // Backend expects just the conversationId string
+    this.emit(SOCKET_CONFIG.emits.CONVERSATION_TYPING, payload.conversationId);
   }
 
   public stopTyping(payload: TypingPayload): void {
-    this.emit(SOCKET_CONFIG.emits.CONVERSATION_STOP_TYPING, payload);
+    // Backend expects just the conversationId string
+    this.emit(SOCKET_CONFIG.emits.CONVERSATION_STOP_TYPING, payload.conversationId);
   }
 
   // ============ Boosting Post Methods ============
 
   public createBoostingPost(
     payload: CreateBoostingPostPayload,
-    callback?: (response: SocketResponse) => void
+    callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(SOCKET_CONFIG.emits.BOOSTING_POST_CREATE, payload, callback);
   }
@@ -296,18 +305,18 @@ class SocketService {
   public updateBoostingPost(
     postId: string,
     payload: Partial<CreateBoostingPostPayload>,
-    callback?: (response: SocketResponse) => void
+    callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(
       SOCKET_CONFIG.emits.BOOSTING_POST_UPDATE,
       { postId, ...payload },
-      callback
+      callback,
     );
   }
 
   public deleteBoostingPost(
     postId: string,
-    callback?: (response: SocketResponse) => void
+    callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(SOCKET_CONFIG.emits.BOOSTING_POST_DELETE, postId, callback);
   }
@@ -316,7 +325,7 @@ class SocketService {
 
   public createOffer(
     payload: { postId: string; message: string; price: number },
-    callback?: (response: SocketResponse) => void
+    callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(SOCKET_CONFIG.emits.OFFER_CREATE, payload, callback);
   }
@@ -324,12 +333,12 @@ class SocketService {
   public updateOfferStatus(
     offerId: string,
     status: "accepted" | "rejected",
-    callback?: (response: SocketResponse) => void
+    callback?: (response: SocketResponse) => void,
   ): void {
     this.emit(
       SOCKET_CONFIG.emits.OFFER_UPDATE_STATUS,
       { offerId, status },
-      callback
+      callback,
     );
   }
 }

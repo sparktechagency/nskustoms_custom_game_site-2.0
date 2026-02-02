@@ -31,7 +31,9 @@ function Header() {
         <div>
           {user ? (
             <Link
-              href={user?.role == "seller" ? "/sellerboosting" : "/boosting"}
+              href={
+                user?.role == "seller" ? "/seller/sellerboosting" : "/boosting"
+              }
               className="bg-red-500 text-white  px-4 py-2 rounded"
             >
               <span className="text-white">Dashboard</span>

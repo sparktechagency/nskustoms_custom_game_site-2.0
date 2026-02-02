@@ -202,13 +202,20 @@ const Message: React.FC = () => {
   const [messageInput, setMessageInput] = useState("");
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [realtimeMessages, setRealtimeMessages] = useState<MessageType[]>([]);
-  const [realtimeConversations, setRealtimeConversations] = useState<Conversation[]>([]);
-  const [updatedConversationIds, setUpdatedConversationIds] = useState<Set<string>>(new Set());
+  const [realtimeConversations, setRealtimeConversations] = useState<
+    Conversation[]
+  >([]);
+  const [updatedConversationIds, setUpdatedConversationIds] = useState<
+    Set<string>
+  >(new Set());
   const [isTyping, setIsTyping] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [typingConversations, setTypingConversations] = useState<Set<string>>(new Set());
+  const [typingConversations, setTypingConversations] = useState<Set<string>>(
+    new Set(),
+  );
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const currentUser = useAppSelector((state) => state.auth.user);
   const { isConnected } = useSocket();
@@ -252,7 +259,7 @@ const Message: React.FC = () => {
   const conversations = React.useMemo(() => {
     // Filter realtime conversations by active tab
     const filteredRealtimeConvs = realtimeConversations.filter(
-      (conv) => conv.type === activeTab
+      (conv) => conv.type === activeTab,
     );
 
     // Merge: realtime first (newer), then API conversations (excluding duplicates)
@@ -271,7 +278,12 @@ const Message: React.FC = () => {
       if (!aUpdated && bUpdated) return 1;
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
-  }, [apiConversations, realtimeConversations, activeTab, updatedConversationIds]);
+  }, [
+    apiConversations,
+    realtimeConversations,
+    activeTab,
+    updatedConversationIds,
+  ]);
 
   const selectedConversation = conversations.find(
     (c) => c._id === selectedConversationId,
@@ -292,7 +304,8 @@ const Message: React.FC = () => {
           behavior: "smooth",
         });
       } else {
-        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        messagesContainerRef.current.scrollTop =
+          messagesContainerRef.current.scrollHeight;
       }
     }
   };
@@ -362,11 +375,15 @@ const Message: React.FC = () => {
         }
 
         // Update conversation in the list (move to top, update lastMessage)
-        setUpdatedConversationIds((prev) => new Set(prev).add(data.conversationId));
+        setUpdatedConversationIds((prev) =>
+          new Set(prev).add(data.conversationId),
+        );
 
         // Update the conversation's lastMessage in realtime conversations
         setRealtimeConversations((prev) => {
-          const existingIndex = prev.findIndex((c) => c._id === data.conversationId);
+          const existingIndex = prev.findIndex(
+            (c) => c._id === data.conversationId,
+          );
           if (existingIndex >= 0) {
             const updated = [...prev];
             updated[existingIndex] = {
@@ -396,26 +413,23 @@ const Message: React.FC = () => {
   // Listen for conversation updates (e.g., lastMessage update from server)
   useSocketEvent<{ conversation: Conversation }>(
     SOCKET_CONFIG.events.CONVERSATION_UPDATED,
-    useCallback(
-      (data) => {
-        if (data.conversation) {
-          // Update in realtime conversations
-          setRealtimeConversations((prev) => {
-            const existingIndex = prev.findIndex(
-              (c) => c._id === data.conversation._id
-            );
-            if (existingIndex >= 0) {
-              const updated = [...prev];
-              updated[existingIndex] = data.conversation;
-              return updated;
-            }
-            // If not found, add it
-            return [data.conversation, ...prev];
-          });
-        }
-      },
-      [],
-    ),
+    useCallback((data) => {
+      if (data.conversation) {
+        // Update in realtime conversations
+        setRealtimeConversations((prev) => {
+          const existingIndex = prev.findIndex(
+            (c) => c._id === data.conversation._id,
+          );
+          if (existingIndex >= 0) {
+            const updated = [...prev];
+            updated[existingIndex] = data.conversation;
+            return updated;
+          }
+          // If not found, add it
+          return [data.conversation, ...prev];
+        });
+      }
+    }, []),
     [],
   );
 
@@ -430,7 +444,9 @@ const Message: React.FC = () => {
             setIsTyping(true);
           }
           // Track typing across all conversations for the list
-          setTypingConversations((prev) => new Set(prev).add(data.conversationId));
+          setTypingConversations((prev) =>
+            new Set(prev).add(data.conversationId),
+          );
         }
       },
       [selectedConversationId, currentUser?._id],
@@ -518,15 +534,21 @@ const Message: React.FC = () => {
             console.error("Failed to send message:", response.error);
             setMessageInput(messageText);
           }
-        }
+          // Focus input after sending
+          inputRef.current?.focus();
+        },
       );
 
       // Fallback timeout in case callback doesn't fire
-      setTimeout(() => setIsSending(false), 5000);
+      setTimeout(() => {
+        setIsSending(false);
+        inputRef.current?.focus();
+      }, 2000);
     } catch (error) {
       console.error("Failed to send message:", error);
       setMessageInput(messageText);
       setIsSending(false);
+      inputRef.current?.focus();
     }
   };
 
@@ -754,6 +776,7 @@ const Message: React.FC = () => {
                 {selectedConversation.isActive ? (
                   <div className="flex items-center gap-3">
                     <input
+                      ref={inputRef}
                       type="text"
                       placeholder="Type a message..."
                       value={messageInput}

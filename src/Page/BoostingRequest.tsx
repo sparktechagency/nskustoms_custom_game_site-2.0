@@ -227,18 +227,25 @@ export default function BoostingRequestPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Socket-based state
   const [offers, setOffers] = useState<BoostingOffer[]>([]);
   const [isLoadingOffers, setIsLoadingOffers] = useState(true);
   const [realtimeMessages, setRealtimeMessages] = useState<MessageType[]>([]);
-  const [realtimeConversations, setRealtimeConversations] = useState<Conversation[]>([]);
-  const [updatedConversationIds, setUpdatedConversationIds] = useState<Set<string>>(new Set());
+  const [realtimeConversations, setRealtimeConversations] = useState<
+    Conversation[]
+  >([]);
+  const [updatedConversationIds, setUpdatedConversationIds] = useState<
+    Set<string>
+  >(new Set());
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [typingConversations, setTypingConversations] = useState<Set<string>>(new Set());
+  const [typingConversations, setTypingConversations] = useState<Set<string>>(
+    new Set(),
+  );
 
   const currentUser = useAppSelector((state) => state.auth.user);
   const { isConnected } = useSocket();
@@ -267,7 +274,8 @@ export default function BoostingRequestPage() {
     useRespondToOfferMutation();
 
   const details = boostingDetails as BoostingPost | undefined;
-  const apiMessages = (messagesData as { messages: MessageType[] })?.messages || [];
+  const apiMessages =
+    (messagesData as { messages: MessageType[] })?.messages || [];
 
   // Combine API conversations with realtime conversations
   const conversations = React.useMemo(() => {
@@ -407,11 +415,15 @@ export default function BoostingRequestPage() {
         }
 
         // Update conversation in the list
-        setUpdatedConversationIds((prev) => new Set(prev).add(data.conversationId));
+        setUpdatedConversationIds((prev) =>
+          new Set(prev).add(data.conversationId),
+        );
 
         // Update the conversation's lastMessage
         setRealtimeConversations((prev) => {
-          const existingIndex = prev.findIndex((c) => c._id === data.conversationId);
+          const existingIndex = prev.findIndex(
+            (c) => c._id === data.conversationId,
+          );
           if (existingIndex >= 0) {
             const updated = [...prev];
             updated[existingIndex] = {
@@ -445,7 +457,7 @@ export default function BoostingRequestPage() {
       if (data.conversation) {
         setRealtimeConversations((prev) => {
           const existingIndex = prev.findIndex(
-            (c) => c._id === data.conversation._id
+            (c) => c._id === data.conversation._id,
           );
           if (existingIndex >= 0) {
             const updated = [...prev];
@@ -468,7 +480,9 @@ export default function BoostingRequestPage() {
           if (data.conversationId === selectedConversationId) {
             setIsTyping(true);
           }
-          setTypingConversations((prev) => new Set(prev).add(data.conversationId));
+          setTypingConversations((prev) =>
+            new Set(prev).add(data.conversationId),
+          );
         }
       },
       [selectedConversationId, currentUser?._id],
@@ -599,11 +613,16 @@ export default function BoostingRequestPage() {
           setMessageInput(messageText);
           toast.error(response.error || "Failed to send message");
         }
+        // Focus input after sending
+        inputRef.current?.focus();
       },
     );
 
     // Fallback timeout
-    setTimeout(() => setIsSending(false), 5000);
+    setTimeout(() => {
+      setIsSending(false);
+      inputRef.current?.focus();
+    }, 2000);
   }, [messageInput, selectedConversationId, isSending]);
 
   // Handle typing indicator
@@ -682,7 +701,8 @@ export default function BoostingRequestPage() {
           behavior: "smooth",
         });
       } else {
-        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        messagesContainerRef.current.scrollTop =
+          messagesContainerRef.current.scrollHeight;
       }
     }
   }, []);
@@ -1145,7 +1165,9 @@ export default function BoostingRequestPage() {
                             <FaUser className="text-white text-xs" />
                           )}
                           <OnlineIndicator
-                            userId={getOtherParticipant(selectedConversation)?._id}
+                            userId={
+                              getOtherParticipant(selectedConversation)?._id
+                            }
                           />
                         </div>
                         <div>
@@ -1155,7 +1177,9 @@ export default function BoostingRequestPage() {
                           <ChatHeaderStatus
                             isActive={selectedConversation.isActive}
                             isTyping={isTyping}
-                            userId={getOtherParticipant(selectedConversation)?._id}
+                            userId={
+                              getOtherParticipant(selectedConversation)?._id
+                            }
                           />
                         </div>
                       </div>
@@ -1204,7 +1228,9 @@ export default function BoostingRequestPage() {
                                           : "bg-gray-700 text-gray-200"
                                       }`}
                                     >
-                                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                                      <p className="text-sm whitespace-pre-wrap">
+                                        {msg.message}
+                                      </p>
                                     </div>
                                     <span className="text-xs text-gray-500 mt-1 block">
                                       {formatMessageTime(msg.createdAt)}
@@ -1241,6 +1267,7 @@ export default function BoostingRequestPage() {
                         {selectedConversation.isActive ? (
                           <div className="flex items-center gap-2">
                             <input
+                              ref={inputRef}
                               type="text"
                               placeholder="Type a message..."
                               value={messageInput}

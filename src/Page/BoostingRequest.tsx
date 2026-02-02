@@ -370,7 +370,64 @@ export default function BoostingRequestPage() {
     [boostingId],
   );
 
-  // Listen for offer notifications (notification:offer event - sent directly to post owner)
+  // Listen for user-specific notifications (notification:{userId} event)
+  // This is the main event for receiving new offer notifications from backend
+  useEffect(() => {
+    if (!isConnected || !currentUser?._id || !boostingId) return;
+
+    const userNotificationEvent = `notification:${currentUser._id}`;
+
+    const handleUserNotification = (data: {
+      notification?: {
+        _id: string;
+        title: string;
+        message: string;
+        type: string;
+        price?: number;
+      };
+      type: string;
+      offer?: BoostingOffer;
+    }) => {
+      // Handle new offer notification
+      if (data.type === "new_offer" && data.offer) {
+        // Check if this offer is for the current boosting post
+        const postId = data.offer.boostingPostId as unknown;
+        const offerPostId =
+          typeof postId === "string"
+            ? postId
+            : (postId as { _id?: string })?._id;
+
+        if (offerPostId === boostingId) {
+          // Add offer to the list
+          setOffers((prev) => {
+            const exists = prev.some((o) => o._id === data.offer!._id);
+            if (exists) return prev;
+            return [data.offer!, ...prev];
+          });
+
+          // Show toast notification
+          const notificationMessage =
+            data.notification?.message ||
+            `New offer of $${data.offer.price} received!`;
+          toast.info(notificationMessage, {
+            description: `From: ${data.offer.userId?.name || "Seller"} | Delivery: ${data.offer.deliverTime || "TBD"}`,
+          });
+        }
+      }
+    };
+
+    // Subscribe to user-specific notification event
+    const unsubscribe = socketService.on(
+      userNotificationEvent,
+      handleUserNotification as (...args: unknown[]) => void,
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isConnected, currentUser?._id, boostingId]);
+
+  // Listen for offer notifications (notification:offer event - fallback)
   useSocketEvent<{
     type: string;
     offer: BoostingOffer;
@@ -399,6 +456,36 @@ export default function BoostingRequestPage() {
       [boostingId],
     ),
     [boostingId],
+  );
+
+  // Listen for offer status changes (when offers are accepted/rejected)
+  useSocketEvent<{
+    offerId: string;
+    status: "pending" | "accepted" | "declined";
+    message?: string;
+  }>(
+    SOCKET_CONFIG.events.OFFER_STATUS_CHANGED,
+    useCallback(
+      (data) => {
+        if (!data.offerId) return;
+
+        // Update the offer status in the list
+        setOffers((prev) =>
+          prev.map((o) =>
+            o._id === data.offerId ? { ...o, status: data.status } : o,
+          ),
+        );
+
+        // Show toast notification
+        if (data.status === "accepted") {
+          toast.success(data.message || "Offer has been accepted!");
+        } else if (data.status === "declined") {
+          toast.info(data.message || "Offer has been declined.");
+        }
+      },
+      [],
+    ),
+    [],
   );
 
   // Listen for new conversations
@@ -691,7 +778,18 @@ export default function BoostingRequestPage() {
   ) => {
     try {
       await respondToOffer({ offerId, status: "accepted" }).unwrap();
-      toast.success("Offer accepted!");
+
+      // Update offer status locally
+      setOffers((prev) =>
+        prev.map((o) =>
+          o._id === offerId ? { ...o, status: "accepted" } : o,
+        ),
+      );
+
+      // Show success toast with seller notification info
+      toast.success(`Offer accepted! ${offer.userId.name} has been notified.`, {
+        description: `Price: $${offer.price} | Delivery: ${offer.deliverTime || 'As agreed'}`,
+      });
 
       // Redirect to payments page with offer details
       const paymentParams = new URLSearchParams({
@@ -705,7 +803,7 @@ export default function BoostingRequestPage() {
       router.push(`/payments?${paymentParams.toString()}`);
     } catch (error) {
       console.error("Failed to respond to offer:", error);
-      toast.error("Failed to respond to offer");
+      toast.error("Failed to accept offer. Please try again.");
     }
   };
 

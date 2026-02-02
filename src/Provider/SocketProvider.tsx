@@ -103,21 +103,27 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Handler for offer notifications
     const handleOfferNotification = (data: NotificationData) => {
       const title = data.notification?.title || data.title || "New Offer";
-      const message = data.notification?.message || data.message || "You have a new offer!";
-      toast.info(message, { description: title });
+      const message =
+        data.notification?.message || data.message || "You have a new offer!";
+      console.log(title, message, "notifications");
+      // toast.info(message, { description: title });
     };
 
     // Handler for message notifications
     const handleMessageNotification = (data: NotificationData) => {
       const title = data.notification?.title || data.title || "New Message";
-      const message = data.notification?.message || data.message || "You have a new message!";
+      const message =
+        data.notification?.message || data.message || "You have a new message!";
       toast.info(message, { description: title });
     };
 
     // Handler for order notifications
     const handleOrderNotification = (data: NotificationData) => {
       const title = data.notification?.title || data.title || "Order Update";
-      const message = data.notification?.message || data.message || "Your order has been updated!";
+      const message =
+        data.notification?.message ||
+        data.message ||
+        "Your order has been updated!";
       toast.info(message, { description: title });
     };
 

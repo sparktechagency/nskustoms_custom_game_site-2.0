@@ -88,7 +88,7 @@ export default function CheckoutPage() {
 
       const { paymentUrl } = res?.data || {};
       if (paymentUrl) {
-        window.location.href = paymentUrl;
+        window.location.assign(paymentUrl);
       } else {
         toast.success("Order created successfully!");
         router.push("/buyer/orders");

@@ -86,12 +86,18 @@ export default function Register() {
   return (
     <div className="bg-[#282836F0] rounded-xl shadow-2xl w-full max-w-md p-6 md:p-8">
       {/* Header */}
-      <div className="flex justify-center space-x-3 items-center mb-6">
-        <Link href={"/"}>
-          {" "}
-          <Image src={logo} width={100} height={400} alt="AuraBoost  Logo " />
+      <div className="flex flex-col items-center mb-8">
+        <Link href="/" className="mb-4">
+          <Image
+            src={logo}
+            width={150}
+            height={60}
+            alt="AuraBoost Logo"
+            className="h-[60px] w-auto object-contain"
+          />
         </Link>
         <h1 className="text-2xl font-bold text-white">Sign Up</h1>
+        <p className="text-gray-400 text-sm mt-1">Create your account to get started</p>
       </div>
 
       {/* Social Sign In */}

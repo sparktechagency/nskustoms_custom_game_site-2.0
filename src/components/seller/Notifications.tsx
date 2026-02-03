@@ -168,7 +168,7 @@ const Notifications = () => {
   return (
     <div>
       {/* Content */}
-      <div className="relative">
+      <div className="relative px-6">
         {/* Header */}
         <div className="flex items-center justify-between pb-4">
           <div className="flex items-center gap-2">

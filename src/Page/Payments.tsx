@@ -8,6 +8,7 @@ import Footer from "@/src/components/Landing/Footer";
 import { useCreateOrderBuyerMutation } from "../redux/features/orders/ordersApi";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, User, Clock, DollarSign } from "lucide-react";
+import { useGetSettingByTypeQuery } from "../redux/features/settings/settingApi";
 
 interface OrderResponse {
   data: {
@@ -15,10 +16,21 @@ interface OrderResponse {
   };
 }
 
-// Platform charge constant
-const PLATFORM_CHARGE = 5;
+interface PlatformChargeData {
+  type: string;
+  value: number;
+}
+
+// Helper function to round to 2 decimal places
+const roundToTwoDecimals = (num: number): number => {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+};
 
 export default function CheckoutPage() {
+  const { data: platformChargeData } = useGetSettingByTypeQuery({
+    type: "platform_charge",
+  });
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -36,10 +48,15 @@ export default function CheckoutPage() {
   const [gameUsername, setGameUsername] = useState("");
   const [gamePassword, setGamePassword] = useState("");
 
+  // Get platform charge percentage from API (value is the actual percentage, e.g., 5 = 5%)
+  const platformChargeSettings = platformChargeData as PlatformChargeData | undefined;
+  const platformChargePercentage = platformChargeSettings?.value ?? 5; // Default to 5% if not available
+
   // Calculate totals
   const orderPrice = price;
-  const platformCharge = PLATFORM_CHARGE;
-  const total = orderPrice + platformCharge;
+  // Calculate platform charge as percentage of order price
+  const platformCharge = roundToTwoDecimals((orderPrice * platformChargePercentage) / 100);
+  const total = roundToTwoDecimals(orderPrice + platformCharge);
 
   const handlePayment = async () => {
     if (!gameUsername.trim()) {
@@ -207,7 +224,9 @@ export default function CheckoutPage() {
 
                   {/* Platform Charge */}
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-gray-400">Platform Charge</span>
+                    <span className="text-gray-400">
+                      Platform Charge ({platformChargePercentage}%)
+                    </span>
                     <div className="flex items-center gap-1 text-white">
                       <DollarSign className="w-4 h-4" />
                       <span className="font-medium">

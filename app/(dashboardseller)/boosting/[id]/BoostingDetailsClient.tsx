@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FaCircle } from "react-icons/fa";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   useGetBoostingPostByIdQuery,
@@ -34,6 +35,7 @@ const BoostingDetailsClient = () => {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const { data: boostingDetails, isLoading } = useGetBoostingPostByIdQuery(id);
+  console.log("boostingDetails", boostingDetails);
   const [makeAsCancellBoosting, { isLoading: isCancelling }] =
     useMakeBoostingAsCancelledMutation();
   const [makeAsCompleteBoosting, { isLoading: isCompleting }] =
@@ -244,9 +246,17 @@ const BoostingDetailsClient = () => {
 
               <div className="flex items-center gap-3">
                 {details.isCancelled ? (
-                  <span className="px-3 py-1.5 bg-red-500/20 text-red-400 text-sm rounded-lg">
-                    Cancelled
-                  </span>
+                  <>
+                    <Link
+                      href={`/refundpolicy?orderId=${id}`}
+                      className="text-sm text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                    >
+                      Refund Money
+                    </Link>
+                    <span className="px-3 py-1.5 bg-red-500/20 text-red-400 text-sm rounded-lg">
+                      Cancelled
+                    </span>
+                  </>
                 ) : details.isCompleted ? (
                   <span className="px-3 py-1.5 bg-green-500/20 text-green-400 text-sm rounded-lg">
                     Completed

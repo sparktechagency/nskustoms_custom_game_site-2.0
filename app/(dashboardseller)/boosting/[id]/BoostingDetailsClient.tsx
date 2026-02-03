@@ -35,7 +35,6 @@ const BoostingDetailsClient = () => {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const { data: boostingDetails, isLoading } = useGetBoostingPostByIdQuery(id);
-  console.log("boostingDetails", boostingDetails);
   const [makeAsCancellBoosting, { isLoading: isCancelling }] =
     useMakeBoostingAsCancelledMutation();
   const [makeAsCompleteBoosting, { isLoading: isCompleting }] =

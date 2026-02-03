@@ -54,7 +54,9 @@ export default function Footer() {
   };
 
   const getCurrentLanguageLabel = () => {
-    return languages.find((l) => l.value === selectedLanguage)?.label || "English";
+    return (
+      languages.find((l) => l.value === selectedLanguage)?.label || "English"
+    );
   };
 
   const getCurrentCurrencySymbol = () => {
@@ -198,7 +200,8 @@ export default function Footer() {
                   />
                 </svg>
                 <span>
-                  {getCurrentLanguageLabel()} | {currency} - {getCurrentCurrencySymbol()}
+                  {getCurrentLanguageLabel()} | {currency} -{" "}
+                  {getCurrentCurrencySymbol()}
                 </span>
                 <svg
                   className={`w-4 h-4 ml-1 transition-transform ${
@@ -268,18 +271,19 @@ export default function Footer() {
             © 2025. The Auraboost website is operated by GWD Processing FZCO.
           </p>
           <div className="mt-2 flex justify-center space-x-4">
-            <a
-              href="#"
+            <Link
+              href="/docs/privacy_policy"
               className="text-[#A3A3A3] hover:text-white transition-colors"
             >
               Privacy Policy
-            </a>
-            <a
-              href="#"
+            </Link>
+
+            <Link
+              href="/docs/terms_condition"
               className="text-[#A3A3A3] hover:text-white transition-colors"
             >
               Terms & Condition
-            </a>
+            </Link>
             <a
               href="#"
               className="text-[#A3A3A3] hover:text-white transition-colors"

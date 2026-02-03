@@ -335,7 +335,7 @@ export default function BoostingRequestPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRealtimeMessages([]);
-     
+
     setIsTyping(false);
   }, [selectedConversationId]);
 
@@ -442,7 +442,9 @@ export default function BoostingRequestPage() {
         // boostingPostId can be string or object with _id
         const postId = data.offer.boostingPostId as unknown;
         const offerPostId =
-          typeof postId === "string" ? postId : (postId as { _id?: string })?._id;
+          typeof postId === "string"
+            ? postId
+            : (postId as { _id?: string })?._id;
 
         if (offerPostId === boostingId) {
           setOffers((prev) => {
@@ -465,26 +467,23 @@ export default function BoostingRequestPage() {
     message?: string;
   }>(
     SOCKET_CONFIG.events.OFFER_STATUS_CHANGED,
-    useCallback(
-      (data) => {
-        if (!data.offerId) return;
+    useCallback((data) => {
+      if (!data.offerId) return;
 
-        // Update the offer status in the list
-        setOffers((prev) =>
-          prev.map((o) =>
-            o._id === data.offerId ? { ...o, status: data.status } : o,
-          ),
-        );
+      // Update the offer status in the list
+      setOffers((prev) =>
+        prev.map((o) =>
+          o._id === data.offerId ? { ...o, status: data.status } : o,
+        ),
+      );
 
-        // Show toast notification
-        if (data.status === "accepted") {
-          toast.success(data.message || "Offer has been accepted!");
-        } else if (data.status === "declined") {
-          toast.info(data.message || "Offer has been declined.");
-        }
-      },
-      [],
-    ),
+      // Show toast notification
+      if (data.status === "accepted") {
+        toast.success(data.message || "Offer has been accepted!");
+      } else if (data.status === "declined") {
+        toast.info(data.message || "Offer has been declined.");
+      }
+    }, []),
     [],
   );
 
@@ -513,6 +512,8 @@ export default function BoostingRequestPage() {
     SOCKET_CONFIG.events.CONVERSATION_MESSAGE,
     useCallback(
       (data) => {
+        console.log("New message received via socket:", data);
+
         // Add message to realtime messages if in selected conversation
         if (data.conversationId === selectedConversationId) {
           setRealtimeMessages((prev) => [...prev, data.message]);
@@ -781,14 +782,12 @@ export default function BoostingRequestPage() {
 
       // Update offer status locally
       setOffers((prev) =>
-        prev.map((o) =>
-          o._id === offerId ? { ...o, status: "accepted" } : o,
-        ),
+        prev.map((o) => (o._id === offerId ? { ...o, status: "accepted" } : o)),
       );
 
       // Show success toast with seller notification info
       toast.success(`Offer accepted! ${offer.userId.name} has been notified.`, {
-        description: `Price: $${offer.price} | Delivery: ${offer.deliverTime || 'As agreed'}`,
+        description: `Price: $${offer.price} | Delivery: ${offer.deliverTime || "As agreed"}`,
       });
 
       // Redirect to payments page with offer details

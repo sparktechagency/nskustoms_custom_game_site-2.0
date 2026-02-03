@@ -14,7 +14,14 @@ const generSettingApi = baseApi.injectEndpoints({
       }),
       transformResponse: (res) => res.data,
     }),
+    postSupportMessage: builder.mutation({
+      query: (data) => ({
+        url:"/admin/support-messages/create",
+        method: "POST",
+        body: data
+      }),
+    }),
   }),
 });
 
-export const { useGetSettingByTypeQuery } = generSettingApi;
+export const { useGetSettingByTypeQuery, usePostSupportMessageMutation } = generSettingApi;

@@ -18,11 +18,11 @@ import Image from "next/image";
 import { CgMenuBoxed } from "react-icons/cg";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, selectCurrentUser } from "@/src/redux/features/auth/authSlice";
-import { FaCircleDollarToSlot } from "react-icons/fa6";
 import { GiWallet } from "react-icons/gi";
 import { Loader2 } from "lucide-react";
 import socketService from "@/src/lib/socket/socketService";
 import Logo from "@/src/Assets/Landing/logo.png";
+import { BiSupport } from "react-icons/bi";
 
 // Logout Confirmation Modal
 const LogoutModal = ({
@@ -188,7 +188,7 @@ const SellerSidebar = () => {
     { label: "Notifications", path: "/seller/notifications", icon: FaBell },
     { label: "Feedback", path: "/seller/feedback", icon: FaStar },
     { label: "Wallet", path: "/seller/wallet", icon: GiWallet },
-    { label: "Refund Policy", path: "/seller/sellerrefundpolicy", icon: FaCircleDollarToSlot },
+    { label: "Support Message", path: "/seller/sellersupportmessage", icon: BiSupport },
     { label: "Settings", path: "/seller/accountsetting", icon: FaCog },
   ];
 

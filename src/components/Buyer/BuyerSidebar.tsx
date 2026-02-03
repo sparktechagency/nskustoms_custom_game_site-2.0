@@ -20,6 +20,7 @@ import { logout, selectCurrentUser } from "@/src/redux/features/auth/authSlice";
 import { Loader2 } from "lucide-react";
 import socketService from "@/src/lib/socket/socketService";
 import Logo from "@/src/Assets/Landing/logo.png";
+import { BiSupport } from "react-icons/bi";
 
 // Logout Confirmation Modal
 const LogoutModal = ({
@@ -182,6 +183,7 @@ const BuyerSidebar = () => {
     { label: "Boosting", path: "/boosting", icon: FaRocket },
     { label: "Messages", path: "/message", icon: FaEnvelope },
     { label: "Notifications", path: "/notifications", icon: FaBell },
+     { label: "Support Message", path: "/supportmessage", icon: BiSupport },
     { label: "Feedback", path: "/feedback", icon: FaStar },
     { label: "Settings", path: "/accountsetting", icon: FaCog },
   ];

@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import support from '@/src/Assets/seller/support.png'
 import Image from 'next/image';
 import { useSetRefundsMutation } from '@/src/redux/features/become-seller/becomeSellerApi';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface FormData {
   orderId: string;
@@ -15,6 +15,7 @@ interface FormData {
 }
 
 const Page = () => {
+     const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
   console.log(orderId);
@@ -78,7 +79,11 @@ const Page = () => {
       console.log('Response:', res);
       
       // Check if response code is 200
-      if (res.code === 200) {
+      if (res.code === 201) {
+        // navigate hobe id dynami this  ite hobe 
+        // /boosting/698167e7e81b5f7a0fcc2b11
+       router.push(`/boosting/${orderId}`);
+
         // Reset form after successful submission
         setFormData({
           orderId: '',
@@ -142,7 +147,7 @@ const Page = () => {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <Image width={50} height={50} src={support} alt="image" />
-            <h1 className="text-4xl font-bold text-white">Support</h1>
+            <h1 className="text-4xl font-bold text-white">Refunds Order Money</h1>
           </div>
           <p className="text-gray-400 text-sm">
             Need help with purchases, game issues, or your account? Submit a support request and our team will assist you as soon as possible.

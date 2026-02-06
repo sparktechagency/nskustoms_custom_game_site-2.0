@@ -19,25 +19,12 @@ const languages = [
   { label: "Spanish", value: "es" },
 ];
 
-const currencies = [
-  { label: "USD", value: "USD", symbol: "$" },
-  { label: "EUR", value: "EUR", symbol: "€" },
-  { label: "GBP", value: "GBP", symbol: "£" },
-  { label: "CAD", value: "CAD", symbol: "$" },
-];
-
 export default function Footer() {
   const [selectedLanguage, setSelectedLanguage] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("currentLanguage") || "en";
     }
     return "en";
-  });
-  const [currency, setCurrency] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentCurrency") || "USD";
-    }
-    return "USD";
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -47,20 +34,10 @@ export default function Footer() {
     changeGoogleTranslateLanguage(lang);
   };
 
-  const switchCurrency = (curr: string) => {
-    setCurrency(curr);
-    localStorage.setItem("currentCurrency", curr);
-    setIsDropdownOpen(false);
-  };
-
   const getCurrentLanguageLabel = () => {
     return (
       languages.find((l) => l.value === selectedLanguage)?.label || "English"
     );
-  };
-
-  const getCurrentCurrencySymbol = () => {
-    return currencies.find((c) => c.value === currency)?.symbol || "$";
   };
 
   const paymentMethods = [
@@ -162,7 +139,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Right section - Payment methods and language/currency selector */}
+          {/* Right section - Payment methods and language selector */}
           <div className="flex flex-col items-center lg:items-end space-y-6">
             {/* Payment methods */}
             <div className="flex flex-wrap items-center gap-3">
@@ -179,7 +156,7 @@ export default function Footer() {
               ))}
             </div>
 
-            {/* Language and currency selector */}
+            {/* Language selector */}
             <div className="relative">
               <button
                 className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-md flex items-center space-x-2"
@@ -199,10 +176,7 @@ export default function Footer() {
                     d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
                   />
                 </svg>
-                <span>
-                  {getCurrentLanguageLabel()} | {currency} -{" "}
-                  {getCurrentCurrencySymbol()}
-                </span>
+                <span>{getCurrentLanguageLabel()}</span>
                 <svg
                   className={`w-4 h-4 ml-1 transition-transform ${
                     isDropdownOpen ? "rotate-180" : ""
@@ -238,24 +212,6 @@ export default function Footer() {
                         }`}
                       >
                         {lang.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="py-1">
-                    <div className="px-4 py-2 text-sm text-gray-300 border-b border-gray-700">
-                      Currency
-                    </div>
-                    {currencies.map((curr) => (
-                      <button
-                        key={curr.value}
-                        onClick={() => switchCurrency(curr.value)}
-                        className={`block w-full text-left px-4 py-2 text-sm ${
-                          currency === curr.value
-                            ? "bg-gray-700"
-                            : "hover:bg-gray-700"
-                        }`}
-                      >
-                        {curr.label} - {curr.symbol}
                       </button>
                     ))}
                   </div>

@@ -3,10 +3,16 @@ import React, { useState } from "react";
 import { ThumbsUp, ThumbsDown, Star, Package } from "lucide-react";
 import notfund from "@/src/Assets/seller/goldie.png";
 import Image from "next/image";
-import { useGetSellerRatingStatsQuery } from "@/src/redux/features/ratings/ratingsApi";
+import {
+  useGetRatingsForSellerQuery,
+  useGetSellerRatingStatsQuery,
+} from "@/src/redux/features/ratings/ratingsApi";
 const Feedback = () => {
   const [activeTab, setActiveTab] = useState("all");
-  useGetSellerRatingStatsQuery({});
+  const { data: sellerRatingsStats } = useGetSellerRatingStatsQuery({});
+  const { data: sellerRatings } = useGetRatingsForSellerQuery({});
+  console.log(sellerRatings, "Seller Ratings");
+  console.log(sellerRatingsStats, "Seller Ratings Stats");
 
   const stats = [
     {

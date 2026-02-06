@@ -1,11 +1,5 @@
 import { baseApi } from "@/src/redux/baseApi/baseApi";
 
-interface SellerRatingsParams {
-  page?: number;
-  limit?: number;
-  minRating?: number;
-}
-
 interface CreateRatingBody {
   orderId: string;
   rating: number;
@@ -48,21 +42,12 @@ const ratingsApi = baseApi.injectEndpoints({
 
     // Get ratings for a seller
     getRatingsForSeller: builder.query({
-      query: ({
-        sellerId,
-        params,
-      }: {
-        sellerId: string;
-        params?: SellerRatingsParams;
-      }) => ({
-        url: `/ratings/seller/${sellerId}`,
+      query: () => ({
+        url: `/ratings/seller`,
         method: "GET",
-        params: params || { page: 1, limit: 10 },
       }),
-      providesTags: (_result, _error, { sellerId }) => [
-        { type: "Rating", id: `SELLER_${sellerId}` },
-        "Rating",
-      ],
+      transformResponse: (res) => res?.data,
+      providesTags: ["Rating"],
     }),
     // Get ratings for a seller
     getSellerRatingStats: builder.query({
@@ -72,6 +57,7 @@ const ratingsApi = baseApi.injectEndpoints({
         params: params || { page: 1, limit: 10 },
       }),
       providesTags: ["Rating"],
+      transformResponse: (res) => res?.data,
     }),
 
     // Update rating by ID

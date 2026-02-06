@@ -26,7 +26,7 @@ const notificationsApi = baseApi.injectEndpoints({
         method: "POST",
         body: notificationBody,
       }),
-      invalidatesTags: ["notification"],
+      invalidatesTags: ["Notification"],
     }),
 
     // Get my notifications
@@ -37,7 +37,16 @@ const notificationsApi = baseApi.injectEndpoints({
         params: params || { page: 1, limit: 10 },
       }),
       transformResponse: (res) => res.data,
-      providesTags: ["notification"],
+      providesTags: (result) =>
+        result?.notifications
+          ? [
+              ...result.notifications.map(({ _id }: { _id: string }) => ({
+                type: "Notification" as const,
+                id: _id,
+              })),
+              "Notification",
+            ]
+          : ["Notification"],
     }),
 
     // Delete notification by ID
@@ -46,7 +55,10 @@ const notificationsApi = baseApi.injectEndpoints({
         url: `/notifications/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["notification"],
+      invalidatesTags: (_result, _error, id) => [
+        { type: "Notification", id },
+        "Notification",
+      ],
     }),
 
     // Mark notifications as read
@@ -56,7 +68,7 @@ const notificationsApi = baseApi.injectEndpoints({
         method: "POST",
         body: body,
       }),
-      invalidatesTags: ["notification"],
+      invalidatesTags: ["Notification"],
     }),
   }),
 });

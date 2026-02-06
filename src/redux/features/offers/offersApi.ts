@@ -33,6 +33,10 @@ const offersApi = baseApi.injectEndpoints({
         method: "POST",
         body: offersBody,
       }),
+      invalidatesTags: (_result, _error, { boostingPostId }) => [
+        "Offer",
+        { type: "BoostingPost", id: boostingPostId },
+      ],
     }),
 
     // Update offer as seller
@@ -48,6 +52,10 @@ const offersApi = baseApi.injectEndpoints({
         method: "PUT",
         body: offersBody,
       }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Offer", id },
+        "Offer",
+      ],
     }),
 
     // Get my offers as seller
@@ -58,6 +66,16 @@ const offersApi = baseApi.injectEndpoints({
         params: params || { page: 1, limit: 10 },
       }),
       transformResponse: (r) => r.data,
+      providesTags: (result) =>
+        result?.offers
+          ? [
+              ...result.offers.map(({ _id }: { _id: string }) => ({
+                type: "Offer" as const,
+                id: _id,
+              })),
+              "Offer",
+            ]
+          : ["Offer"],
     }),
 
     // Get offers for a post (Buyer)
@@ -74,6 +92,16 @@ const offersApi = baseApi.injectEndpoints({
         params: params || { page: 1, limit: 1000 },
       }),
       transformResponse: (res) => res?.data?.offers,
+      providesTags: (result, _error, { postId }) =>
+        result
+          ? [
+              ...result.map(({ _id }: { _id: string }) => ({
+                type: "Offer" as const,
+                id: _id,
+              })),
+              { type: "Offer", id: `POST_${postId}` },
+            ]
+          : [{ type: "Offer", id: `POST_${postId}` }],
     }),
 
     // Get single offer by ID
@@ -82,6 +110,7 @@ const offersApi = baseApi.injectEndpoints({
         url: `/offers/${id}`,
         method: "GET",
       }),
+      providesTags: (_result, _error, id) => [{ type: "Offer", id }],
     }),
 
     // Respond to offer (Buyer) - accept/reject
@@ -91,6 +120,12 @@ const offersApi = baseApi.injectEndpoints({
         method: "POST",
         body: offersBody,
       }),
+      invalidatesTags: (_result, _error, { offerId }) => [
+        { type: "Offer", id: offerId },
+        "Offer",
+        "BoostingPost",
+        "Order",
+      ],
     }),
 
     // Delete offer
@@ -99,6 +134,10 @@ const offersApi = baseApi.injectEndpoints({
         url: `/offers/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: "Offer", id },
+        "Offer",
+      ],
     }),
   }),
 });

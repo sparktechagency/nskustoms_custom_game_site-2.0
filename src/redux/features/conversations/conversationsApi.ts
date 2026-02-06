@@ -30,6 +30,7 @@ const conversationsApi = baseApi.injectEndpoints({
         method: "POST",
         body: conversationBody,
       }),
+      invalidatesTags: ["Conversation"],
     }),
 
     // Get my conversations
@@ -40,6 +41,16 @@ const conversationsApi = baseApi.injectEndpoints({
         params: params || { page: 1, limit: 100 },
       }),
       transformResponse: (res) => res.data,
+      providesTags: (result) =>
+        result?.conversations
+          ? [
+              ...result.conversations.map(({ _id }: { _id: string }) => ({
+                type: "Conversation" as const,
+                id: _id,
+              })),
+              "Conversation",
+            ]
+          : ["Conversation"],
     }),
 
     // Get all messages by conversation ID
@@ -50,6 +61,7 @@ const conversationsApi = baseApi.injectEndpoints({
         params: params,
       }),
       transformResponse: (res) => res.data,
+      providesTags: (_result, _error, { id }) => [{ type: "Message", id }],
     }),
 
     // Send message by conversation ID
@@ -65,6 +77,10 @@ const conversationsApi = baseApi.injectEndpoints({
         method: "POST",
         body: messageBody,
       }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Message", id },
+        { type: "Conversation", id },
+      ],
     }),
 
     // Get single conversation by ID
@@ -74,6 +90,7 @@ const conversationsApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (res) => res.data,
+      providesTags: (_result, _error, id) => [{ type: "Conversation", id }],
     }),
   }),
 });

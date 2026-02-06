@@ -29,6 +29,11 @@ const ratingsApi = baseApi.injectEndpoints({
         method: "POST",
         body: ratingBody,
       }),
+      invalidatesTags: (_result, _error, { orderId, sellerId }) => [
+        "Rating",
+        { type: "Order", id: orderId },
+        { type: "Rating", id: `SELLER_${sellerId}` },
+      ],
     }),
 
     // Get rating by order ID
@@ -37,6 +42,9 @@ const ratingsApi = baseApi.injectEndpoints({
         url: `/ratings/order/${orderId}`,
         method: "GET",
       }),
+      providesTags: (_result, _error, orderId) => [
+        { type: "Rating", id: `ORDER_${orderId}` },
+      ],
     }),
 
     // Get ratings for a seller
@@ -52,6 +60,10 @@ const ratingsApi = baseApi.injectEndpoints({
         method: "GET",
         params: params || { page: 1, limit: 10 },
       }),
+      providesTags: (_result, _error, { sellerId }) => [
+        { type: "Rating", id: `SELLER_${sellerId}` },
+        "Rating",
+      ],
     }),
     // Get ratings for a seller
     getSellerRatingStats: builder.query({
@@ -60,6 +72,7 @@ const ratingsApi = baseApi.injectEndpoints({
         method: "GET",
         params: params || { page: 1, limit: 10 },
       }),
+      providesTags: ["Rating"],
     }),
 
     // Update rating by ID
@@ -75,6 +88,10 @@ const ratingsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: ratingBody,
       }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Rating", id },
+        "Rating",
+      ],
     }),
 
     // Delete rating by ID
@@ -83,6 +100,10 @@ const ratingsApi = baseApi.injectEndpoints({
         url: `/ratings/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: "Rating", id },
+        "Rating",
+      ],
     }),
   }),
 });

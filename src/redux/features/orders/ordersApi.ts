@@ -31,6 +31,7 @@ const ordersApi = baseApi.injectEndpoints({
         method: "POST",
         body: orderBody,
       }),
+      invalidatesTags: ["Order", "BoostingPost", "Offer"],
     }),
 
     // Update order status
@@ -43,6 +44,11 @@ const ordersApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: orderBody,
       }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Order", id },
+        "Order",
+        "BoostingPost",
+      ],
     }),
 
     // Get my orders as buyer
@@ -52,6 +58,16 @@ const ordersApi = baseApi.injectEndpoints({
         method: "GET",
         params: params || { page: 1, limit: 10 },
       }),
+      providesTags: (result) =>
+        result?.data?.orders
+          ? [
+              ...result.data.orders.map(({ _id }: { _id: string }) => ({
+                type: "Order" as const,
+                id: _id,
+              })),
+              "Order",
+            ]
+          : ["Order"],
     }),
     // Get my orders as Seller
     getMyOrdersAsSeller: builder.query({
@@ -60,6 +76,16 @@ const ordersApi = baseApi.injectEndpoints({
         method: "GET",
         params: params || { page: 1, limit: 10 },
       }),
+      providesTags: (result) =>
+        result?.data?.orders
+          ? [
+              ...result.data.orders.map(({ _id }: { _id: string }) => ({
+                type: "Order" as const,
+                id: _id,
+              })),
+              "Order",
+            ]
+          : ["Order"],
     }),
 
     // Get single order by ID
@@ -68,6 +94,7 @@ const ordersApi = baseApi.injectEndpoints({
         url: `/orders/${id}`,
         method: "GET",
       }),
+      providesTags: (_result, _error, id) => [{ type: "Order", id }],
     }),
     // payments verifications by session id
     getVerifyPayments: builder.query({
@@ -75,6 +102,7 @@ const ordersApi = baseApi.injectEndpoints({
         url: `/orders/payment/verify/${sessionId}`,
         method: "GET",
       }),
+      providesTags: ["Order"],
     }),
   }),
 });

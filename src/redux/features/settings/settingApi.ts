@@ -13,12 +13,13 @@ const generSettingApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (res) => res.data,
+      providesTags: (_result, _error, { type }) => [{ type: "Setting", id: type }],
     }),
     postSupportMessage: builder.mutation({
       query: (data) => ({
-        url:"/admin/support-messages/create",
+        url: "/admin/support-messages/create",
         method: "POST",
-        body: data
+        body: data,
       }),
     }),
   }),

@@ -8,6 +8,7 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userInfo,
       }),
+      invalidatesTags: ["User"],
     }),
     register: builder.mutation({
       query: (userInfo) => ({
@@ -15,6 +16,7 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userInfo,
       }),
+      invalidatesTags: ["User"],
     }),
     forgetPassword: builder.mutation({
       query: (data) => ({
@@ -29,6 +31,7 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
     changePassword: builder.mutation({
       query: (data) => ({
@@ -36,6 +39,7 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
     verifyEmail: builder.mutation({
       query: (data) => ({
@@ -43,6 +47,7 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
     resendVerification: builder.mutation({
       query: ({ email }) => ({

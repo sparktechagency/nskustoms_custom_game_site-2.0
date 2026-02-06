@@ -1163,9 +1163,7 @@ export default function BoostingRequestPage() {
                           <div className="flex flex-wrap items-center gap-4 text-sm">
                             <div className="flex items-center gap-1 text-green-400">
                               <DollarSign className="w-4 h-4" />
-                              <span className="font-medium">
-                                ${offer.price}
-                              </span>
+                              <span className="font-medium">{offer.price}</span>
                             </div>
                             <div className="flex items-center gap-1 text-gray-400">
                               <Clock className="w-4 h-4" />

@@ -49,13 +49,17 @@ export default function CheckoutPage() {
   const [gamePassword, setGamePassword] = useState("");
 
   // Get platform charge percentage from API (value is the actual percentage, e.g., 5 = 5%)
-  const platformChargeSettings = platformChargeData as PlatformChargeData | undefined;
+  const platformChargeSettings = platformChargeData as
+    | PlatformChargeData
+    | undefined;
   const platformChargePercentage = platformChargeSettings?.value ?? 5; // Default to 5% if not available
 
   // Calculate totals
   const orderPrice = price;
   // Calculate platform charge as percentage of order price
-  const platformCharge = roundToTwoDecimals((orderPrice * platformChargePercentage) / 100);
+  const platformCharge = roundToTwoDecimals(
+    (orderPrice * platformChargePercentage) / 100,
+  );
   const total = roundToTwoDecimals(orderPrice + platformCharge);
 
   const handlePayment = async () => {
@@ -224,9 +228,7 @@ export default function CheckoutPage() {
 
                   {/* Platform Charge */}
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-gray-400">
-                      Platform Charge ({platformChargePercentage}%)
-                    </span>
+                    <span className="text-gray-400">Platform Charge</span>
                     <div className="flex items-center gap-1 text-white">
                       <DollarSign className="w-4 h-4" />
                       <span className="font-medium">

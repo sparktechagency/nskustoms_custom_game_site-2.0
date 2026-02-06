@@ -199,3 +199,33 @@ export interface BoostingResponse {
   total: number;
   pages: number;
 }
+
+/**====================Ratings page =========================== */
+export interface RatingUser {
+  _id: string;
+  name: string;
+  image: string;
+}
+
+export interface Rating {
+  _id: string;
+  userId: RatingUser;
+  sellerId: string;
+  orderId: string;
+  content: string;
+  rating: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SellerRatings {
+  ratings: Rating[];
+  averageRating: number;
+}
+
+export interface SellerRatingsStats {
+  averageRating: number;
+  totalRatings: number;
+  totalCompletedOrders: number;
+  totalCancelledOrders: number;
+}

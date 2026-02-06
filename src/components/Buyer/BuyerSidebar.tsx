@@ -8,7 +8,6 @@ import {
   FaRocket,
   FaEnvelope,
   FaBell,
-  FaStar,
   FaCog,
   FaSignOutAlt,
   FaTimes,
@@ -138,9 +137,7 @@ const ProfileSection = ({ compact = false }: { compact?: boolean }) => {
         <h2 className="text-sm font-bold text-white truncate">
           {user?.name || "N/A"}
         </h2>
-        <p className="text-xs text-gray-400 truncate">
-          {user?.email || ""}
-        </p>
+        <p className="text-xs text-gray-400 truncate">{user?.email || ""}</p>
       </div>
     </div>
   );
@@ -183,8 +180,7 @@ const BuyerSidebar = () => {
     { label: "Boosting", path: "/boosting", icon: FaRocket },
     { label: "Messages", path: "/message", icon: FaEnvelope },
     { label: "Notifications", path: "/notifications", icon: FaBell },
-     { label: "Support Message", path: "/supportmessage", icon: BiSupport },
-    { label: "Feedback", path: "/feedback", icon: FaStar },
+    { label: "Support Message", path: "/supportmessage", icon: BiSupport },
     { label: "Settings", path: "/accountsetting", icon: FaCog },
   ];
 
@@ -196,7 +192,13 @@ const BuyerSidebar = () => {
   }));
 
   // Logout button component for reuse
-  const LogoutButton = ({ onClick, className = "" }: { onClick: () => void; className?: string }) => (
+  const LogoutButton = ({
+    onClick,
+    className = "",
+  }: {
+    onClick: () => void;
+    className?: string;
+  }) => (
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 group ${className}`}
@@ -343,7 +345,11 @@ const BuyerSidebar = () => {
         /* Selected menu item */
         .ant-menu-item-selected,
         .ant-menu-item-selected:hover {
-          background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+          background: linear-gradient(
+            135deg,
+            #fef2f2 0%,
+            #fee2e2 100%
+          ) !important;
           color: #dc2626 !important;
         }
 

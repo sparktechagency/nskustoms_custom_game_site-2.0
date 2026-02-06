@@ -80,7 +80,7 @@ export default function OrderReviewModal({
           <textarea
             value={review}
             onChange={(e) => setReview(e.target.value)}
-            placeholder="give an review..."
+            placeholder="Give an review..."
             className="w-full bg-gray-700 text-gray-300 px-4 py-3 rounded-md resize-none min-h-[100px] focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>

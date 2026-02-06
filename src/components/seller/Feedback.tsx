@@ -101,7 +101,7 @@ const Feedback = () => {
         {/* Empty State */}
         <div className="bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50 p-12 flex flex-col items-center justify-center min-h-[400px]">
           <div className="text-6xl mb-4">
-            <Image src={notfund} alt="image" />
+            <Image src={notfund} alt="image" width={200} height={250} />
           </div>
           <p className="text-gray-400 text-lg">Nothing found</p>
         </div>

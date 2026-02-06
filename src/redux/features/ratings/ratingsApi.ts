@@ -8,9 +8,8 @@ interface SellerRatingsParams {
 
 interface CreateRatingBody {
   orderId: string;
-  sellerId: string;
   rating: number;
-  comment?: string;
+  content?: string;
   [key: string]: unknown;
 }
 
@@ -29,10 +28,10 @@ const ratingsApi = baseApi.injectEndpoints({
         method: "POST",
         body: ratingBody,
       }),
-      invalidatesTags: (_result, _error, { orderId, sellerId }) => [
+      invalidatesTags: (_result, _error, { orderId }) => [
         "Rating",
         { type: "Order", id: orderId },
-        { type: "Rating", id: `SELLER_${sellerId}` },
+        "BoostingPost",
       ],
     }),
 

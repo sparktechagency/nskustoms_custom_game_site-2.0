@@ -10,6 +10,7 @@ import {
   useMakeBoostingAsCancelledMutation,
   useMakeBoostingAsCompletedMutation,
 } from "@/src/redux/features/boosting-post/boostingApi";
+import { useCreateRatingMutation } from "@/src/redux/features/ratings/ratingsApi";
 import {
   Loader2,
   CheckCircle,
@@ -17,6 +18,7 @@ import {
   User,
   MessageSquare,
   ArrowLeft,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatBoostingType, formatDate } from "@/src/utils/pageHealper";
@@ -39,9 +41,14 @@ const BoostingDetailsClient = () => {
     useMakeBoostingAsCancelledMutation();
   const [makeAsCompleteBoosting, { isLoading: isCompleting }] =
     useMakeBoostingAsCompletedMutation();
+  const [createRating, { isLoading: isSubmittingRating }] =
+    useCreateRatingMutation();
 
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [reviewContent, setReviewContent] = useState("");
 
   const details = boostingDetails as BoostingPost | undefined;
 
@@ -50,6 +57,7 @@ const BoostingDetailsClient = () => {
       await makeAsCompleteBoosting(id).unwrap();
       toast.success("Boosting marked as completed!");
       setShowCompleteConfirm(false);
+      setShowRatingModal(true);
     } catch (error) {
       console.error("Failed to mark as complete:", error);
       toast.error("Failed to mark as complete");
@@ -65,6 +73,38 @@ const BoostingDetailsClient = () => {
       console.error("Failed to cancel:", error);
       toast.error("Failed to cancel boosting");
     }
+  };
+
+  const handleRatingSubmit = async () => {
+    if (rating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+
+    try {
+      await createRating({
+        orderId: id,
+        content: reviewContent,
+        rating: rating,
+      }).unwrap();
+      toast.success("Thank you for your feedback!");
+      setShowRatingModal(false);
+      setRating(0);
+      setReviewContent("");
+    } catch (error) {
+      console.error("Failed to submit rating:", error);
+      toast.error("Failed to submit rating");
+    }
+  };
+
+  const handleCloseRatingModal = () => {
+    setShowRatingModal(false);
+    setRating(0);
+    setReviewContent("");
+  };
+
+  const handleStarClick = (starValue: number) => {
+    setRating(starValue);
   };
 
   // Render boosting details based on type
@@ -505,6 +545,84 @@ const BoostingDetailsClient = () => {
                 >
                   {isCancelling && <Loader2 className="w-4 h-4 animate-spin" />}
                   Cancel Boosting
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rating Modal */}
+        {showRatingModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#282836] rounded-lg p-6 max-w-md w-full border border-gray-700 relative">
+              <button
+                onClick={handleCloseRatingModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                aria-label="Close modal"
+              >
+                ✕
+              </button>
+
+              <div className="mb-6">
+                <h2 className="text-white text-xl font-bold mb-1">
+                  How was your experience?
+                </h2>
+                <p className="text-gray-400">
+                  Share your feedback about this order.
+                </p>
+              </div>
+
+              {/* Rating Stars */}
+              <div className="flex justify-center mb-6 space-x-2">
+                {[1, 2, 3, 4, 5].map((starValue) => (
+                  <button
+                    key={starValue}
+                    onClick={() => handleStarClick(starValue)}
+                    className="focus:outline-none"
+                    aria-label={`Rate ${starValue} stars`}
+                  >
+                    <Star
+                      className={`w-8 h-8 transition-colors ${
+                        starValue <= rating
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-500"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {/* Review Textarea */}
+              <div className="mb-6">
+                <textarea
+                  value={reviewContent}
+                  onChange={(e) => setReviewContent(e.target.value)}
+                  placeholder="Write your review (optional)..."
+                  className="w-full bg-gray-700 text-gray-300 px-4 py-3 rounded-lg resize-none min-h-[120px] focus:outline-none focus:ring-2 focus:ring-red-500 border border-gray-600"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCloseRatingModal}
+                  className="flex-1 py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={handleRatingSubmit}
+                  disabled={rating === 0 || isSubmittingRating}
+                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                    rating > 0
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-red-600 opacity-50 cursor-not-allowed text-white"
+                  }`}
+                >
+                  {isSubmittingRating && (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  )}
+                  Submit Review
                 </button>
               </div>
             </div>

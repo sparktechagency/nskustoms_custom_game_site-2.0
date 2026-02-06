@@ -1,61 +1,64 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+"use client";
 
-import { useGetTransactionsQuery, useGetTransactionsStatsQuery, useSetTransactionsMutation } from '@/src/redux/features/become-seller/becomeSellerApi';
-import { useState } from 'react';
+import {
+  useGetTransactionsQuery,
+  useGetTransactionsStatsQuery,
+  useSetTransactionsMutation,
+} from "@/src/redux/features/become-seller/becomeSellerApi";
+import { formatDate, getStatusColor } from "@/src/utils/pageHealper";
+import {
+  Wallet,
+  TrendingUp,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Receipt,
+  Loader2,
+} from "lucide-react";
+import { useState } from "react";
+
+interface TransactionStats {
+  totalEarning: number;
+  totalWithdrawal: number;
+  availableWithdrawal: number;
+  totalTransactions: number;
+  pendingAmount: number;
+  paidAmount: number;
+  rejectedAmount: number;
+}
 
 const WalletPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [withdrawalAmount, setWithdrawalAmount] = useState('500');
+  const [withdrawalAmount, setWithdrawalAmount] = useState("500");
   const [formData, setFormData] = useState({
-    accountNumber: '',
-    swiftCode: '',
-    bankName: '',
-    accountHolderName: ''
-  }); 
+    accountNumber: "",
+    swiftCode: "",
+    bankName: "",
+    accountHolderName: "",
+  });
 
-  const {data} = useGetTransactionsQuery({})
-  console.log(data)
+  const { data, isLoading: isTransactionsLoading } = useGetTransactionsQuery(
+    {},
+  );
 
-  const {data:Stats} = useGetTransactionsStatsQuery({})
-  const paidAmount = Stats?.data?.paidAmount
+  const { data: Stats, isLoading: isStatsLoading } =
+    useGetTransactionsStatsQuery({});
 
-  const [SetTransactions] = useSetTransactionsMutation()
+  const stats = Stats?.data as TransactionStats | undefined;
+  const availableBalance = stats?.availableWithdrawal ?? 0;
+
+  const [SetTransactions] = useSetTransactionsMutation();
 
   const transactions = data?.data?.transactions || [];
 
-  // Format date helper function
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-
-  // Get status badge color
-  const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'paid':
-        return 'bg-green-500/20 text-green-400';
-      case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400';
-      case 'rejected':
-        return 'bg-red-500/20 text-red-400';
-      default:
-        return 'bg-gray-500/20 text-gray-400';
-    }
-  };
-
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -66,92 +69,199 @@ const WalletPage = () => {
           accountNumber: formData.accountNumber,
           swiftCode: formData.swiftCode,
           bankName: formData.bankName,
-          accountHolderName: formData.accountHolderName
+          accountHolderName: formData.accountHolderName,
         },
-        amount: Number(withdrawalAmount)
+        amount: Number(withdrawalAmount),
       };
-      
-      console.log('Withdrawal request:', payload);
-      
+
+      console.log("Withdrawal request:", payload);
+
       // Post withdrawal request
       const result = await SetTransactions(payload).unwrap();
-      console.log('Success:', result);
-      
+      console.log("Success:", result);
+
       // Reset form and close modal
       setFormData({
-        accountNumber: '',
-        swiftCode: '',
-        bankName: '',
-        accountHolderName: ''
+        accountNumber: "",
+        swiftCode: "",
+        bankName: "",
+        accountHolderName: "",
       });
-      setWithdrawalAmount('500');
+      setWithdrawalAmount("500");
       setIsModalOpen(false);
-      
     } catch (error) {
-      console.error('Withdrawal request failed:', error);
+      console.error("Withdrawal request failed:", error);
       // You can add toast notification here
     }
   };
 
+  const isLoading = isStatsLoading || isTransactionsLoading;
+
+  const statsCards = [
+    {
+      icon: TrendingUp,
+      label: "Total Earnings",
+      value: stats?.totalEarning ?? 0,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+      prefix: "$",
+    },
+    {
+      icon: ArrowUpCircle,
+      label: "Total Withdrawal",
+      value: stats?.totalWithdrawal ?? 0,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      prefix: "$",
+    },
+    {
+      icon: Wallet,
+      label: "Available to Withdraw",
+      value: stats?.availableWithdrawal ?? 0,
+      color: "text-emerald-500",
+      bgColor: "bg-emerald-500/10",
+      prefix: "$",
+    },
+    {
+      icon: Receipt,
+      label: "Total Transactions",
+      value: stats?.totalTransactions ?? 0,
+      color: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+      prefix: "",
+    },
+  ];
+
   return (
-    <div className="">
+    <div className="px-6">
       {/* Wallet Header */}
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-red-500 text-2xl font-bold mb-2 flex items-center">
+        <h1 className="text-red-500 text-2xl font-bold mb-6 flex items-center">
           <span className="mr-2">💰</span> Wallet
         </h1>
-        <div className="bg-[#282836] backdrop-blur-sm rounded-lg p-2 mb-6 relative overflow-hidden">
-          {/* Background decorative image would go here */}
+
+        {/* Main Balance Card */}
+        <div className="bg-gradient-to-r from-[#282836] to-[#1e1e2a] backdrop-blur-sm rounded-xl p-6 mb-6 border border-gray-700/50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
           <div className="relative z-10">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
-                <p className="text-gray-400 text-sm">Total Balance</p>
-                <p className="text-white text-3xl font-bold">${paidAmount}</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <Wallet className="w-5 h-5 text-emerald-500" />
+                  <p className="text-gray-400 text-sm">Available Balance</p>
+                </div>
+                <p className="text-white text-4xl font-bold">
+                  {isLoading ? (
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+                  ) : (
+                    `$${availableBalance.toLocaleString()}`
+                  )}
+                </p>
+                <p className="text-gray-500 text-sm mt-1">
+                  Ready for withdrawal
+                </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                disabled={availableBalance <= 0}
+                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
               >
+                <ArrowDownCircle className="w-5 h-5" />
                 Request Withdrawal
               </button>
             </div>
           </div>
         </div>
 
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {statsCards.slice(0, 4).map((stat, index) => (
+            <div
+              key={index}
+              className="bg-[#282836] backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-gray-600/50 transition-colors"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                </div>
+                <span className="text-gray-400 text-sm">{stat.label}</span>
+              </div>
+              <div className="text-white text-2xl font-bold">
+                {isLoading ? (
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+                ) : (
+                  `${stat.prefix}${stat.value.toLocaleString()}`
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* Recent Transactions */}
         <div className="bg-[#282836] backdrop-blur-sm rounded-lg overflow-hidden">
-          <h2 className="text-white text-xl font-bold p-6 pb-4">Recent Transactions</h2>
-          
+          <h2 className="text-white text-xl font-bold p-6 pb-4">
+            Recent Transactions
+          </h2>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-700">
-                  <th className="text-left text-gray-400 font-medium p-4 text-sm">Bank Name</th>
-                  <th className="text-left text-gray-400 font-medium p-4 text-sm">Account Holder</th>
-                  <th className="text-left text-gray-400 font-medium p-4 text-sm">Type</th>
-                  <th className="text-left text-gray-400 font-medium p-4 text-sm">Transaction Date</th>
-                  <th className="text-left text-gray-400 font-medium p-4 text-sm">Amount</th>
-                  <th className="text-left text-gray-400 font-medium p-4 text-sm">Status</th>
+                  <th className="text-left text-gray-400 font-medium p-4 text-sm">
+                    Bank Name
+                  </th>
+                  <th className="text-left text-gray-400 font-medium p-4 text-sm">
+                    Account Holder
+                  </th>
+                  <th className="text-left text-gray-400 font-medium p-4 text-sm">
+                    Type
+                  </th>
+                  <th className="text-left text-gray-400 font-medium p-4 text-sm">
+                    Transaction Date
+                  </th>
+                  <th className="text-left text-gray-400 font-medium p-4 text-sm">
+                    Amount
+                  </th>
+                  <th className="text-left text-gray-400 font-medium p-4 text-sm">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.length > 0 ? (
                   transactions.map((transaction: any) => (
-                    <tr key={transaction._id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                    <tr
+                      key={transaction._id}
+                      className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors"
+                    >
                       <td className="p-4">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-slate-700 rounded-lg mr-3 flex items-center justify-center">
                             <span className="text-xs">🏦</span>
                           </div>
-                          <span className="text-white text-sm">{transaction.bankInfo?.bankName || 'N/A'}</span>
+                          <span className="text-white text-sm">
+                            {transaction.bankInfo?.bankName || "N/A"}
+                          </span>
                         </div>
                       </td>
-                      <td className="p-4 text-gray-300 text-sm">{transaction.bankInfo?.accountHolderName || 'N/A'}</td>
-                      <td className="p-4 text-gray-300 text-sm capitalize">{transaction.type}</td>
-                      <td className="p-4 text-gray-300 text-sm">{formatDate(transaction.createdAt)}</td>
-                      <td className="p-4 text-white font-semibold text-sm">${transaction.amount}</td>
+                      <td className="p-4 text-gray-300 text-sm">
+                        {transaction.bankInfo?.accountHolderName || "N/A"}
+                      </td>
+                      <td className="p-4 text-gray-300 text-sm capitalize">
+                        {transaction.type}
+                      </td>
+                      <td className="p-4 text-gray-300 text-sm">
+                        {formatDate(transaction.createdAt)}
+                      </td>
+                      <td className="p-4 text-white font-semibold text-sm">
+                        ${transaction.amount}
+                      </td>
                       <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(transaction.status)}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(transaction.status)}`}
+                        >
                           {transaction.status}
                         </span>
                       </td>
@@ -174,23 +284,30 @@ const WalletPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md border border-slate-700 shadow-2xl">
-            <h2 className="text-emerald-400 text-xl font-bold mb-6 text-center">Withdrawal Request</h2>
-            
+            <h2 className="text-emerald-400 text-xl font-bold mb-6 text-center">
+              Withdrawal Request
+            </h2>
+
             <div className="space-y-4">
               {/* Available Balance and Withdrawal Amount */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-300 text-sm mb-2 block">Available Balance</label>
+                  <label className="text-gray-300 text-sm mb-2 block">
+                    Available Balance
+                  </label>
                   <div className="bg-slate-900 rounded-lg px-4 py-3 text-white font-semibold">
-                    ${paidAmount}
+                    ${availableBalance.toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  <label className="text-gray-300 text-sm mb-2 block">Withdrawal Amount</label>
+                  <label className="text-gray-300 text-sm mb-2 block">
+                    Withdrawal Amount
+                  </label>
                   <input
                     type="number"
                     value={withdrawalAmount}
                     onChange={(e) => setWithdrawalAmount(e.target.value)}
+                    max={availableBalance}
                     className="bg-slate-900 rounded-lg px-4 py-3 text-white w-full focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
@@ -198,7 +315,9 @@ const WalletPage = () => {
 
               {/* Account Holder Name */}
               <div>
-                <label className="text-gray-300 text-sm mb-2 block">Account Holder Name</label>
+                <label className="text-gray-300 text-sm mb-2 block">
+                  Account Holder Name
+                </label>
                 <input
                   type="text"
                   name="accountHolderName"
@@ -211,7 +330,9 @@ const WalletPage = () => {
 
               {/* Account Number */}
               <div>
-                <label className="text-gray-300 text-sm mb-2 block">Account Number</label>
+                <label className="text-gray-300 text-sm mb-2 block">
+                  Account Number
+                </label>
                 <input
                   type="text"
                   name="accountNumber"
@@ -224,7 +345,9 @@ const WalletPage = () => {
 
               {/* Swift Code */}
               <div>
-                <label className="text-gray-300 text-sm mb-2 block">Swift Code</label>
+                <label className="text-gray-300 text-sm mb-2 block">
+                  Swift Code
+                </label>
                 <input
                   type="text"
                   name="swiftCode"
@@ -237,7 +360,9 @@ const WalletPage = () => {
 
               {/* Bank Name */}
               <div>
-                <label className="text-gray-300 text-sm mb-2 block">Bank Name</label>
+                <label className="text-gray-300 text-sm mb-2 block">
+                  Bank Name
+                </label>
                 <input
                   type="text"
                   name="bankName"

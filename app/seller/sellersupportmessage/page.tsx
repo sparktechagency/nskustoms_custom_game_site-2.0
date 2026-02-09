@@ -1,5 +1,7 @@
 import SupportMessageForm from "@/src/components/shared/SupportMessageForm";
 
+export const dynamic = "force-dynamic";
+
 const Page = () => {
   return (
     <SupportMessageForm

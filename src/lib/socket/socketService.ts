@@ -154,15 +154,15 @@ class SocketService {
     this.socket.on(events.NOTIFICATION_MESSAGE, () => {
       store.dispatch(incrementUnreadMessages());
       // Invalidate notifications cache
-      store.dispatch(baseApi.util.invalidateTags(["notification"]));
+      store.dispatch(baseApi.util.invalidateTags(["Notification"]));
     });
 
     this.socket.on(events.NOTIFICATION_OFFER, () => {
-      store.dispatch(baseApi.util.invalidateTags(["notification"]));
+      store.dispatch(baseApi.util.invalidateTags(["Notification"]));
     });
 
     this.socket.on(events.NOTIFICATION_ORDER, () => {
-      store.dispatch(baseApi.util.invalidateTags(["notification"]));
+      store.dispatch(baseApi.util.invalidateTags(["Notification"]));
     });
 
     // Typing events

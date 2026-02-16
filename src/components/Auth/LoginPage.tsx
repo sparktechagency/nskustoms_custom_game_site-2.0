@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import appleLogo from "@/src/Assets/Auth/apple_logo.png";
-import googleLogo from "@/src/Assets/Auth/google_logo.png";
 import logo from "@/src/Assets/Landing/logo.png";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -77,16 +75,8 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // TODO: Handle Google sign-in logic
-  };
-
-  const handleAppleSignIn = () => {
-    // TODO: Handle Apple sign-in logic
-  };
-
   return (
-    <div className="bg-[#282836F0] rounded-xl shadow-2xl w-full max-w-md p-6 md:p-8">
+    <div className="bg-[#282836F0] rounded-xl shadow-2xl w-full min-w-[30rem] max-w-md p-6 md:p-8">
       {/* Header */}
       <div className="flex flex-col items-center mb-8">
         <Link href="/" className="mb-4">
@@ -99,37 +89,9 @@ export default function Login() {
           />
         </Link>
         <h1 className="text-2xl font-bold text-white">Sign In</h1>
-        <p className="text-gray-400 text-sm mt-1">Welcome back! Please sign in to continue</p>
-      </div>
-
-      {/* Social Sign In */}
-      <div className="mb-6">
-        <h2 className="text-lg text-left font-semibold text-gray-300 mb-3">
-          Or with other accounts
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={handleGoogleSignIn}
-            className="flex items-center justify-center text-sm space-x-1 px-4 py-2.5 border border-gray-700 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-200 text-white"
-          >
-            <Image src={googleLogo} width={19} height={10} alt="Google Logo " />
-            <span> Sign in with Google</span>
-          </button>
-          <button
-            onClick={handleAppleSignIn}
-            className="flex items-center justify-center text-sm space-x-1 px-4 py-2.5 border border-gray-700 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-200 text-white"
-          >
-            <Image src={appleLogo} width={19} height={10} alt="Apple Logo " />
-            <span> Sign in with Apple</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="flex items-center my-4">
-        <div className="flex-1 border-t border-gray-700"></div>
-        <span className="px-3 text-sm text-gray-400">or</span>
-        <div className="flex-1 border-t border-gray-700"></div>
+        <p className="text-gray-400 text-sm mt-1">
+          Welcome back! Please sign in to continue
+        </p>
       </div>
 
       {/* Sign In Form */}
@@ -154,7 +116,7 @@ export default function Login() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="enter your email"
+            placeholder="Enter your email"
             className="w-full px-3 py-2 bg-gray-700 border border-gray-600  rounded-xs text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
@@ -174,7 +136,7 @@ export default function Login() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="enter your password"
+              placeholder="Enter your password"
               className="w-full px-3 py-2 bg-gray-700 border border-gray-600  rounded-xs text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
               required
             />

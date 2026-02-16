@@ -109,14 +109,14 @@ const AccountSettings = () => {
                 )}
               </div>
             </div>
-            <div>
+            {/* <div>
               <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
                 Upload image
               </button>
               <p className="text-gray-400 text-xs mt-2">
                 Must be JPEG, PNG or HEIC and cannot exceed 10MB.
               </p>
-            </div>
+            </div> */}
           </div>
 
           {/* Name Field */}
@@ -131,9 +131,9 @@ const AccountSettings = () => {
                 readOnly
                 className="w-full bg-gray-800/50 border border-gray-700 rounded px-4 py-3 text-gray-300 text-sm focus:outline-none focus:border-gray-600"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-400">
+              {/* <button className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-400">
                 <Edit2 className="w-4 h-4" />
-              </button>
+              </button> */}
             </div>
           </div>
 

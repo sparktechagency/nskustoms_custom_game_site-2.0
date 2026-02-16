@@ -19,13 +19,12 @@ export function updateHtmlLangAttribute(langCode: string) {
 
 // Function to change the Google Translate language
 export function changeGoogleTranslateLanguage(langCode: string) {
-  // Set the googtrans cookie for Google Translate
-  const domain = window.location.hostname;
+  // Store selected language in localStorage
+  localStorage.setItem("currentLanguage", langCode);
 
-  // Clear existing googtrans cookies
-  document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-  document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
-  document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
+  // Clear existing googtrans cookies (path-level and domain-level)
+  document.cookie = "googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+  document.cookie = "googtrans=; domain=.auraboost.gg; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
 
   // Update HTML lang attribute before reload
   updateHtmlLangAttribute(langCode);
@@ -36,11 +35,11 @@ export function changeGoogleTranslateLanguage(langCode: string) {
     return;
   }
 
-  // Set new googtrans cookie
+  // Set new googtrans cookie with proper domain
   const googtransValue = `/en/${langCode}`;
-  document.cookie = `googtrans=${googtransValue}; path=/;`;
-  document.cookie = `googtrans=${googtransValue}; path=/; domain=${domain};`;
-  document.cookie = `googtrans=${googtransValue}; path=/; domain=.${domain};`;
+  const maxAge = 30 * 24 * 60 * 60;
+  document.cookie = `googtrans=${googtransValue}; path=/; max-age=${maxAge}`;
+  document.cookie = `googtrans=${googtransValue}; domain=.auraboost.gg; path=/; max-age=${maxAge}`;
 
   // Reload to apply translation
   window.location.reload();

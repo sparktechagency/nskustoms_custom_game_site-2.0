@@ -40,6 +40,7 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
     zipCode: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -55,6 +56,8 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
           [field]: value,
         },
       }));
+    } else if (name === "country") {
+      setFormData((prev) => ({ ...prev, country: value, nationality: value }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -62,6 +65,24 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    // Validate age (must be 18+)
+    const { year, month, day } = formData.dateOfBirth;
+    if (year && month && day) {
+      const birthDate = new Date(Number(year), Number(month) - 1, Number(day));
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        setError("You must be at least 18 years old to register as a seller.");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     // Submit data to parent component
@@ -84,6 +105,12 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="bg-red-500/20 border border-red-500 text-red-400 px-4 py-2 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="flex flex-col items-start space-y-2">
           <label
             htmlFor="firstName"

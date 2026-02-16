@@ -200,39 +200,6 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
 
         <div className="flex flex-col items-start space-y-2">
           <label
-            htmlFor="nationality"
-            className="block text-sm font-medium text-gray-300 mb-1"
-          >
-            Nationality:
-          </label>
-          <div className="relative w-full">
-            <select
-              id="nationality"
-              name="nationality"
-              value={formData.nationality}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none pr-10"
-              required
-            >
-              <option value="">Nationality</option>
-              <option value="us">United States</option>
-              <option value="ca">Canada</option>
-              <option value="uk">United Kingdom</option>
-              <option value="au">Australia</option>
-              <option value="de">Germany</option>
-              <option value="fr">France</option>
-              <option value="jp">Japan</option>
-              <option value="cn">China</option>
-              <option value="in">India</option>
-              <option value="br">Brazil</option>
-              {/* Add more countries as needed */}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-
-        <div className="flex flex-col items-start space-y-2">
-          <label
             htmlFor="streetAddress"
             className="block text-sm font-medium text-gray-300 mb-1"
           >

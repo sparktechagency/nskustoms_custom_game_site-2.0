@@ -60,13 +60,18 @@ export default function Register() {
         password: formData.password,
         dateOfBirth: formatDateForApi(formData.dateOfBirth),
       }).unwrap();
-
       // Redirect to OTP verification page with email
-      router.push(`/opt-verifications?email=${encodeURIComponent(formData.email)}`);
+      router.push(
+        `/opt-verifications?email=${encodeURIComponent(formData.email)}`,
+      );
     } catch (err: unknown) {
-      const error = err as { data?: { message?: string }; message?: string };
+      const error = err as {
+        data?: { message?: string; error?: string };
+        message?: string;
+      };
       const errorMessage =
         error?.data?.message ||
+        error?.data?.error ||
         error?.message ||
         "Registration failed. Please try again.";
       setError(errorMessage);
@@ -87,7 +92,9 @@ export default function Register() {
           />
         </Link>
         <h1 className="text-2xl font-bold text-white">Sign Up</h1>
-        <p className="text-gray-400 text-sm mt-1">Create your account to get started</p>
+        <p className="text-gray-400 text-sm mt-1">
+          Create your account to get started
+        </p>
       </div>
 
       {/* Sign Up Form */}

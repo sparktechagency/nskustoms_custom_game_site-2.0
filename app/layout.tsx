@@ -6,47 +6,47 @@ import { Toaster } from "sonner";
 import { GoogleTranslateScript } from "@/src/components/GoogleTranslateScript";
 
 export const metadata: Metadata = {
-  title: {
-    default: "Auraboost - Best Platform for Game Rank Boosting",
-    template: " AuraboostGame Boosting",
-  },
+  // title: {
+  //   default: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
+  //   template: "%s | Auraboost",
+  // },
+  title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
   description:
-    "Auraboost is the premier platform for game rank boosting services. Professional boosting for Valorant, League of Legends, CS:GO, and more. Fast, secure, and reliable ranking solutions.",
+    "Upgrade your rank with elite ELO and LoL Boosting services designed for maximum security and total discretion. Experience top-tier performance, seamless service, and round-the-clock availability across every server.",
   keywords: [
-    "game boosting",
-    "rank boosting",
-    "Valorant boost",
+    "ELO boosting",
+    "LoL boosting",
     "League of Legends boost",
-    "CS:GO boost",
-    "gaming services",
-    "rank increase",
-    "professional gaming",
-    "competitive gaming",
-    "MMR boost",
-    "ELO boost",
+    "rank boosting",
+    "game boosting",
+    "Valorant boost",
+    "affordable boosting",
+    "fast ELO boost",
+    "secure rank boost",
+    "24/7 boosting service",
+    "Auraboost",
   ],
   authors: [{ name: "Auraboost Team" }],
   creator: "Auraboost Team",
-  publisher: "Auraboost",
-  generator: "Next.js",
+  publisher: "GWD Processing FZCO",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://www.auraboost.com"),
+  metadataBase: new URL("https://www.auraboost.gg"),
   openGraph: {
-    title: "Auraboost - Best Platform for Game Rank Boosting",
+    title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
     description:
-      "Professional game rank boosting services for Valorant, League of Legends, CS:GO, and more. Fast, secure, and reliable ranking solutions.",
-    url: "https://www.auraboost.com",
+      "Upgrade your rank with elite ELO and LoL Boosting services designed for maximum security and total discretion. Top-tier performance and round-the-clock availability across every server.",
+    url: "https://www.auraboost.gg",
     siteName: "Auraboost",
     images: [
       {
-        url: "/og-image.jpg", // Add your og image
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Auraboost - Game Rank Boosting Platform",
+        alt: "Auraboost - ELO & LoL Boosting Platform",
       },
     ],
     locale: "en_US",
@@ -54,10 +54,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Auraboost - Best Platform for Game Rank Boosting",
+    title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
     description:
-      "Professional game rank boosting services for Valorant, League of Legends, CS:GO, and more.",
-    // images: ["/twitter-image.jpg"], // Add your twitter image
+      "Upgrade your rank with elite ELO and LoL Boosting services. Maximum security, total discretion, and 24/7 availability.",
   },
   robots: {
     index: true,
@@ -70,10 +69,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "google-site-verification-token", // Add your verification token
-    yandex: "yandex-verification-token", // Add your verification token
-  },
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
@@ -81,7 +76,7 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   alternates: {
-    canonical: "https://www.Auraboost.com",
+    canonical: "/",
   },
 };
 

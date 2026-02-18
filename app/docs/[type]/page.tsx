@@ -11,11 +11,17 @@ interface SettingData {
   title?: string;
 }
 
-type SettingType = "privacy_policy" | "terms_condition" | "about_us" | "platform_charge";
+type SettingType =
+  | "privacy_policy"
+  | "terms_condition"
+  | "about_us"
+  | "platform_charge";
 
 function Page() {
   const { type } = useParams<{ type: string }>();
-  const { data, isLoading } = useGetSettingByTypeQuery({ type: type as SettingType });
+  const { data, isLoading } = useGetSettingByTypeQuery({
+    type: type as SettingType,
+  });
 
   const settingData = data as SettingData | undefined;
 
@@ -43,33 +49,40 @@ function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Header />
       <main className="flex-1 py-12 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Title */}
-          <h1 className="text-3xl font-bold text-white mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">
             {settingData?.title || formatTitle(type)}
           </h1>
 
           {/* Content */}
           {settingData?.content ? (
             <div
-              className="prose prose-invert prose-lg max-w-none
-                prose-headings:text-white
-                prose-p:text-gray-300
-                prose-strong:text-white
-                prose-a:text-red-400 prose-a:no-underline hover:prose-a:underline
-                prose-ul:text-gray-300
-                prose-ol:text-gray-300
-                prose-li:text-gray-300
-                prose-blockquote:border-red-500 prose-blockquote:text-gray-400
-                [&_*]:leading-relaxed"
+              className="prose prose-pink"
               dangerouslySetInnerHTML={{ __html: settingData.content }}
             />
           ) : (
+            // <div
+            // className="prose prose-invert prose-lg max-w-none
+            //   prose-headings:text-white
+            //   prose-p:text-gray-300
+            //   prose-strong:text-white
+            //   prose-a:text-red-400 prose-a:no-underline hover:prose-a:underline
+            //   prose-ul:text-gray-300
+            //   prose-ol:text-gray-300
+            //   prose-li:text-gray-300
+            //   prose-blockquote:border-red-500 prose-blockquote:text-gray-400
+            //   [&_*]:leading-relaxed"
+
+            //   dangerouslySetInnerHTML={{ __html: settingData.content }}
+            // />
             <div className="text-center py-12">
-              <p className="text-gray-400">No content available for this page.</p>
+              <p className="text-gray-400">
+                No content available for this page.
+              </p>
             </div>
           )}
         </div>

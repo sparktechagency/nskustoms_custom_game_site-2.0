@@ -10,6 +10,8 @@ import {
   useResendVerificationMutation,
 } from "@/src/redux/features/auth/authApi";
 
+// url -> &type=reset
+
 export default function OtpVerification() {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(60);
@@ -20,6 +22,8 @@ export default function OtpVerification() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const type = searchParams.get("type") || "";
+  console.log(type);
 
   const [verifyEmail, { isLoading: isSubmitting }] = useVerifyEmailMutation();
   const [resendVerification, { isLoading: isResending }] =
@@ -224,7 +228,7 @@ export default function OtpVerification() {
               {isResending ? "Sending..." : "Resend OTP"}
             </button>
           ) : (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-400 underline">
               Resend OTP in{" "}
               <span className="text-white font-medium">{resendTimer}s</span>
             </p>

@@ -25,7 +25,7 @@ const authApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
-    resitPassword: builder.mutation({
+    resetPassword: builder.mutation({
       query: (data) => ({
         url: `/auth/reset-password`,
         method: "POST",
@@ -51,8 +51,9 @@ const authApi = baseApi.injectEndpoints({
     }),
     resendVerification: builder.mutation({
       query: ({ email }) => ({
-        url: `/auth/resend-verification/${email}`,
-        method: "GET",
+        url: `/auth/resend-verification`,
+        method: "POST",
+        body: { email },
       }),
     }),
     checkUserExist: builder.mutation({
@@ -68,7 +69,7 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useForgetPasswordMutation,
-  useResitPasswordMutation,
+  useResetPasswordMutation,
   useChangePasswordMutation,
   useVerifyEmailMutation,
   useResendVerificationMutation,

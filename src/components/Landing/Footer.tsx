@@ -225,6 +225,16 @@ export default function Footer() {
         <div className="mt-12 pt-6 border-t text-xs border-gray-800 text-center text-gray-400">
           <p>
             © 2025. The Auraboost website is operated by GWD Processing FZCO.
+            (Developed by{" "}
+            <a
+              href="https://www.linkedin.com/in/faysaldev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-red-500 hover:text-blue-300 transition-colors"
+            >
+              faysaldev
+            </a>
+            ). All rights reserved.
           </p>
           <div className="mt-2 flex justify-center space-x-4">
             <Link

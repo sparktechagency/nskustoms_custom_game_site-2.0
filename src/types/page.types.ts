@@ -184,6 +184,8 @@ export interface BoostingOffer {
   status: "pending" | "accepted" | "declined";
   createdAt: string;
   updatedAt: string;
+  sellerRating?: number;
+  sellerCompletedOrders?: number;
 }
 
 /**=====================Buyer Boosting page =========================== */

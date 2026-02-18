@@ -7,6 +7,7 @@ import Header from "@/src/components/Landing/Header";
 import Footer from "@/src/components/Landing/Footer";
 import CancelBoostingRequestModal from "@/src/components/BoostingRequestPage/CancelBoostingRequestModal";
 import EmptyBoostingRequest from "@/src/components/BoostingRequestPage/EmptyBoostingRequest";
+import OfferCard from "@/src/components/BoostingRequestPage/OfferCard";
 import {
   useGetBoostingPostByIdQuery,
   useMakeBoostingAsCancelledMutation,
@@ -19,10 +20,6 @@ import {
   MessageCircle,
   Send,
   ChevronDown,
-  Clock,
-  DollarSign,
-  CheckCircle,
-  User,
 } from "lucide-react";
 import { FaCircle, FaUser } from "react-icons/fa";
 import { toast } from "sonner";
@@ -1115,90 +1112,16 @@ export default function BoostingRequestPage() {
                   </p>
                 </div>
               ) : sortedOffers.length > 0 ? (
-                <div className="divide-y divide-gray-700/50">
+                <div className="flex flex-col gap-3 p-4">
                   {sortedOffers.map((offer) => (
-                    <div
+                    <OfferCard
                       key={offer._id}
-                      className="p-4 hover:bg-gray-800/30 transition-colors"
-                    >
-                      <div className="flex items-start gap-4">
-                        {/* Seller Avatar */}
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                          {offer.userId.image ? (
-                            <Image
-                              src={offer.userId.image}
-                              alt={offer.userId.name}
-                              width={48}
-                              height={48}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <User className="w-6 h-6 text-white" />
-                          )}
-                        </div>
-
-                        {/* Offer Details */}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-white font-medium">
-                              {offer.userId.name}
-                            </span>
-                            <span
-                              className={`px-2 py-0.5 text-xs rounded ${
-                                offer.status === "pending"
-                                  ? "bg-yellow-500/20 text-yellow-400"
-                                  : offer.status === "accepted"
-                                    ? "bg-green-500/20 text-green-400"
-                                    : "bg-red-500/20 text-red-400"
-                              }`}
-                            >
-                              {offer.status}
-                            </span>
-                          </div>
-
-                          <p className="text-gray-400 text-sm mb-2 line-clamp-2">
-                            {offer.message}
-                          </p>
-
-                          <div className="flex flex-wrap items-center gap-4 text-sm">
-                            <div className="flex items-center gap-1 text-green-400">
-                              <DollarSign className="w-4 h-4" />
-                              <span className="font-medium">{offer.price}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-gray-400">
-                              <Clock className="w-4 h-4" />
-                              <span>{offer.deliverTime}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex flex-col gap-2">
-                          <button
-                            onClick={() =>
-                              handleChatWithSeller(offer.userId._id)
-                            }
-                            disabled={isCreatingConversation}
-                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors disabled:opacity-50 flex items-center gap-1"
-                          >
-                            <MessageCircle className="w-3 h-3" />
-                            Chat
-                          </button>
-                          {offer.status === "pending" && (
-                            <button
-                              onClick={() =>
-                                handleRespondToOffer(offer._id, offer)
-                              }
-                              disabled={isRespondingToOffer}
-                              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors disabled:opacity-50 flex items-center gap-1"
-                            >
-                              <CheckCircle className="w-3 h-3" />
-                              Accept
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                      offer={offer}
+                      onChat={handleChatWithSeller}
+                      onAccept={handleRespondToOffer}
+                      isChatDisabled={isCreatingConversation}
+                      isAcceptDisabled={isRespondingToOffer}
+                    />
                   ))}
                 </div>
               ) : (

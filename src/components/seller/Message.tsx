@@ -4,10 +4,11 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaUser } from "react-icons/fa";
-import { Loader2, Send, MessageCircle } from "lucide-react";
+import { Loader2, Send, MessageCircle, MoreVertical } from "lucide-react";
 import {
   useGetMyConversationsQuery,
   useGetMessagesByConversationIdQuery,
+  useDeleteConversationMutation,
 } from "@/src/redux/features/conversations/conversationsApi";
 import { useAppSelector } from "@/src/redux/hooks";
 import {
@@ -111,6 +112,7 @@ const ChatHeaderStatus: React.FC<{
 
 // Conversation list item with online/typing status
 const ConversationListItem: React.FC<{
+  conversationId: string;
   otherUserId: string | undefined;
   otherUserName: string;
   otherUserImage: string | null;
@@ -119,7 +121,9 @@ const ConversationListItem: React.FC<{
   isSelected: boolean;
   isTyping: boolean;
   onClick: () => void;
+  onDelete: (id: string) => void;
 }> = ({
+  conversationId,
   otherUserId,
   otherUserName,
   otherUserImage,
@@ -128,13 +132,29 @@ const ConversationListItem: React.FC<{
   isSelected,
   isTyping,
   onClick,
+  onDelete,
 }) => {
   const isOnline = useIsUserOnline(otherUserId);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMenu]);
 
   return (
     <div
       onClick={onClick}
-      className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-800/50 transition-colors border-b border-gray-700/50 ${
+      className={`group relative flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-800/50 transition-colors border-b border-gray-700/50 ${
         isSelected ? "bg-gray-800/50" : ""
       }`}
     >
@@ -189,6 +209,36 @@ const ConversationListItem: React.FC<{
           </p>
         )}
       </div>
+
+      {/* Three-dot menu */}
+      <div
+        ref={menuRef}
+        className={`absolute right-2 bottom-1 ${showMenu ? "block" : "hidden group-hover:block"}`}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowMenu((prev) => !prev);
+          }}
+          className="p-1 rounded hover:bg-gray-700 transition-colors"
+        >
+          <MoreVertical className="w-4 h-4 text-gray-400" />
+        </button>
+        {showMenu && (
+          <div className="absolute right-0 top-7 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-20 min-w-[160px]">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(conversationId);
+                setShowMenu(false);
+              }}
+              className="w-full text-left px-4 py-2 text-xs text-red-400 hover:bg-gray-700 rounded-md transition-colors"
+            >
+              Delete Conversation
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -218,6 +268,7 @@ const Message: React.FC = () => {
 
   const currentUser = useAppSelector((state) => state.auth.user);
   const { isConnected } = useSocket();
+  const [deleteConversation] = useDeleteConversationMutation();
 
   const handleSelectConversation = (conversationId: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -231,13 +282,25 @@ const Message: React.FC = () => {
     router.push(`?${params.toString()}`);
   };
 
+  const handleDeleteConversation = async (id: string) => {
+    try {
+      await deleteConversation(id).unwrap();
+      // If the deleted conversation is currently selected, clear it
+      if (selectedConversationId === id) {
+        handleClearConversation();
+      }
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
+    }
+  };
+
   const {
     data: conversationsData,
     isLoading: isLoadingConversations,
     refetch: refetchConversations,
   } = useGetMyConversationsQuery({
     page: 1,
-    limit: 100,
+    limit: 1000,
     type: activeTab,
   });
 
@@ -314,7 +377,7 @@ const Message: React.FC = () => {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRealtimeMessages([]);
-     
+
     setIsTyping(false);
   }, [selectedConversationId]);
 
@@ -602,11 +665,6 @@ const Message: React.FC = () => {
       <div className="flex h-[600px] rounded-lg overflow-hidden border border-gray-700">
         {/* Sidebar - Conversations List */}
         <div className="w-72 bg-[#282836] border-r border-gray-700 flex flex-col">
-          {/* Header */}
-          <div className="bg-[#ac21128f] text-white px-4 py-3 text-sm font-medium border-b border-gray-700">
-            Browse Messages
-          </div>
-
           {/* Conversations List */}
           <div className="flex-1 overflow-y-auto">
             {isLoadingConversations ? (
@@ -620,6 +678,7 @@ const Message: React.FC = () => {
                 return (
                   <ConversationListItem
                     key={conv._id}
+                    conversationId={conv._id}
                     otherUserId={otherUser?._id}
                     otherUserName={otherUser?.name || "Unknown"}
                     otherUserImage={otherUser?.image || null}
@@ -628,6 +687,7 @@ const Message: React.FC = () => {
                     isSelected={selectedConversationId === conv._id}
                     isTyping={typingConversations.has(conv._id)}
                     onClick={() => handleSelectConversation(conv._id)}
+                    onDelete={handleDeleteConversation}
                   />
                 );
               })

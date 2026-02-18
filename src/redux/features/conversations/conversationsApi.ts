@@ -92,6 +92,15 @@ const conversationsApi = baseApi.injectEndpoints({
       transformResponse: (res) => res.data,
       providesTags: (_result, _error, id) => [{ type: "Conversation", id }],
     }),
+
+    // Delete conversation by ID
+    deleteConversation: builder.mutation({
+      query: (id: string) => ({
+        url: `/conversations/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Conversation"],
+    }),
   }),
 });
 
@@ -101,4 +110,5 @@ export const {
   useGetMessagesByConversationIdQuery,
   useSendMessageMutation,
   useGetConversationByIdQuery,
+  useDeleteConversationMutation,
 } = conversationsApi;

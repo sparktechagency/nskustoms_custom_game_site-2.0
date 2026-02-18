@@ -10,8 +10,6 @@ import {
   useResendVerificationMutation,
 } from "@/src/redux/features/auth/authApi";
 
-// url -> &type=reset
-
 export default function OtpVerification() {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(60);
@@ -23,7 +21,8 @@ export default function OtpVerification() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
   const type = searchParams.get("type") || "";
-  console.log(type);
+
+  const isReset = type === "reset";
 
   const [verifyEmail, { isLoading: isSubmitting }] = useVerifyEmailMutation();
   const [resendVerification, { isLoading: isResending }] =
@@ -45,7 +44,6 @@ export default function OtpVerification() {
   }, [resendTimer]);
 
   const handleChange = (index: number, value: string) => {
-    // Only allow digits
     if (value && !/^\d$/.test(value)) return;
 
     const newOtp = [...otp];
@@ -54,7 +52,6 @@ export default function OtpVerification() {
     setError(null);
     setSuccessMessage(null);
 
-    // Auto-focus next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -64,7 +61,6 @@ export default function OtpVerification() {
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
-    // Move to previous input on backspace if current input is empty
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -81,7 +77,6 @@ export default function OtpVerification() {
     });
     setOtp(newOtp);
 
-    // Focus the next empty input or the last one
     const nextEmptyIndex = newOtp.findIndex((val) => !val);
     if (nextEmptyIndex !== -1) {
       inputRefs.current[nextEmptyIndex]?.focus();
@@ -102,13 +97,22 @@ export default function OtpVerification() {
     }
 
     if (!email) {
-      setError("Email not found. Please go back to registration.");
+      setError("Email not found. Please go back and try again.");
       return;
     }
 
+    if (isReset) {
+      // Redirect to reset password page with email and code
+      router.push(
+        `/reset-password?email=${encodeURIComponent(email)}&code=${encodeURIComponent(otpCode)}`,
+      );
+      return;
+    }
+
+    // Email verification flow
     try {
       await verifyEmail({
-        email: email,
+        email,
         code: otpCode,
       }).unwrap();
 
@@ -129,14 +133,13 @@ export default function OtpVerification() {
     setSuccessMessage(null);
 
     if (!email) {
-      setError("Email not found. Please go back to registration.");
+      setError("Email not found. Please go back and try again.");
       return;
     }
 
     try {
       await resendVerification({ email }).unwrap();
 
-      // Reset timer and OTP
       setResendTimer(60);
       setCanResend(false);
       setOtp(["", "", "", "", "", ""]);
@@ -155,11 +158,13 @@ export default function OtpVerification() {
   return (
     <div className="bg-[#282836F0] rounded-xl shadow-2xl w-full max-w-md p-6 md:p-8">
       {/* Header */}
-      <div className="flex flex-col  justify-center space-y-3 items-center mb-6">
+      <div className="flex flex-col justify-center space-y-3 items-center mb-6">
         <Link href={"/"}>
           <Image src={logo} width={100} height={400} alt="AuraBoost Logo" />
         </Link>
-        <h1 className="text-2xl font-bold text-white">Verify OTP</h1>
+        <h1 className="text-2xl font-bold text-white">
+          {isReset ? "Verify Code" : "Verify OTP"}
+        </h1>
       </div>
 
       {/* Description */}
@@ -245,7 +250,11 @@ export default function OtpVerification() {
               : "bg-red-600 hover:bg-red-700 active:bg-red-800"
           }`}
         >
-          {isSubmitting ? "Verifying..." : "Verify OTP"}
+          {isSubmitting
+            ? "Verifying..."
+            : isReset
+              ? "Continue"
+              : "Verify OTP"}
         </button>
       </form>
 

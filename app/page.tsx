@@ -1,6 +1,81 @@
 import LandingPage from "@/src/Page/Landing";
+import { Metadata } from "next";
 
 // offers page logo change as buyer expected
+
+export const metadata: Metadata = {
+  title: {
+    default: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
+    template: "%s | Auraboost",
+  },
+  description:
+    "Upgrade your rank with elite ELO and LoL Boosting services designed for maximum security and total discretion. Experience top-tier performance, seamless service, and round-the-clock availability across every server.",
+  keywords: [
+    "ELO boosting",
+    "LoL boosting",
+    "League of Legends boost",
+    "rank boosting",
+    "game boosting",
+    "Valorant boost",
+    "affordable boosting",
+    "fast ELO boost",
+    "secure rank boost",
+    "24/7 boosting service",
+    "Auraboost",
+  ],
+  authors: [{ name: "Auraboost Team" }],
+  creator: "Auraboost Team",
+  publisher: "GWD Processing FZCO",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://www.auraboost.gg"),
+  openGraph: {
+    title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
+    description:
+      "Upgrade your rank with elite ELO and LoL Boosting services designed for maximum security and total discretion. Top-tier performance and round-the-clock availability across every server.",
+    url: "https://www.auraboost.gg",
+    siteName: "Auraboost",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Auraboost - ELO & LoL Boosting Platform",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
+    description:
+      "Upgrade your rank with elite ELO and LoL Boosting services. Maximum security, total discretion, and 24/7 availability.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+  manifest: "/site.webmanifest",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function Home() {
   return <LandingPage />;

@@ -223,7 +223,7 @@ export default function Footer() {
 
         {/* Bottom section - Copyright and legal links */}
         <div className="mt-12 pt-6 border-t text-xs border-gray-800 text-center text-gray-400">
-          <p>© 2026 TG Gaming Services LTD. All right reserved.</p>
+          <p>© 2026 AB Gaming Services LTD. All right reserved.</p>
           <div className="mt-2 flex justify-center space-x-4">
             <Link
               href="/docs/privacy_policy"

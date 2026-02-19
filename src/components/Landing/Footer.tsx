@@ -51,7 +51,7 @@ export default function Footer() {
 
   const helpCenterLinks = [
     { name: "Help Center", href: "/docs" },
-    { name: "Contact Us", href: "#" },
+    { name: "Contact Us", href: "/contact" },
   ];
 
   const accountWarrantyLinks = [

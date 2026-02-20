@@ -46,34 +46,30 @@ export default function ContactUs() {
       <section className="bg-[#1e1e2c] py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
-            {/* Left - Contact Info */}
+            {/* Left - About & Contact Info */}
             <div
               className="flex flex-col justify-center space-y-8"
               data-aos="fade-right"
             >
-              {/* Phone */}
-              <div className="flex items-start gap-4">
-                <div className="bg-[#282836] p-3 rounded-lg">
-                  <svg
-                    className="w-6 h-6 text-blue-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Phone</p>
-                  <p className="text-white text-lg font-semibold">
-                    978-238-9925
-                  </p>
-                </div>
+              {/* About Text */}
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  Who we are
+                </h2>
+                <p className="text-gray-400 leading-relaxed">
+                  Auraboost is a premier game boosting platform built for
+                  players who want to reach their full potential. Whether
+                  you&apos;re looking to climb the ranked ladder, unlock
+                  exclusive rewards, or simply dominate your favorite game,
+                  our team of verified, top-tier boosters is here to make it
+                  happen — fast, secure, and discreet.
+                </p>
+                <p className="text-gray-400 leading-relaxed mt-3">
+                  We offer 24/7 support, real-time order tracking, and our
+                  RankGuard warranty so you can boost with confidence. Have a
+                  question, need help with an order, or want to become a
+                  seller? Reach out — we&apos;d love to hear from you.
+                </p>
               </div>
 
               {/* Email */}

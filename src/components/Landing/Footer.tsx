@@ -55,17 +55,17 @@ export default function Footer() {
   ];
 
   const accountWarrantyLinks = [
-    { name: "RankGuard (Buying)", href: "#" },
-    { name: "RankGuard (Selling)", href: "#" },
-    { name: "Deposited", href: "#" },
-    { name: "Withdrawal", href: "#" },
+    { name: "RankGuard (Buying)", href: "/docs/tradeshield-buying" },
+    { name: "RankGuard (Selling)", href: "/docs/tradeshield-selling" },
+    { name: "Deposited", href: "/docs/deposited" },
+    { name: "Withdrawal", href: "/docs/withdrawal" },
   ];
 
   const accountSellerRulesLinks = [
-    { name: "Seller Rules", href: "#" },
-    { name: "Changing Username", href: "#" },
-    { name: "Fees", href: "#" },
-    { name: "Refund Policy", href: "#" },
+    { name: "Seller Rules", href: "/docs/seller-rules" },
+    { name: "Changing Username", href: "/docs/changing-username" },
+    { name: "Fees", href: "/docs/fees" },
+    { name: "Refund Policy", href: "/docs/refund-policy" },
   ];
 
   return (
@@ -110,12 +110,12 @@ export default function Footer() {
               <ul className="space-y-2">
                 {accountWarrantyLinks.map((link, index) => (
                   <li key={index}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-blue-300 text-sm hover:text-white transition-colors"
                     >
-                      <span className="text-blue-300">{link.name}</span>
-                    </a>
+                      {link.name}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -127,12 +127,12 @@ export default function Footer() {
               <ul className="space-y-2">
                 {accountSellerRulesLinks.map((link, index) => (
                   <li key={index}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-blue-300 text-sm hover:text-white transition-colors"
                     >
-                      <span className="text-blue-300">{link.name}</span>
-                    </a>
+                      {link.name}
+                    </Link>
                   </li>
                 ))}
               </ul>

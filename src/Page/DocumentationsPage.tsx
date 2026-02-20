@@ -1,24 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { documentationData } from "@/src/data/documentation";
 import SidebarDocs from "../components/documentations/SidebarDocs";
 import DocsSearchBar from "../components/documentations/DocsSearchBar";
 import DocumentationContent from "../components/documentations/DocumentationContent";
 import TableOfContents from "../components/documentations/TableOfContents";
 
-const getInitialPage = () => {
-  if (typeof window === "undefined") return "how-to-buy";
-
-  const path = window.location.pathname;
-  const parts = path.split("/");
-  const slug = parts[parts.length - 1];
-
-  return slug && documentationData[slug] ? slug : "how-to-buy";
-};
-
 export default function DocumentationPage() {
-  const [activePage] = useState(getInitialPage);
+  const pathname = usePathname();
+  const slug = pathname.split("/").pop() || "";
+  const activePage = slug && documentationData[slug] ? slug : "how-to-buy";
   const [activeSection, setActiveSection] = useState("");
 
   const handleSectionClick = (id: string) => {
@@ -51,13 +44,6 @@ export default function DocumentationPage() {
         title: step.title,
       });
     });
-
-    if (doc.securityTips && doc.securityTips.length > 0) {
-      sections.push({
-        id: "security-tips",
-        title: "Security Tips for Account Purchases",
-      });
-    }
 
     return sections;
   };

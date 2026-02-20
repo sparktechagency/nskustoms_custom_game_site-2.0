@@ -1,6 +1,9 @@
 "use client";
-import { useGetSettingByTypeQuery } from "@/src/redux/features/settings/settingApi";
+
 import { useParams } from "next/navigation";
+import { documentationData } from "@/src/data/documentation";
+import DocumentationPage from "@/src/Page/DocumentationsPage";
+import { useGetSettingByTypeQuery } from "@/src/redux/features/settings/settingApi";
 import { Loader2 } from "lucide-react";
 import Header from "@/src/components/Landing/Header";
 import Footer from "@/src/components/Landing/Footer";
@@ -17,15 +20,20 @@ type SettingType =
   | "about_us"
   | "platform_charge";
 
-function Page() {
-  const { type } = useParams<{ type: string }>();
+const settingTypes = [
+  "privacy_policy",
+  "terms_condition",
+  "about_us",
+  "platform_charge",
+];
+
+function SettingsPage({ type }: { type: string }) {
   const { data, isLoading } = useGetSettingByTypeQuery({
     type: type as SettingType,
   });
 
   const settingData = data as SettingData | undefined;
 
-  // Format type for display (e.g., "privacy_policy" -> "Privacy Policy")
   const formatTitle = (str: string) => {
     return str
       .split(/[-_]/)
@@ -53,32 +61,16 @@ function Page() {
       <Header />
       <main className="flex-1 py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          {/* Title */}
           <h1 className="text-3xl font-bold text-gray-900 mb-8">
             {settingData?.title || formatTitle(type)}
           </h1>
 
-          {/* Content */}
           {settingData?.content ? (
             <div
               className="prose prose-pink"
               dangerouslySetInnerHTML={{ __html: settingData.content }}
             />
           ) : (
-            // <div
-            // className="prose prose-invert prose-lg max-w-none
-            //   prose-headings:text-white
-            //   prose-p:text-gray-300
-            //   prose-strong:text-white
-            //   prose-a:text-red-400 prose-a:no-underline hover:prose-a:underline
-            //   prose-ul:text-gray-300
-            //   prose-ol:text-gray-300
-            //   prose-li:text-gray-300
-            //   prose-blockquote:border-red-500 prose-blockquote:text-gray-400
-            //   [&_*]:leading-relaxed"
-
-            //   dangerouslySetInnerHTML={{ __html: settingData.content }}
-            // />
             <div className="text-center py-12">
               <p className="text-gray-400">
                 No content available for this page.
@@ -90,6 +82,23 @@ function Page() {
       <Footer />
     </div>
   );
+}
+
+function Page() {
+  const { type } = useParams<{ type: string }>();
+
+  // If it's a documentation page, render with sidebar layout
+  if (documentationData[type]) {
+    return <DocumentationPage />;
+  }
+
+  // If it's a settings page (privacy_policy, terms_condition, etc.)
+  if (settingTypes.includes(type)) {
+    return <SettingsPage type={type} />;
+  }
+
+  // Fallback — treat unknown slugs as documentation
+  return <DocumentationPage />;
 }
 
 export default Page;

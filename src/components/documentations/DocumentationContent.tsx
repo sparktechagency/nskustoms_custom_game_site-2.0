@@ -33,20 +33,6 @@ export default function DocumentationContent({
           <p className="mb-4 text-[16px] text-[#A3A3A3]">{step.content}</p>
         </div>
       ))}
-
-      {doc.securityTips && doc.securityTips.length > 0 && (
-        <>
-          <h2 id="security-tips" className="section-heading mt-8">
-            Security Tips for Account Purchases
-          </h2>
-          {doc.securityTips.map((tip) => (
-            <div key={tip.game} className="security-tip">
-              <h3 className="security-tip-title">{tip.game}</h3>
-              <p className="text-[16px] text-[#A3A3A3]">{tip.tips}</p>
-            </div>
-          ))}
-        </>
-      )}
     </div>
   );
 }

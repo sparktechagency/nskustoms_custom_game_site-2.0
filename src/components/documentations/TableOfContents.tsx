@@ -22,7 +22,7 @@ export default function TableOfContents({
   // Function to handle scroll and update active section
   const handleScroll = useCallback(() => {
     const sections = document.querySelectorAll(
-      '[id^="step-"], #overview, #security-tips'
+      '[id^="step-"], #overview'
     );
     let currentSection = activeId;
 

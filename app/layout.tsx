@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import ReduxProvider from "@/src/Provider/ReduxProvider";
 import "aos/dist/aos.css";
@@ -87,6 +88,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-4M16QYP5V5"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-4M16QYP5V5');
+          `}
+        </Script>
+      </head>
       <body className={`antialiased`}>
         <GoogleTranslateScript />
         <Toaster position="top-right" />

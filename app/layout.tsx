@@ -7,11 +7,11 @@ import { Toaster } from "sonner";
 import { GoogleTranslateScript } from "@/src/components/GoogleTranslateScript";
 
 export const metadata: Metadata = {
-  // title: {
-  //   default: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
-  //   template: "%s | Auraboost",
-  // },
-  title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
+  title: {
+    default: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
+    template: "%s | Auraboost",
+  },
+  // title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
   description:
     "Upgrade your rank with elite ELO and LoL Boosting services designed for maximum security and total discretion. Experience top-tier performance, seamless service, and round-the-clock availability across every server.",
   keywords: [
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     siteName: "Auraboost",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/opengraph-image.png",
         width: 1200,
         height: 630,
         alt: "Auraboost - ELO & LoL Boosting Platform",
@@ -58,6 +58,7 @@ export const metadata: Metadata = {
     title: "Auraboost - Affordable ELO & LoL Boosting | 24/7 Support",
     description:
       "Upgrade your rank with elite ELO and LoL Boosting services. Maximum security, total discretion, and 24/7 availability.",
+    images: ["/opengraph-image.png"],
   },
   robots: {
     index: true,

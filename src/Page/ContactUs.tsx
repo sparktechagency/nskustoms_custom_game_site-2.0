@@ -4,19 +4,65 @@ import { useState, useEffect, type FormEvent } from "react";
 import Header from "@/src/components/Landing/Header";
 import Footer from "@/src/components/Landing/Footer";
 import AOS from "aos";
+import { toast } from "sonner";
+import { useContactUsMutation } from "@/src/redux/features/settings/settingApi";
 
 export default function ContactUs() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+
+  const [contactUs, { isLoading }] = useContactUsMutation();
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
   }, []);
 
-  const handleSubmit = (e: FormEvent) => {
+  const validate = () => {
+    const newErrors: { name?: string; email?: string; message?: string } = {};
+
+    if (name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    } else if (name.trim().length > 100) {
+      newErrors.name = "Name must be at most 100 characters";
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      newErrors.email = "Invalid email address";
+    }
+
+    if (message.trim().length < 5) {
+      newErrors.message = "Message must be at least 5 characters";
+    } else if (message.trim().length > 2500) {
+      newErrors.message = "Message must be at most 2500 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log({ name, email, message });
+    if (!validate()) return;
+
+    try {
+      await contactUs({
+        name: name.trim(),
+        email: email.trim(),
+        message: message.trim(),
+      }).unwrap();
+
+      toast.success("Message sent successfully! We'll get back to you soon.");
+      setName("");
+      setEmail("");
+      setMessage("");
+      setErrors({});
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string } };
+      toast.error(error?.data?.message || "Failed to send message. Please try again.");
+    }
   };
 
   return (
@@ -139,9 +185,15 @@ export default function ContactUs() {
                     placeholder="Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-[#1e1e2c] text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400 transition-colors placeholder-gray-500"
-                    required
+                    className={`w-full bg-[#1e1e2c] text-white border rounded-lg px-4 py-3 focus:outline-none transition-colors placeholder-gray-500 ${
+                      errors.name
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-700 focus:border-blue-400"
+                    }`}
                   />
+                  {errors.name && (
+                    <p className="text-red-400 text-xs mt-1">{errors.name}</p>
+                  )}
                 </div>
 
                 <div>
@@ -153,9 +205,15 @@ export default function ContactUs() {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#1e1e2c] text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400 transition-colors placeholder-gray-500"
-                    required
+                    className={`w-full bg-[#1e1e2c] text-white border rounded-lg px-4 py-3 focus:outline-none transition-colors placeholder-gray-500 ${
+                      errors.email
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-700 focus:border-blue-400"
+                    }`}
                   />
+                  {errors.email && (
+                    <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                  )}
                 </div>
 
                 <div>
@@ -167,16 +225,23 @@ export default function ContactUs() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={5}
-                    className="w-full bg-[#1e1e2c] text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400 transition-colors placeholder-gray-500 resize-none"
-                    required
+                    className={`w-full bg-[#1e1e2c] text-white border rounded-lg px-4 py-3 focus:outline-none transition-colors placeholder-gray-500 resize-none ${
+                      errors.message
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-700 focus:border-blue-400"
+                    }`}
                   />
+                  {errors.message && (
+                    <p className="text-red-400 text-xs mt-1">{errors.message}</p>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors cursor-pointer"
+                  disabled={isLoading}
+                  className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors cursor-pointer"
                 >
-                  SEND MESSAGE
+                  {isLoading ? "SENDING..." : "SEND MESSAGE"}
                 </button>
               </form>
             </div>

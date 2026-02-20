@@ -22,7 +22,21 @@ const generSettingApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+    contactUs: builder.mutation<
+      { message: string },
+      { name: string; email: string; message: string }
+    >({
+      query: (data) => ({
+        url: "/contact-us",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useGetSettingByTypeQuery, usePostSupportMessageMutation } = generSettingApi;
+export const {
+  useGetSettingByTypeQuery,
+  usePostSupportMessageMutation,
+  useContactUsMutation,
+} = generSettingApi;

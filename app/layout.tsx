@@ -104,6 +104,46 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`antialiased`}>
+        <Script
+          id="json-ld-organization"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Auraboost",
+              url: "https://www.auraboost.gg",
+              logo: "https://www.auraboost.gg/logo.png",
+              sameAs: [],
+              contactPoint: {
+                "@type": "ContactPoint",
+                email: "tg@auraboost.gg",
+                contactType: "customer support",
+                availableLanguage: ["English"],
+              },
+            }),
+          }}
+        />
+        <Script
+          id="json-ld-website"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Auraboost",
+              url: "https://www.auraboost.gg",
+              potentialAction: {
+                "@type": "SearchAction",
+                target:
+                  "https://www.auraboost.gg/docs?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
         <GoogleTranslateScript />
         <Toaster position="top-right" />
         <ReduxProvider>{children}</ReduxProvider>

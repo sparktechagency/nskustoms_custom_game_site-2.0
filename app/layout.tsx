@@ -26,6 +26,12 @@ export const metadata: Metadata = {
     "secure rank boost",
     "24/7 boosting service",
     "Auraboost",
+    "Auraboost ELO boost",
+    "Auraboost LoL boost",
+    "Auraboost rank boost",
+    "Auraboost game boost",
+    "Auraboost Valorant boost",
+    "auraboost gg",
   ],
   authors: [{ name: "Auraboost Team" }],
   creator: "Auraboost Team",
@@ -137,8 +143,7 @@ export default function RootLayout({
               url: "https://www.auraboost.gg",
               potentialAction: {
                 "@type": "SearchAction",
-                target:
-                  "https://www.auraboost.gg/docs?q={search_term_string}",
+                target: "https://www.auraboost.gg/docs?q={search_term_string}",
                 "query-input": "required name=search_term_string",
               },
             }),

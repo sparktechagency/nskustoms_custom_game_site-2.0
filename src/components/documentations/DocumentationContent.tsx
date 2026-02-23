@@ -20,9 +20,12 @@ export default function DocumentationContent({
 
   return (
     <div className="content-body">
-      <h1 id="overview" className="text-3xl font-bold mb-6">
+      <h1 id="overview" className="text-3xl font-bold mb-3">
         {doc.title}
       </h1>
+      <p className="text-[#A3A3A3] text-[15px] mb-8 leading-relaxed">
+        {doc.description}
+      </p>
 
       {doc.steps.map((step) => (
         <div key={step.number} className="step" id={`step-${step.number}`}>
@@ -30,7 +33,9 @@ export default function DocumentationContent({
             <span>Step {step.number}: </span>
             {step.title}
           </h2>
-          <p className="mb-4 text-[16px] text-[#A3A3A3]">{step.content}</p>
+          <p className="mb-6 text-[16px] text-[#A3A3A3] leading-relaxed">
+            {step.content}
+          </p>
         </div>
       ))}
     </div>

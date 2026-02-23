@@ -1,24 +1,7 @@
-"use client";
-
-import { useParams } from "next/navigation";
+import { Metadata } from "next";
 import { documentationData } from "@/src/data/documentation";
 import DocumentationPage from "@/src/Page/DocumentationsPage";
-import { useGetSettingByTypeQuery } from "@/src/redux/features/settings/settingApi";
-import { Loader2 } from "lucide-react";
-import Header from "@/src/components/Landing/Header";
-import Footer from "@/src/components/Landing/Footer";
-
-interface SettingData {
-  type: string;
-  content: string;
-  title?: string;
-}
-
-type SettingType =
-  | "privacy_policy"
-  | "terms_condition"
-  | "about_us"
-  | "platform_charge";
+import SettingsPageClient from "./SettingsPageClient";
 
 const settingTypes = [
   "privacy_policy",
@@ -27,78 +10,90 @@ const settingTypes = [
   "platform_charge",
 ];
 
-function SettingsPage({ type }: { type: string }) {
-  const { data, isLoading } = useGetSettingByTypeQuery({
-    type: type as SettingType,
-  });
+const settingMeta: Record<string, { title: string; description: string }> = {
+  privacy_policy: {
+    title: "Privacy Policy",
+    description:
+      "Read Auraboost's privacy policy. Learn how we collect, use, and protect your personal data.",
+  },
+  terms_condition: {
+    title: "Terms & Conditions",
+    description:
+      "Read Auraboost's terms and conditions. Understand the rules and agreements that govern your use of our platform.",
+  },
+  about_us: {
+    title: "About Us",
+    description:
+      "Learn about Auraboost — the trusted game boosting platform built for competitive gamers.",
+  },
+  platform_charge: {
+    title: "Platform Charges",
+    description:
+      "Understand Auraboost's platform charges and fee structure.",
+  },
+};
 
-  const settingData = data as SettingData | undefined;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ type: string }>;
+}): Promise<Metadata> {
+  const { type } = await params;
 
-  const formatTitle = (str: string) => {
-    return str
-      .split(/[-_]/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex flex-col">
-        <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
-            <p className="text-gray-400">Loading...</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+  const doc = documentationData[type];
+  if (doc) {
+    return {
+      title: doc.title,
+      description: doc.description,
+      openGraph: {
+        title: doc.title,
+        description: doc.description,
+        url: `https://www.auraboost.gg/docs/${type}`,
+        siteName: "Auraboost",
+        type: "article",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: doc.title,
+        description: doc.description,
+      },
+      alternates: {
+        canonical: `/docs/${type}`,
+      },
+    };
   }
 
-  return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <Header />
-      <main className="flex-1 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            {settingData?.title || formatTitle(type)}
-          </h1>
+  const setting = settingMeta[type];
+  if (setting) {
+    return {
+      title: setting.title,
+      description: setting.description,
+      alternates: {
+        canonical: `/docs/${type}`,
+      },
+    };
+  }
 
-          {settingData?.content ? (
-            <div
-              className="prose prose-pink"
-              dangerouslySetInnerHTML={{ __html: settingData.content }}
-            />
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400">
-                No content available for this page.
-              </p>
-            </div>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+  return {
+    title: "Help Center",
+    description: "Auraboost Help Center — guides, policies, and support documentation.",
+  };
 }
 
-function Page() {
-  const { type } = useParams<{ type: string }>();
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ type: string }>;
+}) {
+  const { type } = await params;
 
-  // If it's a documentation page, render with sidebar layout
   if (documentationData[type]) {
     return <DocumentationPage />;
   }
 
-  // If it's a settings page (privacy_policy, terms_condition, etc.)
   if (settingTypes.includes(type)) {
-    return <SettingsPage type={type} />;
+    return <SettingsPageClient type={type} />;
   }
 
-  // Fallback — treat unknown slugs as documentation
   return <DocumentationPage />;
 }
-
-export default Page;

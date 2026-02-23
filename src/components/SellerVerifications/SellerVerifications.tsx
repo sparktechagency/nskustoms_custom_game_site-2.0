@@ -36,11 +36,11 @@ interface FormDataType {
     month: string;
     day: string;
   };
-  nationality: string;
   streetAddress: string;
   city: string;
   country: string;
   zipCode: string;
+  opGgAccounts: string;
 }
 
 interface VerificationData {

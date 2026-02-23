@@ -12,11 +12,11 @@ export interface FormData {
     month: string;
     day: string;
   };
-  nationality: string;
   streetAddress: string;
   city: string;
   country: string;
   zipCode: string;
+  opGgAccounts: string;
 }
 
 interface SellerIDVerificationFormProps {
@@ -33,11 +33,11 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
       month: "",
       day: "",
     },
-    nationality: "",
     streetAddress: "",
     city: "",
     country: "",
     zipCode: "",
+    opGgAccounts: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +56,6 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
           [field]: value,
         },
       }));
-    } else if (name === "country") {
-      setFormData((prev) => ({ ...prev, country: value, nationality: value }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -296,6 +294,25 @@ export default function SellerIDVerificationForm({ onSubmit, onNext }: SellerIDV
             value={formData.zipCode}
             onChange={handleChange}
             placeholder="Zip code"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col items-start space-y-2">
+          <label
+            htmlFor="opGgAccounts"
+            className="block text-sm font-medium text-gray-300 mb-1"
+          >
+            Main Account OP.GG Link
+          </label>
+          <input
+            type="url"
+            id="opGgAccounts"
+            name="opGgAccounts"
+            value={formData.opGgAccounts}
+            onChange={handleChange}
+            placeholder="https://www.op.gg/summoners/na/YourUsername"
             className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />

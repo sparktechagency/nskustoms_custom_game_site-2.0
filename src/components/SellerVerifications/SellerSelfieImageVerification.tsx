@@ -13,11 +13,11 @@ interface FormDataType {
     month: string;
     day: string;
   };
-  nationality: string;
   streetAddress: string;
   city: string;
   country: string;
   zipCode: string;
+  opGgAccounts: string;
 }
 
 type SellerTypeValue = (typeof SellerTypes)[keyof typeof SellerTypes];
@@ -121,11 +121,11 @@ export default function SellerSelfieImageVerification({
     formData.append("birthYear", verificationData.formData.dateOfBirth.year);
     formData.append("birthMonth", verificationData.formData.dateOfBirth.month);
     formData.append("birthDay", verificationData.formData.dateOfBirth.day);
-    formData.append("nationality", verificationData.formData.nationality);
     formData.append("streetAddress", verificationData.formData.streetAddress);
     formData.append("city", verificationData.formData.city);
     formData.append("country", verificationData.formData.country);
     formData.append("zipCode", verificationData.formData.zipCode);
+    formData.append("opGgAccounts", verificationData.formData.opGgAccounts);
     formData.append("frontId", verificationData.idImages.frontImage);
     formData.append("backId", verificationData.idImages.backImage);
     formData.append("selfieWithId", image);

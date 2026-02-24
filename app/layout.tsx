@@ -108,13 +108,10 @@ export default function RootLayout({
             gtag('config', 'G-4M16QYP5V5');
           `}
         </Script>
-        {process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID && (
-          <Script
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
+        <meta
+          name="google-adsense-account"
+          content="ca-pub-2779698672601493"
+        />
       </head>
       <body className={`antialiased`}>
         <Script

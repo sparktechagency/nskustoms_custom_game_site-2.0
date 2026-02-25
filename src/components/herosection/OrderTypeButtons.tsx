@@ -12,51 +12,51 @@ const OrderTypeButtons: React.FC<OrderTypeButtonsProps> = ({
   setOrderType 
 }) => {
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 w-full sm:w-auto">
         <button
           onClick={() => setOrderType("rank-boost")}
-          className={`px-3 py-2 rounded-t text-sm min-w-[100px] ${
+          className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-t text-xs sm:text-sm sm:min-w-[100px] transition-colors ${
             orderType === "rank-boost"
               ? "bg-[#AC2212]"
-              : "bg-[#282836] hover:bg-[#282836]"
+              : "bg-[#282836] hover:bg-[#3a3a4a]"
           }`}
         >
           Rank Boost
         </button>
         <button
           onClick={() => setOrderType("placement-matches")}
-          className={`px-3 py-2 rounded-t text-sm min-w-[100px] ${
+          className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-t text-xs sm:text-sm sm:min-w-[100px] transition-colors ${
             orderType === "placement-matches"
               ? "bg-[#AC2212]"
-              : "bg-[#282836] hover:bg-[#282836]"
+              : "bg-[#282836] hover:bg-[#3a3a4a]"
           }`}
         >
           Placement Matches
         </button>
         <button
           onClick={() => setOrderType("net-wins")}
-          className={`px-3 py-2 rounded-t text-sm min-w-[100px] ${
+          className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-t text-xs sm:text-sm sm:min-w-[100px] transition-colors ${
             orderType === "net-wins"
               ? "bg-[#AC2212]"
-              : "bg-[#282836] hover:bg-[#282836]"
+              : "bg-[#282836] hover:bg-[#3a3a4a]"
           }`}
         >
           Net Wins
         </button>
         <button
           onClick={() => setOrderType("custom-request")}
-          className={`px-3 py-2 text-sm rounded-t min-w-[100px] ${
+          className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-t sm:min-w-[100px] transition-colors ${
             orderType === "custom-request"
               ? "bg-[#AC2212]"
-              : "bg-[#282836] hover:bg-[#282836]"
+              : "bg-[#282836] hover:bg-[#3a3a4a]"
           }`}
         >
           Custom Request
         </button>
       </div>
-      <div className="flex items-center gap-2 py-2 rounded  p-3">
-        <Star className="w-8 h-8 fill-yellow-400 text-yellow-400" />
+      <div className="flex items-center gap-2 py-1.5 sm:py-2 rounded p-2 sm:p-3">
+        <Star className="w-6 h-6 sm:w-8 sm:h-8 fill-yellow-400 text-yellow-400 shrink-0" />
         <div className="text-xs sm:text-sm">
           <div className="font-semibold">Review Auraboost here</div>
           <div className="text-gray-400">and get 5% OFF orders</div>

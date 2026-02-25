@@ -1,14 +1,14 @@
 function TopFooterText() {
   return (
-    <section className="py-16 bg-black">
-      <div className="container mx-auto px-4 space-y-6 text-center text-lg text-white">
-        <p className="w-[800px] mx-auto">
+    <section className="py-8 sm:py-12 md:py-16 bg-black">
+      <div className="container mx-auto px-4 sm:px-6 space-y-4 sm:space-y-6 text-center text-sm sm:text-sm md:text-base lg:text-lg text-white">
+        <p className="max-w-[800px] mx-auto">
           Auraboost is not affiliated with, associated with, authorized by,
           endorsed by, or in any way officially connected with Riot Games, Inc.
           or League of Legends.
         </p>
         {/* description */}
-        <p className="w-[950px] mx-auto">
+        <p className="max-w-[950px] mx-auto">
           Auraboost is not affiliated with, associated with, authorized by,
           endorsed by, or in any way officially connected with Riot Games, Inc.
           or League of Legends. League of Legends and all related names,

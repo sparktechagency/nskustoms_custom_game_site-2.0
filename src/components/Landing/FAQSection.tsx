@@ -58,26 +58,26 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="py-16 bg-gray-900">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-8 text-center text-white">FAQ</h2>
+    <section className="py-8 sm:py-12 md:py-16 bg-gray-900">
+      <div className="container mx-auto px-4 sm:px-6">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-5 sm:mb-8 text-center text-white">FAQ</h2>
 
-        <div className="max-w-4xl mx-auto space-y-4">
+        <div className="max-w-4xl mx-auto space-y-2 sm:space-y-4">
           {faqItems.map((item, index) => (
             <div
               key={index}
-              className="bg-[#282836] rounded-lg p-6 cursor-pointer text-white transition-all duration-300"
+              className="bg-[#282836] rounded-lg px-4 py-3 sm:p-6 cursor-pointer text-white transition-all duration-300"
               onClick={() => toggleAccordion(index)}
             >
-              <div className="flex justify-between items-center">
-                <h3 className="font-semibold text-white">{item.question}</h3>
-                <span className="text-xl text-white">
+              <div className="flex justify-between items-center gap-3">
+                <h3 className="font-semibold text-sm sm:text-base text-white">{item.question}</h3>
+                <span className="text-lg sm:text-xl text-white shrink-0">
                   {activeIndex === index ? "−" : "+"}
                 </span>
               </div>
 
               {activeIndex === index && (
-                <div className="mt-4 text-white pt-4 border-t border-gray-600 animate-fadeIn">
+                <div className="mt-3 sm:mt-4 text-xs sm:text-base text-white pt-3 sm:pt-4 border-t border-gray-600 animate-fadeIn">
                   {item.answer}
                 </div>
               )}

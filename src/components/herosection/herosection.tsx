@@ -19,7 +19,7 @@ const Herosection = () => {
       <div className="absolute inset-0 bg-black/80 z-10"></div>
 
       {/* Main Content */}
-      <div className="relative z-20  md:container mx-auto md:px-5 mt-2 md:mt-5 px-2 ">
+      <div className="relative z-20  md:container mx-auto md:px-5 mt-2 md:mt-5 px-2 text-xs sm:text-sm md:text-base ">
         <h1>
           Get amazing deals from professional boosters in under
           <span className="text-[#AC2212] pl-1">5 minutes</span>
